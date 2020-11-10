@@ -14,11 +14,29 @@
  * limitations under the License.
  ******************************************************************************/
 
-$scrollbarThumbBackground: #C4C4C4;
-$scrollbarTrackBackground: #F2F2F2;
+ @import "./common/vars";
 
-$primaryTextColor: #4D4D4D;
-$secondaryTextColor: #808080;
-$secondaryLightTextColor: #999999;
+.button {
+	@include unselectable;
+	display: inline-flex;
+	font-size: 14px;
+	height: 30px;
+	border-radius: 20px;
+	background-color: #fff;
+	padding: 3px 15px;
+	align-items: center;
+	cursor: pointer;
+	font-weight: 500;
+	margin-left: 20px;
+}
 
-$appBackgroundColor: #e7e7e7;
+.clear-icon {
+	@include icon(url(../../resources/icons/remove.svg), 12px, 12px);
+	margin-right: 10px;
+}
+
+.arrow-right-icon {
+	@include icon(url(../../resources/icons/arrow.svg), 16px, 16px);
+	transform: rotate(180deg);
+	margin-left: 10px;
+}

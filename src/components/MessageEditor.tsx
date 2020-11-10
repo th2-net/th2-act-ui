@@ -15,67 +15,126 @@
  ***************************************************************************** */
 
 import React from 'react';
-import Prism from 'prismjs';
-// eslint-disable-next-line import/no-unassigned-import
-import 'prismjs/themes/prism.css';
-import '../styles/message-editor.scss';
+import {
+	monaco,
+	EditorDidMount,
+	ControlledEditor,
+	ControlledEditorOnChange,
+} from '@monaco-editor/react';
+import { Field, Message } from '../models/Message';
+import { createSchema } from '../helpers/schema';
 
-const MessageEditor = () => {
-	const [content, setContent] = React.useState(
-		JSON.stringify(
-			{},
-			null,
-			4,
-		),
-	);
+interface Props {
+	messageSchema: Message | null;
+}
 
-	const textareaRef = React.useRef<HTMLTextAreaElement>(null);
-	const codeRef = React.useRef<HTMLPreElement>(null);
+const MessageEditor = ({ messageSchema }: Props) => {
+	const monacoRef = React.useRef<any>(null);
+	const valueGetter = React.useRef<(() => string) | null>(null);
+	const uri = React.useRef<string>('');
+	const [code, setCode] = React.useState('{}');
 
-	const handleKeyDown = (evt: React.KeyboardEvent<HTMLTextAreaElement>) => {
-		let value = content;
-		const selStartPos = evt.currentTarget.selectionStart;
-
-		if (evt.key === 'Tab') {
-			value =				`${value.substring(0, selStartPos)
-			}    ${
-				value.substring(selStartPos, value.length)}`;
-			// eslint-disable-next-line no-param-reassign
-			evt.currentTarget.selectionStart = selStartPos + 3;
-			// eslint-disable-next-line no-param-reassign
-			evt.currentTarget.selectionEnd = selStartPos + 4;
-			evt.preventDefault();
-
-			setContent(value);
-		}
+	const handleEditorDidMount: EditorDidMount = _valueGetter => {
+		valueGetter.current = _valueGetter;
 	};
 
 	React.useEffect(() => {
-		Prism.highlightAll();
+		monaco.init().then(_monaco => {
+			(monacoRef as any).current = _monaco;
+			if (messageSchema) {
+				initiateSchema(messageSchema);
+			} else {
+				monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
+					validate: true,
+					schemas: [{
+						uri: 'do.not.load',
+						schema: {},
+					}],
+				});
+			}
+		});
 	}, []);
 
 	React.useEffect(() => {
-		Prism.highlightAll();
-	}, [content]);
+		if (!monacoRef.current) return;
+		(uri as any).current = monacoRef.current.Uri.parse('://b/foo.json');
+		if (messageSchema) {
+			initiateSchema(messageSchema);
+			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
+				validate: true,
+				schemas: [
+					{
+						uri: 'http://myserver/foo-schema.json',
+						fileMatch: ['*'],
+						schema: {
+							type: 'object',
+							properties: createSchema(messageSchema[Object.keys(messageSchema)[0]].content),
+						},
+					},
+				],
+			});
+		} else {
+			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
+				validate: true,
+				schemas: [{
+					uri: 'do.not.load',
+					schema: {},
+				}],
+			});
+		}
+	}, [messageSchema]);
+
+	const onValueChange: ControlledEditorOnChange = (event, value) => {
+		setCode(value || '');
+	};
+
+	const initiateSchema = (schema: Message) => {
+		try {
+			const extractField = (field: Field, title: string): any => {
+				if (!field.required) return {};
+				if (field.type === 'simple') {
+					const allowedValues = Object.values(field.allowedValues);
+					const value = field.defaultValue
+						? field.defaultValue
+						: allowedValues.length
+							? allowedValues[0]
+							: '';
+					return {
+						[title]: value,
+					};
+				}
+				if (field.type === 'map') {
+					return {
+						[title]: {
+							...Object.keys(field.value)
+								.reduce((prev, curr) => extractField(field.value[curr], curr), {}),
+						},
+					};
+				}
+				return {};
+			};
+			const content = schema[Object.keys(schema)[0]].content;
+			const result = Object.keys(content)
+				.reduce((prev, curr) => ({
+					...prev,
+					...extractField(content[curr], curr),
+				}), {});
+			const regex = new RegExp('""', 'g');
+			const replaced = JSON.stringify(result, null, 4).replace(regex, '');
+			setCode(replaced);
+		} catch (error) {
+			console.log('Error occured while initating message');
+		}
+	};
 
 	return (
-		<div className="code-edit-container">
-			<textarea
-				className="code-input"
-				value={content}
-				onChange={evt => setContent(evt.target.value)}
-				onKeyDown={handleKeyDown}
-				ref={textareaRef}
-				onScroll={e => {
-					if (codeRef.current) {
-						codeRef.current.scrollTop = e.currentTarget.scrollTop;
-					}
-				}}
-			/>
-			<pre className="code-output" ref={codeRef}>
-				<code className="language-javascript">{content}</code>
-			</pre>
-		</div>
+		<ControlledEditor
+			height="500px"
+			language="json"
+			value={code}
+			onChange={onValueChange}
+			editorDidMount={handleEditorDidMount}
+		/>
 	);
 };
 

@@ -22,22 +22,34 @@ interface Props {
     options: string[];
     selected: string;
     prefix?: string;
-    onChange: (option: string) => void;
+	onChange: (option: string) => void;
+	label?: string;
+	id?: string;
 }
 
 export default function Select({
-	options, selected, onChange, className = '', prefix = '',
+	options,
+	selected,
+	onChange,
+	className = '',
+	prefix = '',
+	label,
+	id,
 }: Props) {
 	return (
-		<select
-			className={`options-select ${className}`}
-			value={prefix + selected}
-			onChange={e => onChange(e.target.value.substring(prefix.length))}>
-			{
-				options.map((opt, index) => (
-					<option key={index}>{prefix + opt}</option>
-				))
-			}
-		</select>
+		<div className="options-select__root">
+			{label && <label className="options-select__label" htmlFor={id}>{label}</label>}
+			<select
+				className={`options-select ${className}`}
+				id={id}
+				value={prefix + selected}
+				onChange={e => onChange(e.target.value.substring(prefix.length))}>
+				{
+					options.map((opt, index) => (
+						<option key={index}>{prefix + opt}</option>
+					))
+				}
+			</select>
+		</div>
 	);
 }

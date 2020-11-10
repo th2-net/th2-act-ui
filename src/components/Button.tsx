@@ -1,4 +1,4 @@
-/** *****************************************************************************
+/** ****************************************************************************
  * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,18 +11,25 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- *  limitations under the License.
+ * limitations under the License.
  ***************************************************************************** */
 
 import React from 'react';
-import RootStoreContext from '../contexts/rootStoreContext';
+import '../styles/button.scss';
 
-export const useRootStore = () => {
-	const rootStore = React.useContext(RootStoreContext);
+interface Props {
+	children: React.ReactNode;
+	className?: string;
+	onClick?: (event: React.MouseEvent) => void;
+}
 
-	if (!rootStore) {
-		throw new Error('useRootStore should be used inside of RootStoreContextProvider');
-	}
+const Button = ({ children, className = '', onClick }: Props) => (
+	<div
+		className={`button ${className}`}
+		onClick={onClick}
+		role="button">
+		{children}
+	</div>
+);
 
-	return rootStore;
-};
+export default Button;

@@ -14,6 +14,40 @@
  * limitations under the License.
  ***************************************************************************** */
 
-const api = {};
+import { Dictionary } from '../models/Dictionary';
+import { Message } from '../models/Message';
+
+const api = {
+	async getDictionaryList(): Promise<string[]> {
+		const dictionariesResponse = await fetch('/dictionaries');
+
+		if (dictionariesResponse.ok) {
+			return dictionariesResponse.json();
+		}
+
+		console.error(dictionariesResponse.statusText);
+		return [];
+	},
+	async getDictionary(dictionaryName: string): Promise<Dictionary> {
+		const dictionaryResponse = await fetch(`/${dictionaryName}`);
+
+		if (dictionaryResponse.ok) {
+			return dictionaryResponse.json();
+		}
+
+		console.error(dictionaryResponse.statusText);
+		return [];
+	},
+	async getMessage(messageType: string, dictionaryName: string): Promise<Message | null> {
+		const messageResponse = await fetch(`/${dictionaryName}/${messageType}`);
+
+		if (messageResponse.ok) {
+			return messageResponse.json();
+		}
+
+		console.error(messageResponse.statusText);
+		return null;
+	},
+};
 
 export default api;

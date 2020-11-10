@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
+ 
+@import "./common/vars"; 
 
-$scrollbarThumbBackground: #C4C4C4;
-$scrollbarTrackBackground: #F2F2F2;
-
-$primaryTextColor: #4D4D4D;
-$secondaryTextColor: #808080;
-$secondaryLightTextColor: #999999;
-
-$appBackgroundColor: #e7e7e7;
+.result {
+	display: flex;
+	flex-grow: 1;
+	background-color: #fff;
+	border-radius: 6px;
+}
+ 

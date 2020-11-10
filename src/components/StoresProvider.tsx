@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import React from 'react';
-import RootStoreContext, { createRootStore } from '../contexts/rootStoreContext';
+import RootStoreContext, { createRootStore } from '../contexts/storeContext';
 
 function RootStoreProvider({ children }: React.PropsWithChildren<{}>) {
 	return (

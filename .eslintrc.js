@@ -73,7 +73,7 @@ module.exports = {
 		'radix': "off",
 		"no-unused-expressions": "off",
 		"@typescript-eslint/no-unused-expressions": ["error"],
-		'import/no-unassigned-import': ["error", { "allow": ["**/*.scss", "core-js/**", "regenerator-runtime/**"] }],
+		'import/no-unassigned-import': ["error", { "allow": ["**/*.scss", "core-js/**", "regenerator-runtime/**", "ace-builds/src-noconflict/**"] }],
 		'class-methods-use-this': "off",
 		'no-new-wrappers': "off",
 		'no-mixed-spaces-and-tabs': "off",
