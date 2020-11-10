@@ -2,7 +2,7 @@ variables:
   APP_NAME: "message-sender-ui"
   MAJOR_VERSION: "1"
   MINOR_VERSION: "0"
-  MAINTENANCE_VERSION: '2'
+  MAINTENANCE_VERSION: '3'
   INSPECTION_ENABLED: 'false'
   
 include:
