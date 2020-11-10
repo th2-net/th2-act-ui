@@ -57,6 +57,9 @@ export default class Store {
 		try {
 			const dictionaryList = await api.getDictionaryList();
 			this.dictionaries = dictionaryList;
+			if (dictionaryList.length === 1) {
+				this.selectedDictionaryName = dictionaryList[0];
+			}
 		} catch (error) {
 			console.error('Error occured while fetching dictionaries');
 		}

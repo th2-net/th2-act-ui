@@ -90,7 +90,7 @@ const MessageEditor = ({ messageSchema }: Props) => {
 
 	const initiateSchema = (schema: Message) => {
 		try {
-			const extractField = (field: Field, title: string): any => {
+			const extractField = (field: Field, title: string, isArrayField = false): any => {
 				if (!field.required) return {};
 				if (field.type === 'simple') {
 					const allowedValues = Object.values(field.allowedValues);
@@ -104,11 +104,24 @@ const MessageEditor = ({ messageSchema }: Props) => {
 					};
 				}
 				if (field.type === 'map') {
+					const data = {
+						...Object.keys(field.value)
+							.reduce((prev, curr) => ({
+								...prev,
+								...extractField(field.value[curr], curr),
+							}), {}),
+					};
+					return isArrayField ? data : {
+						[title]: data,
+					};
+				}
+				if (field.type === 'array') {
 					return {
-						[title]: {
-							...Object.keys(field.value)
-								.reduce((prev, curr) => extractField(field.value[curr], curr), {}),
-						},
+						[title]: [
+							...field.value
+								.filter(arrField => arrField.required)
+								.map(arrayField => extractField(arrayField, 'test', true)),
+						],
 					};
 				}
 				return {};
@@ -126,7 +139,6 @@ const MessageEditor = ({ messageSchema }: Props) => {
 			console.log('Error occured while initating message');
 		}
 	};
-
 	return (
 		<ControlledEditor
 			height="500px"

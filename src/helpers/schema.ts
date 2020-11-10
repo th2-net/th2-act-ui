@@ -14,29 +14,64 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import { Field } from '../models/Message';
+
 export const createSchema = (messageSchema: any) => {
-	const lvl: any = {};
-	Object.keys(messageSchema)
-		.forEach(key => {
-			if (messageSchema[key].type === 'simple') {
-				lvl[key] = {
-					type: (messageSchema[key] as any).valueType.toLowerCase(),
-				};
-				if (messageSchema[key].allowedValues && Object.keys(messageSchema[key].allowedValues).length) {
-					lvl[key] = {
-						...lvl[key],
-						enum: Object.values(messageSchema[key].allowedValues),
-					};
-				}
+	const createField = (
+		field: Field,
+		title: string,
+		isArrayField = false,
+	): any => {
+		if (field.type === 'simple') {
+			const simpleField = {
+				[title]: {
+					type: field.valueType.toLowerCase(),
+					required: field.required,
+				},
+			};
+			if (field.allowedValues && Object.keys(field.allowedValues).length) {
+				(simpleField as any)[title].enum = Object.values(field.allowedValues);
 			}
+			return simpleField;
+		}
 
-			if (messageSchema[key].type === 'map') {
-				lvl[key] = {
+		if (field.type === 'map') {
+			const mapField: any = {
+				[title]: {
 					type: 'object',
-					properties: createSchema(messageSchema[key].value as any),
-				};
-			}
-		});
+					properties: {
+						...Object.keys(field.value).reduce(
+							(prev, curr) => ({
+								...prev,
+								...createField(field.value[curr], curr),
+							}),
+							{},
+						),
+					},
+				},
+			};
+			return isArrayField ? mapField[title] : mapField;
+		}
 
-	return lvl;
+		if (field.type === 'array') {
+			return {
+				[title]: {
+					type: 'array',
+					items: {
+						...createField(field.value[0], 'dsa', true),
+					},
+				},
+			};
+		}
+
+		return {};
+	};
+
+	return Object.keys(messageSchema).reduce(
+		(prev, curr) => ({
+			...prev,
+			...createField(messageSchema[curr], curr),
+		}),
+		{},
+	);
 };

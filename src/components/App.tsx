@@ -23,7 +23,6 @@ import Button from './Button';
 import '../styles/root.scss';
 import MessageEditor from './MessageEditor';
 import { useStore } from '../hooks/useStore';
-import { Message } from '../models/Message';
 
 const App = () => {
 	const store = useStore();
