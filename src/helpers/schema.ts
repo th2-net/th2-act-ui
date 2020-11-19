@@ -14,29 +14,33 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { Field } from '../models/Message';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { JSONSchema7 } from 'json-schema';
+import {
+	Field, isMapField, isSimpleField, Message, SimpleField, isArrayField,
+} from '../models/Message';
 
-export const createSchema = (messageSchema: any) => {
+export const createSchema = (message: Message): JSONSchema7 => {
 	const createField = (
 		field: Field,
 		title: string,
-		isArrayField = false,
-	): any => {
-		if (field.type === 'simple') {
-			const simpleField = {
+		isArray = false,
+	): JSONSchema7 => {
+		if (isSimpleField(field)) {
+			const simpleField: { [key: string]: JSONSchema7 } = {
 				[title]: {
-					type: field.valueType.toLowerCase(),
-					required: field.required,
+					type: parseValueType(field),
+					required: field.required ? [] as string[] : undefined,
 				},
 			};
 			if (field.allowedValues && Object.keys(field.allowedValues).length) {
-				(simpleField as any)[title].enum = Object.values(field.allowedValues);
+				simpleField[title].enum = Object.values(field.allowedValues);
 			}
 			return simpleField;
 		}
 
-		if (field.type === 'map') {
-			const mapField: any = {
+		if (isMapField(field)) {
+			const mapField: { [key: string]: JSONSchema7 } = {
 				[title]: {
 					type: 'object',
 					properties: {
@@ -50,15 +54,15 @@ export const createSchema = (messageSchema: any) => {
 					},
 				},
 			};
-			return isArrayField ? mapField[title] : mapField;
+			return isArray ? mapField[title] : mapField;
 		}
 
-		if (field.type === 'array') {
+		if (isArrayField(field)) {
 			return {
 				[title]: {
 					type: 'array',
 					items: {
-						...createField(field.value[0], 'dsa', true),
+						...createField(field.value[0], '', true),
 					},
 				},
 			};
@@ -67,11 +71,75 @@ export const createSchema = (messageSchema: any) => {
 		return {};
 	};
 
-	return Object.keys(messageSchema).reduce(
-		(prev, curr) => ({
-			...prev,
-			...createField(messageSchema[curr], curr),
-		}),
-		{},
-	);
+	const messageContent = getMessageContent(message);
+
+	return {
+		properties: Object.keys(messageContent).reduce(
+			(schema, schemaKey) => ({
+				...schema,
+				...createField(messageContent[schemaKey], schemaKey),
+			}),
+			{},
+		),
+	};
 };
+
+function getMessageContent(message: Message) {
+	return message[Object.keys(message)[0]].content;
+}
+
+function parseValueType(field: SimpleField) {
+	return field.valueType.toLowerCase() as 'string' | 'number' | 'boolean';
+}
+
+export function createInitialMessage(schema: Message) {
+	try {
+		const extractField = (field: Field, title: string, isArray = false): object => {
+			if (!field.required) return {};
+			if (isSimpleField(field)) {
+				const allowedValues = Object.values(field.allowedValues);
+				const value = field.defaultValue
+					? field.defaultValue
+					: allowedValues.length
+						? allowedValues[0]
+						: '';
+				return {
+					[title]: value,
+				};
+			}
+			if (isMapField(field)) {
+				const data = {
+					...Object.keys(field.value)
+						.reduce((prev, curr) => ({
+							...prev,
+							...extractField(field.value[curr], curr),
+						}), {}),
+				};
+				return isArray ? data : {
+					[title]: data,
+				};
+			}
+			if (isArrayField(field)) {
+				return {
+					[title]: [
+						...field.value
+							.filter(arrField => arrField.required)
+							.map(arrayField => extractField(arrayField, '', true)),
+					],
+				};
+			}
+			return {};
+		};
+		const content = schema[Object.keys(schema)[0]].content;
+		const result = Object.keys(content)
+			.reduce((prev, curr) => ({
+				...prev,
+				...extractField(content[curr], curr),
+			}), {});
+		const regex = new RegExp('""', 'g');
+		return JSON.stringify(result, null, 4).replace(regex, '');
+	} catch (error) {
+		console.error('Error occured while initating message');
+		return null;
+	}
+}

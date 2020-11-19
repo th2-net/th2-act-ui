@@ -30,6 +30,8 @@ export default class Store {
 
 	@observable message: Message | null = null;
 
+	@observable session: string | null = null;
+
 	constructor() {
 		this.getDictionaries();
 
@@ -47,6 +49,8 @@ export default class Store {
 			messageType => {
 				if (messageType && this.selectedDictionaryName) {
 					this.getMessageSchema(messageType, this.selectedDictionaryName);
+				} else {
+					this.message = null;
 				}
 			},
 		);

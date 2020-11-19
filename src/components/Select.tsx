@@ -32,7 +32,6 @@ export default function Select({
 	selected,
 	onChange,
 	className = '',
-	prefix = '',
 	label,
 	id,
 }: Props) {
@@ -42,11 +41,12 @@ export default function Select({
 			<select
 				className={`options-select ${className}`}
 				id={id}
-				value={prefix + selected}
-				onChange={e => onChange(e.target.value.substring(prefix.length))}>
+				value={selected}
+				onChange={e => onChange(e.target.value)}>
+				<option label="" />
 				{
 					options.map((opt, index) => (
-						<option key={index}>{prefix + opt}</option>
+						<option key={index}>{opt}</option>
 					))
 				}
 			</select>

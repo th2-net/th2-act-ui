@@ -20,18 +20,21 @@ import {
 	EditorDidMount,
 	ControlledEditor,
 	ControlledEditorOnChange,
+	Monaco,
 } from '@monaco-editor/react';
-import { Field, Message } from '../models/Message';
-import { createSchema } from '../helpers/schema';
+// eslint-disable-next-line import/no-unresolved
+import { Uri } from 'monaco-editor';
+import { Message } from '../models/Message';
+import { createInitialMessage, createSchema } from '../helpers/schema';
 
 interface Props {
 	messageSchema: Message | null;
 }
 
 const MessageEditor = ({ messageSchema }: Props) => {
-	const monacoRef = React.useRef<any>(null);
+	const monacoRef = React.useRef<Monaco>();
 	const valueGetter = React.useRef<(() => string) | null>(null);
-	const uri = React.useRef<string>('');
+	const uri = React.useRef<Uri>();
 	const [code, setCode] = React.useState('{}');
 
 	const handleEditorDidMount: EditorDidMount = _valueGetter => {
@@ -39,8 +42,8 @@ const MessageEditor = ({ messageSchema }: Props) => {
 	};
 
 	React.useEffect(() => {
-		monaco.init().then(_monaco => {
-			(monacoRef as any).current = _monaco;
+		monaco.init().then((_monaco: Monaco) => {
+			monacoRef.current = _monaco;
 			if (messageSchema) {
 				initiateSchema(messageSchema);
 			} else {
@@ -57,23 +60,25 @@ const MessageEditor = ({ messageSchema }: Props) => {
 
 	React.useEffect(() => {
 		if (!monacoRef.current) return;
-		(uri as any).current = monacoRef.current.Uri.parse('://b/foo.json');
 		if (messageSchema) {
+			const messageTitle = Object.keys(messageSchema)[0];
+			uri.current = monacoRef.current.Uri.parse(`://b/${messageTitle}.json`);
 			initiateSchema(messageSchema);
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
 				schemas: [
 					{
-						uri: 'http://myserver/foo-schema.json',
+						uri: `http://myserver/${messageTitle}.json`,
 						fileMatch: ['*'],
 						schema: {
 							type: 'object',
-							properties: createSchema(messageSchema[Object.keys(messageSchema)[0]].content),
+							properties: createSchema(messageSchema),
 						},
 					},
 				],
 			});
 		} else {
+			setCode('{}');
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
 				schemas: [{
@@ -85,60 +90,14 @@ const MessageEditor = ({ messageSchema }: Props) => {
 	}, [messageSchema]);
 
 	const onValueChange: ControlledEditorOnChange = (event, value) => {
-		setCode(value || '');
+		setCode(value || '{}');
 	};
 
-	const initiateSchema = (schema: Message) => {
-		try {
-			const extractField = (field: Field, title: string, isArrayField = false): any => {
-				if (!field.required) return {};
-				if (field.type === 'simple') {
-					const allowedValues = Object.values(field.allowedValues);
-					const value = field.defaultValue
-						? field.defaultValue
-						: allowedValues.length
-							? allowedValues[0]
-							: '';
-					return {
-						[title]: value,
-					};
-				}
-				if (field.type === 'map') {
-					const data = {
-						...Object.keys(field.value)
-							.reduce((prev, curr) => ({
-								...prev,
-								...extractField(field.value[curr], curr),
-							}), {}),
-					};
-					return isArrayField ? data : {
-						[title]: data,
-					};
-				}
-				if (field.type === 'array') {
-					return {
-						[title]: [
-							...field.value
-								.filter(arrField => arrField.required)
-								.map(arrayField => extractField(arrayField, 'test', true)),
-						],
-					};
-				}
-				return {};
-			};
-			const content = schema[Object.keys(schema)[0]].content;
-			const result = Object.keys(content)
-				.reduce((prev, curr) => ({
-					...prev,
-					...extractField(content[curr], curr),
-				}), {});
-			const regex = new RegExp('""', 'g');
-			const replaced = JSON.stringify(result, null, 4).replace(regex, '');
-			setCode(replaced);
-		} catch (error) {
-			console.log('Error occured while initating message');
-		}
+	const initiateSchema = (message: Message) => {
+		const initialSchema = createInitialMessage(message) || '{}';
+		setCode(initialSchema);
 	};
+
 	return (
 		<ControlledEditor
 			height="500px"

@@ -31,20 +31,6 @@ const App = () => {
 		<div className="app">
 			<div className="app__header">
 				<h3 className="app__title">Configuration</h3>
-				<Select
-					label="Sessions"
-					id="sessions"
-					options={[]}
-					selected={''}
-					// eslint-disable-next-line no-console
-					onChange={opt => console.log(opt)}/>
-				<Select
-					label="Dictionaries"
-					id="dictionaries"
-					options={[]}
-					selected={''}
-					// eslint-disable-next-line no-console
-					onChange={opt => console.log(opt)}/>
 			</div>
 			<div className="app__body">
 				<div className="app__row">
@@ -68,10 +54,7 @@ const App = () => {
 						id="session"
 						options={[]}
 						selected={''}
-						// eslint-disable-next-line no-console
-						onChange={opt => {
-							console.log(opt);
-						}}/>
+						onChange={opt => store.session = opt}/>
 					<Select
 						label="Dictionary"
 						id="dictionary"

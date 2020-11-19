@@ -30,9 +30,11 @@ export type MessageFieldBase = {
 	required: boolean;
 };
 
+export type FieldValueType = 'STRING' | 'NUMBER' | 'BOOLEAN';
+
 export type SimpleField = MessageFieldBase & {
 	type: 'simple';
-	valueType: 'STRING' | 'NUMBER' | 'BOOLEAN';
+	valueType: FieldValueType;
 	defaultValue: null | string | number | boolean;
 	allowedValues: {
 		[messageType: string]: string | number | boolean;
@@ -52,3 +54,15 @@ export type MapField = MessageFieldBase & {
 		[key: string]: SimpleField | MapField | ArrayField;
 	};
 };
+
+export function isSimpleField(field: Field): field is SimpleField {
+	return field.type === 'simple';
+}
+
+export function isMapField(field: Field): field is MapField {
+	return field.type === 'map';
+}
+
+export function isArrayField(field: Field): field is ArrayField {
+	return field.type === 'array';
+}
