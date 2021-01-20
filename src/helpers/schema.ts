@@ -102,7 +102,7 @@ export function createInitialMessage(schema: Message) {
 					? field.defaultValue
 					: allowedValues.length
 						? allowedValues[0]
-						: '';
+						: getDefaultValue(field.valueType);
 				return {
 					[title]: value,
 				};
@@ -139,7 +139,22 @@ export function createInitialMessage(schema: Message) {
 		const regex = new RegExp('""', 'g');
 		return JSON.stringify(result, null, 4).replace(regex, '');
 	} catch (error) {
-		console.error('Error occured while initating message');
+		console.error('Error occured while initiating message');
 		return null;
+	}
+}
+
+function getDefaultValue(type: 'STRING' | 'NUMBER' | 'BOOLEAN') {
+	switch (type) {
+		case 'STRING': {
+			return ' ';
+		}
+		case 'NUMBER': {
+			return 0;
+		}
+		case 'BOOLEAN': {
+			return false;
+		}
+		default: return '';
 	}
 }
