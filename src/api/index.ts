@@ -15,11 +15,13 @@
  ***************************************************************************** */
 
 import { Dictionary } from '../models/Dictionary';
-import { Message } from '../models/Message';
+import { Message, MessageRequestModel } from '../models/Message';
 
 const api = {
 	async getDictionaryList(): Promise<string[]> {
-		const dictionariesResponse = await fetch('/dictionaries');
+		const dictionariesResponse = await fetch('/dictionaries', {
+			cache: 'no-cache',
+		});
 
 		if (dictionariesResponse.ok) {
 			return dictionariesResponse.json();
@@ -28,8 +30,22 @@ const api = {
 		console.error(dictionariesResponse.statusText);
 		return [];
 	},
+	async getSessions(): Promise<string[]> {
+		const sessionsResponse = await fetch('/sessions', {
+			cache: 'no-cache',
+		});
+
+		if (sessionsResponse.ok) {
+			return sessionsResponse.json();
+		}
+
+		console.error(sessionsResponse.statusText);
+		return [];
+	},
 	async getDictionary(dictionaryName: string): Promise<Dictionary> {
-		const dictionaryResponse = await fetch(`/${dictionaryName}`);
+		const dictionaryResponse = await fetch(`/${dictionaryName}`, {
+			cache: 'no-cache',
+		});
 
 		if (dictionaryResponse.ok) {
 			return dictionaryResponse.json();
@@ -47,6 +63,21 @@ const api = {
 
 		console.error(messageResponse.statusText);
 		return null;
+	},
+	async sendMessage(request: MessageRequestModel): Promise<boolean> {
+		const res = await fetch('message', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(request),
+		});
+
+		if (!res.ok) {
+			console.error(res);
+		}
+
+		return res.ok;
 	},
 };
 

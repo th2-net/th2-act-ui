@@ -31,7 +31,11 @@ interface Props {
 	messageSchema: Message | null;
 }
 
-const MessageEditor = ({ messageSchema }: Props) => {
+export interface MessageEditorMethods {
+	getFilledMessage: () => object | null;
+}
+
+const MessageEditor = React.forwardRef(({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const monacoRef = React.useRef<Monaco>();
 	const valueGetter = React.useRef<(() => string) | null>(null);
 	const uri = React.useRef<Uri>();
@@ -98,6 +102,22 @@ const MessageEditor = ({ messageSchema }: Props) => {
 		setCode(initialSchema);
 	};
 
+	React.useImperativeHandle(
+		ref,
+		() => ({
+			getFilledMessage: () => {
+				let filledMessage: object | null;
+				try {
+					filledMessage = JSON.parse(code);
+				} catch {
+					filledMessage = null;
+				}
+				return filledMessage;
+			},
+		}),
+		[code],
+	);
+
 	return (
 		<ControlledEditor
 			height="500px"
@@ -107,6 +127,8 @@ const MessageEditor = ({ messageSchema }: Props) => {
 			editorDidMount={handleEditorDidMount}
 		/>
 	);
-};
+});
+
+MessageEditor.displayName = 'MessageEditor';
 
 export default MessageEditor;

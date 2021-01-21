@@ -30,6 +30,13 @@ export type MessageFieldBase = {
 	required: boolean;
 };
 
+export interface MessageRequestModel {
+	session: string;
+	dictionary: string;
+	messageType: string;
+	message: object;
+}
+
 export type FieldValueType = 'STRING' | 'NUMBER' | 'BOOLEAN';
 
 export type SimpleField = MessageFieldBase & {
