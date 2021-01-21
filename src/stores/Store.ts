@@ -22,18 +22,21 @@ import { Message } from '../models/Message';
 export default class Store {
 	@observable dictionaries: Array<string> = [];
 
+	@observable sessions: Array<string> = [];
+
 	@observable dictionary: Dictionary = [];
 
 	@observable selectedDictionaryName: string | null = null;
 
 	@observable selectedMessageType: string | null = null;
 
-	@observable message: Message | null = null;
+	@observable selectedSession: string | null = null;
 
-	@observable session: string | null = null;
+	@observable message: Message | null = null;
 
 	constructor() {
 		this.getDictionaries();
+		this.getSessions();
 
 		reaction(
 			() => this.selectedDictionaryName,
@@ -87,5 +90,28 @@ export default class Store {
 		} catch (error) {
 			console.error('Error occured while fetching message');
 		}
+	};
+
+	@action
+	getSessions = async () => {
+		try {
+			const sessions = await api.getSessions();
+			this.sessions = sessions;
+			if (sessions.length === 1) {
+				this.selectedSession = sessions[0];
+			}
+		} catch (error) {
+			console.error('Error occured while fetching dictionaries');
+		}
+	};
+
+	sendMessage = async (message: object) => {
+		if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) return;
+		await api.sendMessage({
+			session: this.selectedSession,
+			dictionary: this.selectedDictionaryName,
+			messageType: this.selectedMessageType,
+			message,
+		});
 	};
 }

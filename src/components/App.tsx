@@ -21,11 +21,22 @@ import Select from './Select';
 import Result from './Result';
 import Button from './Button';
 import '../styles/root.scss';
-import MessageEditor from './MessageEditor';
+import MessageEditor, { MessageEditorMethods } from './MessageEditor';
 import { useStore } from '../hooks/useStore';
 
 const App = () => {
 	const store = useStore();
+
+	const messageEditorRef: React.RefObject<MessageEditorMethods> = React.useRef(null);
+
+	const sendMessage = () => {
+		if (messageEditorRef.current) {
+			const filledMessage = messageEditorRef.current.getFilledMessage();
+			if (filledMessage) {
+				store.sendMessage(filledMessage);
+			}
+		}
+	};
 
 	return (
 		<div className="app">
@@ -52,9 +63,9 @@ const App = () => {
 					<Select
 						label="Session"
 						id="session"
-						options={[]}
-						selected={''}
-						onChange={opt => store.session = opt}/>
+						options={store.sessions}
+						selected={store.selectedSession || ''}
+						onChange={opt => store.selectedSession = opt}/>
 					<Select
 						label="Dictionary"
 						id="dictionary"
@@ -69,16 +80,16 @@ const App = () => {
 						onChange={opt => store.selectedMessageType = opt}/>
 				</div>
 				<div className="app__editor">
-					<MessageEditor messageSchema={store.message} />
+					<MessageEditor messageSchema={store.message} ref={messageEditorRef} />
 				</div>
 				<div className="app__buttons">
 					<Button>
-						<i className="clear-icon"></i>
+						<i className="clear-icon" />
 						<span>Clear</span>
 					</Button>
-					<Button>
+					<Button onClick={sendMessage}>
 						<span>Send Message</span>
-						<i className="arrow-right-icon"></i>
+						<i className="arrow-right-icon" />
 					</Button>
 				</div>
 				<div className="app__result">

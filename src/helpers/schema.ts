@@ -136,8 +136,7 @@ export function createInitialMessage(schema: Message) {
 				...prev,
 				...extractField(content[curr], curr),
 			}), {});
-		const regex = new RegExp('""', 'g');
-		return JSON.stringify(result, null, 4).replace(regex, '');
+		return JSON.stringify(result, null, 4);
 	} catch (error) {
 		console.error('Error occured while initiating message');
 		return null;
@@ -147,7 +146,7 @@ export function createInitialMessage(schema: Message) {
 function getDefaultValue(type: 'STRING' | 'NUMBER' | 'BOOLEAN') {
 	switch (type) {
 		case 'STRING': {
-			return ' ';
+			return '';
 		}
 		case 'NUMBER': {
 			return 0;
