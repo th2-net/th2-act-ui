@@ -23,7 +23,10 @@ import {
 	Monaco,
 } from '@monaco-editor/react';
 // eslint-disable-next-line import/no-unresolved
-import { Uri } from 'monaco-editor';
+import {
+	CancellationToken, editor, languages, Uri,
+// eslint-disable-next-line import/no-unresolved
+} from 'monaco-editor';
 import { Message } from '../models/Message';
 import { createInitialMessage, createSchema } from '../helpers/schema';
 
@@ -65,6 +68,10 @@ const MessageEditor = React.forwardRef(({ messageSchema }: Props, ref: React.Ref
 	React.useEffect(() => {
 		if (!monacoRef.current) return;
 		if (messageSchema) {
+			const schema = createSchema(messageSchema);
+
+			console.log(schema);
+
 			const messageTitle = Object.keys(messageSchema)[0];
 			uri.current = monacoRef.current.Uri.parse(`://b/${messageTitle}.json`);
 			initiateSchema(messageSchema);
@@ -76,7 +83,7 @@ const MessageEditor = React.forwardRef(({ messageSchema }: Props, ref: React.Ref
 						fileMatch: ['*'],
 						schema: {
 							type: 'object',
-							properties: createSchema(messageSchema),
+							properties: schema,
 						},
 					},
 				],

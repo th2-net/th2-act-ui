@@ -73,15 +73,13 @@ export const createSchema = (message: Message): JSONSchema7 => {
 
 	const messageContent = getMessageContent(message);
 
-	return {
-		properties: Object.keys(messageContent).reduce(
-			(schema, schemaKey) => ({
-				...schema,
-				...createField(messageContent[schemaKey], schemaKey),
-			}),
-			{},
-		),
-	};
+	return Object.keys(messageContent).reduce(
+		(schema, schemaKey) => ({
+			...schema,
+			...createField(messageContent[schemaKey], schemaKey),
+		}),
+		{},
+	);
 };
 
 function getMessageContent(message: Message) {
@@ -95,7 +93,7 @@ function parseValueType(field: SimpleField) {
 export function createInitialMessage(schema: Message) {
 	try {
 		const extractField = (field: Field, title: string, isArray = false): object => {
-			if (!field.required) return {};
+		    if (!field.required) return {};
 			if (isSimpleField(field)) {
 				const allowedValues = Object.values(field.allowedValues);
 				const value = field.defaultValue
@@ -123,7 +121,6 @@ export function createInitialMessage(schema: Message) {
 				return {
 					[title]: [
 						...field.value
-							.filter(arrField => arrField.required)
 							.map(arrayField => extractField(arrayField, '', true)),
 					],
 				};
@@ -138,7 +135,7 @@ export function createInitialMessage(schema: Message) {
 			}), {});
 		return JSON.stringify(result, null, 4);
 	} catch (error) {
-		console.error('Error occured while initiating message');
+		console.error('Error occurred while initiating message');
 		return null;
 	}
 }
