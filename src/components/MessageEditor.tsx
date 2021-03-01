@@ -23,12 +23,10 @@ import {
 	Monaco,
 } from '@monaco-editor/react';
 // eslint-disable-next-line import/no-unresolved
-import {
-	CancellationToken, editor, languages, Uri,
-// eslint-disable-next-line import/no-unresolved
-} from 'monaco-editor';
-import { Message } from '../models/Message';
-import { createInitialMessage, createSchema } from '../helpers/schema';
+import { Uri } from 'monaco-editor';
+import { toJS } from 'mobx';
+import { isParsedMessage, Message } from '../models/Message';
+import { createInitialActMessage, createInitialParsedMessage, createParsedSchema } from '../helpers/schema';
 
 interface Props {
 	messageSchema: Message | null;
@@ -68,23 +66,23 @@ const MessageEditor = React.forwardRef(({ messageSchema }: Props, ref: React.Ref
 	React.useEffect(() => {
 		if (!monacoRef.current) return;
 		if (messageSchema) {
-			const schema = createSchema(messageSchema);
-
-			console.log(schema);
-
+			const isParsedMessageSchema = isParsedMessage(messageSchema);
+			const schema = isParsedMessage(messageSchema) ? createParsedSchema(messageSchema) : toJS(messageSchema);
 			const messageTitle = Object.keys(messageSchema)[0];
-			uri.current = monacoRef.current.Uri.parse(`://b/${messageTitle}.json`);
+			uri.current = monacoRef.current.Uri.parse(
+				`://b/${isParsedMessageSchema ? messageTitle : 'act'}.json`,
+			);
 			initiateSchema(messageSchema);
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
 				schemas: [
 					{
-						uri: `http://myserver/${messageTitle}.json`,
+						uri: `http://myserver/${isParsedMessageSchema ? messageTitle : 'act'}.json`,
 						fileMatch: ['*'],
-						schema: {
+						schema: isParsedMessageSchema ? {
 							type: 'object',
 							properties: schema,
-						},
+						} : schema,
 					},
 				],
 			});
@@ -105,7 +103,9 @@ const MessageEditor = React.forwardRef(({ messageSchema }: Props, ref: React.Ref
 	};
 
 	const initiateSchema = (message: Message) => {
-		const initialSchema = createInitialMessage(message) || '{}';
+		const initialSchema = isParsedMessage(message)
+			? createInitialParsedMessage(message) || '{}'
+			: createInitialActMessage(message) || '{}';
 		setCode(initialSchema);
 	};
 

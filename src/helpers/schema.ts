@@ -15,19 +15,24 @@
  ***************************************************************************** */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { JSONSchema7 } from 'json-schema';
+import { JSONSchema4 } from 'json-schema';
 import {
-	Field, isMapField, isSimpleField, Message, SimpleField, isArrayField,
+	Field,
+	isArrayField,
+	isMapField,
+	isSimpleField,
+	ParsedMessage,
+	SimpleField,
 } from '../models/Message';
 
-export const createSchema = (message: Message): JSONSchema7 => {
+export const createParsedSchema = (message: ParsedMessage): JSONSchema4 => {
 	const createField = (
 		field: Field,
 		title: string,
 		isArray = false,
-	): JSONSchema7 => {
+	): JSONSchema4 => {
 		if (isSimpleField(field)) {
-			const simpleField: { [key: string]: JSONSchema7 } = {
+			const simpleField: { [key: string]: JSONSchema4 } = {
 				[title]: {
 					type: parseValueType(field),
 					required: field.required ? [] as string[] : undefined,
@@ -40,7 +45,7 @@ export const createSchema = (message: Message): JSONSchema7 => {
 		}
 
 		if (isMapField(field)) {
-			const mapField: { [key: string]: JSONSchema7 } = {
+			const mapField: { [key: string]: JSONSchema4 } = {
 				[title]: {
 					type: 'object',
 					properties: {
@@ -82,7 +87,7 @@ export const createSchema = (message: Message): JSONSchema7 => {
 	);
 };
 
-function getMessageContent(message: Message) {
+function getMessageContent(message: ParsedMessage) {
 	return message[Object.keys(message)[0]].content;
 }
 
@@ -90,7 +95,7 @@ function parseValueType(field: SimpleField) {
 	return field.valueType.toLowerCase() as 'string' | 'number' | 'boolean';
 }
 
-export function createInitialMessage(schema: Message) {
+export function createInitialParsedMessage(schema: ParsedMessage) {
 	try {
 		const extractField = (field: Field, title: string, isArray = false): object => {
 		    if (!field.required) return {};
@@ -100,7 +105,7 @@ export function createInitialMessage(schema: Message) {
 					? field.defaultValue
 					: allowedValues.length
 						? allowedValues[0]
-						: getDefaultValue(field.valueType);
+						: getDefaultParsedValue(field.valueType);
 				return {
 					[title]: value,
 				};
@@ -140,7 +145,7 @@ export function createInitialMessage(schema: Message) {
 	}
 }
 
-function getDefaultValue(type: 'STRING' | 'NUMBER' | 'BOOLEAN') {
+function getDefaultParsedValue(type: 'STRING' | 'NUMBER' | 'BOOLEAN') {
 	switch (type) {
 		case 'STRING': {
 			return '';
@@ -152,5 +157,119 @@ function getDefaultValue(type: 'STRING' | 'NUMBER' | 'BOOLEAN') {
 			return false;
 		}
 		default: return '';
+	}
+}
+
+export function createInitialActMessage(schema: JSONSchema4) {
+	const definitionsMap = new Map<string, JSONSchema4>();
+
+	try {
+		const extractSchema = (jsonSchema: JSONSchema4, title: string, isArray = false): object => {
+			let currentSchema = jsonSchema;
+
+			if (currentSchema.definitions) {
+				Object.entries(currentSchema.definitions)
+					.forEach(
+						([key, schm]) => definitionsMap.set(schm.id || key, schm),
+					);
+			}
+			if (currentSchema.$ref) {
+				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+				currentSchema = definitionsMap.get(currentSchema.$ref)!;
+			}
+
+			if (currentSchema.enum) {
+				return {
+					[title]: currentSchema.enum[0],
+				};
+			}
+
+			switch (currentSchema.type) {
+				case 'object': {
+					if (!currentSchema.properties && typeof currentSchema.additionalProperties !== 'object') {
+						throw new Error('Object schema doesn\'t contain properties');
+					}
+
+					if (currentSchema.properties) {
+						const data = {
+							...Object.keys(currentSchema.properties)
+								.reduce((prev, curr) => {
+									if (!currentSchema.properties) {
+										throw new Error('Object schema doesn\'t contain properties');
+									}
+									return {
+										...prev,
+										...extractSchema(currentSchema.properties[curr], curr),
+									};
+								}, {}),
+						};
+						return isArray ? data : {
+							[title]: data,
+						};
+					}
+					return {
+						[title]: {},
+					};
+				}
+				case 'array': {
+					if (Array.isArray(currentSchema.items)) {
+						return {
+							[title]: [
+								...currentSchema.items
+									.map((arrayField: JSONSchema4) => extractSchema(arrayField, '', true)),
+							],
+						};
+					}
+					return {
+						[title]: [],
+					};
+				}
+				case 'string': {
+					return {
+						[title]: '',
+					};
+				}
+				case 'integer': {
+					return {
+						[title]: 0,
+					};
+				}
+				case 'number': {
+					return {
+						[title]: 0,
+					};
+				}
+				case 'boolean': {
+					return {
+						[title]: false,
+					};
+				}
+				case 'null': {
+					return {
+						[title]: null,
+					};
+				}
+				default: return {};
+			}
+		};
+		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+		const content = schema.properties!;
+		if (schema.definitions) {
+			Object.entries(schema.definitions)
+				.forEach(
+					([key, schm]) => {
+						definitionsMap.set(schm.id || key, schm);
+					},
+				);
+		}
+		const result = Object.keys(content)
+			.reduce((prev, curr) => ({
+				...prev,
+				...extractSchema(content[curr], curr),
+			}), {});
+		return JSON.stringify(result, null, 4);
+	} catch (error) {
+		console.error('Error occurred while initiating message', error);
+		return null;
 	}
 }
