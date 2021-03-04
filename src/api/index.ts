@@ -15,7 +15,13 @@
  ***************************************************************************** */
 
 import { Dictionary } from '../models/Dictionary';
-import { Message, MessageRequestModel } from '../models/Message';
+import {
+	JSONSchemaResponce,
+	MessageRequestModel,
+	MethodCallRequestModel,
+	ParsedMessage,
+} from '../models/Message';
+import Service from '../models/Service';
 
 const api = {
 	async getDictionaryList(): Promise<string[]> {
@@ -54,7 +60,7 @@ const api = {
 		console.error(dictionaryResponse.statusText);
 		return [];
 	},
-	async getMessage(messageType: string, dictionaryName: string): Promise<Message | null> {
+	async getMessage(messageType: string, dictionaryName: string): Promise<ParsedMessage | null> {
 		const messageResponse = await fetch(`/${dictionaryName}/${messageType}`);
 
 		if (messageResponse.ok) {
@@ -64,20 +70,85 @@ const api = {
 		console.error(messageResponse.statusText);
 		return null;
 	},
-	async sendMessage(request: MessageRequestModel): Promise<boolean> {
-		const res = await fetch('message', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
+	async sendMessage(request: MessageRequestModel): Promise<void> {
+		const res = await fetch(
+			`/message/?session=${request.session}&dictionary=${request.dictionary}&messageType=${request.messageType}`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(request.message),
 			},
-			body: JSON.stringify(request),
-		});
+		);
 
 		if (!res.ok) {
 			console.error(res);
 		}
+	},
+	async getActsList(): Promise<string[]> {
+		const actsResponse = await fetch('/acts', {
+			cache: 'no-cache',
+		});
 
-		return res.ok;
+		if (actsResponse.ok) {
+			return actsResponse.json();
+		}
+
+		console.error(actsResponse.statusText);
+		return [];
+	},
+	async getServices(actBox: string): Promise<string[]> {
+		const servicesResponse = await fetch(`/services/${actBox}`, {
+			cache: 'no-cache',
+		});
+
+		if (servicesResponse.ok) {
+			return servicesResponse.json();
+		}
+
+		console.error(servicesResponse.statusText);
+		return [];
+	},
+	async getServiceDetails(serviceName: string): Promise<Service | null> {
+		const servicesResponse = await fetch(`/service/${serviceName}`, {
+			cache: 'no-cache',
+		});
+
+		if (servicesResponse.ok) {
+			return servicesResponse.json();
+		}
+
+		console.error(servicesResponse.statusText);
+		return null;
+	},
+	async getActSchema(serviceName: string, methodName: string): Promise<JSONSchemaResponce | null> {
+		const schemaResponse = await fetch(`/json_schema/${serviceName}/?method=${methodName}`, {
+			cache: 'no-cache',
+		});
+
+		if (schemaResponse.ok) {
+			return schemaResponse.json();
+		}
+
+		console.error(schemaResponse.statusText);
+		return null;
+	},
+	async callMethod(request: MethodCallRequestModel): Promise<void> {
+		const res = await fetch(
+			`/method/?fullServiceName=${request.fullServiceName}&methodName=${request.methodName}`,
+			{
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(request.message),
+			},
+		);
+
+		if (!res.ok) {
+			console.error(res);
+		}
 	},
 };
 

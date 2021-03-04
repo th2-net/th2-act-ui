@@ -17,12 +17,12 @@
 import { hot } from 'react-hot-loader/root';
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
-import Select from './Select';
 import Result from './Result';
 import Button from './Button';
 import '../styles/root.scss';
 import MessageEditor, { MessageEditorMethods } from './MessageEditor';
 import { useStore } from '../hooks/useStore';
+import Control from './Control';
 
 const App = () => {
 	const store = useStore();
@@ -44,43 +44,9 @@ const App = () => {
 				<h3 className="app__title">Configuration</h3>
 			</div>
 			<div className="app__body">
-				<div className="app__row">
-					<h3 className="app__title">Send as</h3>
-					<label htmlFor="parsed-message">
-						<input type="radio" value="Parsed Message" id="parsed-message"/>
-						Parsed Message
-					</label>
-					<label htmlFor="raw-message">
-						<input type="radio" value="Raw Message" id="raw-message"/>
-						Raw Message
-					</label>
-					<label htmlFor="act">
-						<input type="radio" value="Act" id="act"/>
-						Act
-					</label>
-				</div>
-				<div className="app__row">
-					<Select
-						label="Session"
-						id="session"
-						options={store.sessions}
-						selected={store.selectedSession || ''}
-						onChange={opt => store.selectedSession = opt}/>
-					<Select
-						label="Dictionary"
-						id="dictionary"
-						options={store.dictionaries}
-						selected={store.selectedDictionaryName || ''}
-						onChange={opt => store.selectedDictionaryName = opt}/>
-					<Select
-						label="Msg Type"
-						id="msg-type"
-						options={store.dictionary}
-						selected={store.selectedMessageType || ''}
-						onChange={opt => store.selectedMessageType = opt}/>
-				</div>
+				<Control />
 				<div className="app__editor">
-					<MessageEditor messageSchema={store.message} ref={messageEditorRef} />
+					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
 				</div>
 				<div className="app__buttons">
 					<Button>

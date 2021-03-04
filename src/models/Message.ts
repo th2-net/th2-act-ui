@@ -14,7 +14,12 @@
  * limitations under the License.
  ***************************************************************************** */
 
-export interface Message {
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { JSONSchema4 } from 'json-schema';
+
+export type Message = ParsedMessage | JSONSchema4;
+
+export interface ParsedMessage {
 	[messageType: string]: {
 		type: 'messagePattern';
 		name: string;
@@ -24,7 +29,7 @@ export interface Message {
 	};
 }
 
-export type MessageFieldBase = {
+export type FieldBase = {
 	type: 'simple' | 'array' | 'map';
 	name: string;
 	required: boolean;
@@ -37,9 +42,15 @@ export interface MessageRequestModel {
 	message: object;
 }
 
+export interface MethodCallRequestModel {
+	fullServiceName: string;
+	methodName: string;
+	message: object;
+}
+
 export type FieldValueType = 'STRING' | 'NUMBER' | 'BOOLEAN';
 
-export type SimpleField = MessageFieldBase & {
+export type SimpleField = FieldBase & {
 	type: 'simple';
 	valueType: FieldValueType;
 	defaultValue: null | string | number | boolean;
@@ -50,17 +61,27 @@ export type SimpleField = MessageFieldBase & {
 
 export type Field = SimpleField | MapField | ArrayField;
 
-export type ArrayField = MessageFieldBase & {
+export type ArrayField = FieldBase & {
 	type: 'array';
 	value: Array<SimpleField | MapField>;
 };
 
-export type MapField = MessageFieldBase & {
+export type MapField = FieldBase & {
 	type: 'map';
 	value: {
 		[key: string]: SimpleField | MapField | ArrayField;
 	};
 };
+
+export interface JSONSchemaResponce {
+	[methodName: string]: string;
+}
+
+export function isParsedMessage(message: Message): message is ParsedMessage {
+	return message
+		&& Object.values((message as ParsedMessage))
+			.every(field => field.name !== undefined && field.content !== undefined);
+}
 
 export function isSimpleField(field: Field): field is SimpleField {
 	return field.type === 'simple';
