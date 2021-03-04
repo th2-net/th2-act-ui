@@ -1,5 +1,5 @@
-/** *****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+/** ****************************************************************************
+ * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,12 @@
  ***************************************************************************** */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { JSONSchema4 } from 'json-schema';
+import { JSONSchema4, JSONSchema7 } from 'json-schema';
 
 export type Message = ParsedMessage | JSONSchema4;
 
 export interface ParsedMessage {
-	[messageType: string]: {
-		type: 'messagePattern';
-		name: string;
-		content: {
-			[key: string]: SimpleField | MapField | ArrayField;
-		};
-	};
+	[messageType: string]: JSONSchema7;
 }
 
 export type FieldBase = {
@@ -47,50 +41,6 @@ export interface MethodCallRequestModel {
 	methodName: string;
 	message: object;
 }
-
-export type FieldValueType = 'STRING' | 'NUMBER' | 'BOOLEAN';
-
-export type SimpleField = FieldBase & {
-	type: 'simple';
-	valueType: FieldValueType;
-	defaultValue: null | string | number | boolean;
-	allowedValues: {
-		[messageType: string]: string | number | boolean;
-	};
-};
-
-export type Field = SimpleField | MapField | ArrayField;
-
-export type ArrayField = FieldBase & {
-	type: 'array';
-	value: Array<SimpleField | MapField>;
-};
-
-export type MapField = FieldBase & {
-	type: 'map';
-	value: {
-		[key: string]: SimpleField | MapField | ArrayField;
-	};
-};
-
 export interface JSONSchemaResponce {
 	[methodName: string]: string;
-}
-
-export function isParsedMessage(message: Message): message is ParsedMessage {
-	return message
-		&& Object.values((message as ParsedMessage))
-			.every(field => field.name !== undefined && field.content !== undefined);
-}
-
-export function isSimpleField(field: Field): field is SimpleField {
-	return field.type === 'simple';
-}
-
-export function isMapField(field: Field): field is MapField {
-	return field.type === 'map';
-}
-
-export function isArrayField(field: Field): field is ArrayField {
-	return field.type === 'array';
 }

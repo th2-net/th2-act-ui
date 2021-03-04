@@ -1,5 +1,5 @@
 /** ****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import React from 'react';
 import {
 	monaco,
@@ -25,11 +27,10 @@ import {
 // eslint-disable-next-line import/no-unresolved
 import { Uri } from 'monaco-editor';
 import { toJS } from 'mobx';
-import { isParsedMessage, Message } from '../models/Message';
-import { createInitialActMessage, createInitialParsedMessage, createParsedSchema } from '../helpers/schema';
+import { createInitialActMessage } from '../helpers/schema';
 
 interface Props {
-	messageSchema: Message | null;
+	messageSchema: JSONSchema4 | JSONSchema7 | null;
 }
 
 export interface MessageEditorMethods {
@@ -66,23 +67,18 @@ const MessageEditor = React.forwardRef(({ messageSchema }: Props, ref: React.Ref
 	React.useEffect(() => {
 		if (!monacoRef.current) return;
 		if (messageSchema) {
-			const isParsedMessageSchema = isParsedMessage(messageSchema);
-			const schema = isParsedMessage(messageSchema) ? createParsedSchema(messageSchema) : toJS(messageSchema);
-			const messageTitle = Object.keys(messageSchema)[0];
+			const schema = toJS(messageSchema);
 			uri.current = monacoRef.current.Uri.parse(
-				`://b/${isParsedMessageSchema ? messageTitle : 'act'}.json`,
+				'://b/$schema.json',
 			);
 			initiateSchema(messageSchema);
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
 				schemas: [
 					{
-						uri: `http://myserver/${isParsedMessageSchema ? messageTitle : 'act'}.json`,
+						uri: 'http://myserver/$schema.json',
 						fileMatch: ['*'],
-						schema: isParsedMessageSchema ? {
-							type: 'object',
-							properties: schema,
-						} : schema,
+						schema,
 					},
 				],
 			});
@@ -102,10 +98,8 @@ const MessageEditor = React.forwardRef(({ messageSchema }: Props, ref: React.Ref
 		setCode(value || '{}');
 	};
 
-	const initiateSchema = (message: Message) => {
-		const initialSchema = isParsedMessage(message)
-			? createInitialParsedMessage(message) || '{}'
-			: createInitialActMessage(message) || '{}';
+	const initiateSchema = (message: JSONSchema4 | JSONSchema7) => {
+		const initialSchema = createInitialActMessage(message) || '{}';
 		setCode(initialSchema);
 	};
 

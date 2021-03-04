@@ -1,5 +1,5 @@
 /** ****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-import { JSONSchema4 } from 'json-schema';
+import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import {
 	action,
 	computed,
@@ -239,7 +239,9 @@ export default class Store {
 
 	@computed get selectedSchema() {
 		switch (this.selectedSchemaType) {
-			case 'parsed-message': return this.parsedMessage;
+			case 'parsed-message': return this.parsedMessage
+				? this.parsedMessage[Object.keys(this.parsedMessage)[0]] as JSONSchema7
+				: null;
 			case 'act': return this.actSchema;
 			default: throw new Error('');
 		}
