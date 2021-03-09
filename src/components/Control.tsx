@@ -129,6 +129,10 @@ const Control = () => {
 						);
 					})
 				}
+
+				{store.isShemaLoading &&
+					<SplashScreen />
+				}
 			</div>
 		</>
 	);

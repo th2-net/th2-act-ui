@@ -48,6 +48,8 @@ const App = () => {
 				<Control />
 				<div className="app__editor">
 					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
+					{store.isShemaLoading &&
+					<div className="overlay" />}
 				</div>
 				<div className="app__buttons">
 					<Button>

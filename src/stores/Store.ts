@@ -74,6 +74,8 @@ export default class Store {
 
 	@observable isSending: boolean = false;
 
+	@observable isShemaLoading: boolean = false;
+
 	constructor() {
 		this.getDictionaries();
 		this.getSessions();
@@ -162,12 +164,14 @@ export default class Store {
 
 	@action
 	getMessageSchema = async (messageType: string, dictinonaryName: string) => {
+		this.isShemaLoading = true;
 		try {
 			const message = await api.getMessage(messageType, dictinonaryName);
 			this.parsedMessage = message;
 		} catch (error) {
 			console.error('Error occured while fetching message');
 		}
+		this.isShemaLoading = false;
 	};
 
 	@action
@@ -187,29 +191,28 @@ export default class Store {
 
 	sendMessage = async (message: object) => {
 		this.isSending = true;
-		await new Promise(resolve => setTimeout(resolve, 2000));
-		// switch (this.selectedSchemaType) {
-		// 	case 'parsed-message': {
-		// 		if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) return;
-		// 		await api.sendMessage({
-		// 			session: this.selectedSession,
-		// 			dictionary: this.selectedDictionaryName,
-		// 			messageType: this.selectedMessageType,
-		// 			message,
-		// 		});
-		// 		break;
-		// 	}
-		// 	case 'act': {
-		// 		if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) return;
-		// 		await api.callMethod({
-		// 			fullServiceName: this.selectedService,
-		// 			methodName: this.selectedMethod.methodName,
-		// 			message,
-		// 		});
-		// 		break;
-		// 	}
-		// 	default:
-		// }
+		switch (this.selectedSchemaType) {
+			case 'parsed-message': {
+				if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) return;
+				await api.sendMessage({
+					session: this.selectedSession,
+					dictionary: this.selectedDictionaryName,
+					messageType: this.selectedMessageType,
+					message,
+				});
+				break;
+			}
+			case 'act': {
+				if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) return;
+				await api.callMethod({
+					fullServiceName: this.selectedService,
+					methodName: this.selectedMethod.methodName,
+					message,
+				});
+				break;
+			}
+			default:
+		}
 		this.isSending = false;
 	};
 
@@ -276,6 +279,7 @@ export default class Store {
 
 	@action
 	getActSchema = async (serviceName: string, methodName: string) => {
+		this.isShemaLoading = true;
 		if (!this.selectedMethod) return;
 		try {
 			const actMessage = await api.getActSchema(serviceName, methodName);
@@ -285,5 +289,6 @@ export default class Store {
 		} catch (error) {
 			console.error('Error occured while fetching dictionaries');
 		}
+		this.isShemaLoading = false;
 	};
 }
