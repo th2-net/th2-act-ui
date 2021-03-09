@@ -106,3 +106,14 @@ ul {
         grid-template-rows: auto 1fr;
     } 
 }
+
+.splash-screen {
+	width: auto;
+	display: inline-block;
+	place-items: center;
+    margin: 0 5px;
+
+	&__spinner {
+		@include spinner(3px, 14px, 2s);
+	}
+}

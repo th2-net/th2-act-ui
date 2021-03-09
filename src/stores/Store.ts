@@ -60,6 +60,20 @@ export default class Store {
 
 	@observable selectedSchemaType: SchemaType = 'parsed-message';
 
+	@observable isSessionsLoading: boolean = false;
+
+	@observable isDictionariesLoading: boolean = false;
+
+	@observable isDictionaryLoading: boolean = false;
+
+	@observable isActsLoading: boolean = false;
+
+	@observable isServicesLoading: boolean = false;
+
+	@observable isMethodsLoading: boolean = false;
+
+	@observable isSending: boolean = false;
+
 	constructor() {
 		this.getDictionaries();
 		this.getSessions();
@@ -136,12 +150,14 @@ export default class Store {
 
 	@action
 	getDictionary = async (dictinonaryName: string) => {
+		this.isDictionaryLoading = true;
 		try {
 			const dictionary = await api.getDictionary(dictinonaryName);
 			this.dictionary = dictionary;
 		} catch (error) {
 			console.error('Error occured while fetching dictionary');
 		}
+		this.isDictionaryLoading = false;
 	};
 
 	@action
@@ -156,6 +172,7 @@ export default class Store {
 
 	@action
 	getSessions = async () => {
+		this.isSessionsLoading = true;
 		try {
 			const sessions = await api.getSessions();
 			this.sessions = sessions;
@@ -165,35 +182,40 @@ export default class Store {
 		} catch (error) {
 			console.error('Error occured while fetching dictionaries');
 		}
+		this.isSessionsLoading = false;
 	};
 
 	sendMessage = async (message: object) => {
-		switch (this.selectedSchemaType) {
-			case 'parsed-message': {
-				if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) return;
-				await api.sendMessage({
-					session: this.selectedSession,
-					dictionary: this.selectedDictionaryName,
-					messageType: this.selectedMessageType,
-					message,
-				});
-				break;
-			}
-			case 'act': {
-				if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) return;
-				await api.callMethod({
-					fullServiceName: this.selectedService,
-					methodName: this.selectedMethod.methodName,
-					message,
-				});
-				break;
-			}
-			default:
-		}
+		this.isSending = true;
+		await new Promise(resolve => setTimeout(resolve, 2000));
+		// switch (this.selectedSchemaType) {
+		// 	case 'parsed-message': {
+		// 		if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) return;
+		// 		await api.sendMessage({
+		// 			session: this.selectedSession,
+		// 			dictionary: this.selectedDictionaryName,
+		// 			messageType: this.selectedMessageType,
+		// 			message,
+		// 		});
+		// 		break;
+		// 	}
+		// 	case 'act': {
+		// 		if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) return;
+		// 		await api.callMethod({
+		// 			fullServiceName: this.selectedService,
+		// 			methodName: this.selectedMethod.methodName,
+		// 			message,
+		// 		});
+		// 		break;
+		// 	}
+		// 	default:
+		// }
+		this.isSending = false;
 	};
 
 	@action
 	getActs = async () => {
+		this.isActsLoading = true;
 		try {
 			const actsList = await api.getActsList();
 			this.acts = actsList;
@@ -203,10 +225,12 @@ export default class Store {
 		} catch (error) {
 			console.error('Error occured while fetching dictionaries');
 		}
+		this.isActsLoading = false;
 	};
 
 	@action
 	getServices = async (actBox: string) => {
+		this.isServicesLoading = true;
 		try {
 			const services = await api.getServices(actBox);
 			this.services = services;
@@ -216,10 +240,12 @@ export default class Store {
 		} catch (error) {
 			console.error('Error occured while fetching dictionaries');
 		}
+		this.isServicesLoading = false;
 	};
 
 	@action
 	getServiceDetails = async (serviceName: string) => {
+		this.isMethodsLoading = true;
 		try {
 			const serviceDetails = await api.getServiceDetails(serviceName);
 			if (!serviceDetails) return;
@@ -231,6 +257,7 @@ export default class Store {
 		} catch (error) {
 			console.error('Error occured while fetching dictionaries');
 		}
+		this.isMethodsLoading = false;
 	};
 
 	@action setSelectedSchemaType = (type: SchemaType) => {

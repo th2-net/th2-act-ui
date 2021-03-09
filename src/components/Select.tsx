@@ -21,6 +21,7 @@ interface Props {
     className?: string;
     options: string[];
     selected: string;
+	disabled: boolean
     prefix?: string;
 	onChange: (option: string) => void;
 	label?: string;
@@ -30,6 +31,7 @@ interface Props {
 export default function Select({
 	options,
 	selected,
+	disabled,
 	onChange,
 	className = '',
 	label,
@@ -42,6 +44,7 @@ export default function Select({
 				className={`options-select ${className}`}
 				id={id}
 				value={selected}
+				disabled={disabled}
 				onChange={e => onChange(e.target.value)}>
 				<option label="" />
 				{

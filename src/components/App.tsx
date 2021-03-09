@@ -23,6 +23,7 @@ import '../styles/root.scss';
 import MessageEditor, { MessageEditorMethods } from './MessageEditor';
 import { useStore } from '../hooks/useStore';
 import Control from './Control';
+import SplashScreen from './SplashScreen';
 
 const App = () => {
 	const store = useStore();
@@ -53,9 +54,9 @@ const App = () => {
 						<i className="clear-icon" />
 						<span>Clear</span>
 					</Button>
-					<Button onClick={sendMessage}>
+					<Button onClick={store.isSending ? () => {} : sendMessage} className={store.isSending ? "disabled" : ""}>
 						<span>Send Message</span>
-						<i className="arrow-right-icon" />
+						{store.isSending ? <SplashScreen/> : <i className="arrow-right-icon" />}
 					</Button>
 				</div>
 				<div className="app__result">
