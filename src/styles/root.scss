@@ -106,3 +106,28 @@ ul {
         grid-template-rows: auto 1fr;
     } 
 }
+
+.splash-screen {
+	width: auto;
+	display: inline-block;
+	place-items: center;
+    margin: 0 5px;
+
+	&__spinner {
+		@include spinner(3px, 14px, 2s);
+	}
+}
+
+.app__editor {
+    position: relative;
+    overflow: hidden;
+
+    .overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: rgba(#000, .2);
+    }
+}

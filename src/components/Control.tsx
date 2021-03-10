@@ -18,6 +18,7 @@ import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useStore } from '../hooks/useStore';
 import Select from './Select';
+import SplashScreen from './SplashScreen';
 
 export type SchemaType = 'parsed-message' | 'raw-message' | 'act';
 
@@ -33,6 +34,7 @@ const Control = () => {
 					id: 'session',
 					options: store.sessions,
 					selected: store.selectedSession || '',
+					disabled: store.isSessionsLoading,
 					onChange: (opt: string) => store.selectedSession = opt,
 				},
 				{
@@ -40,6 +42,7 @@ const Control = () => {
 					id: 'dictionary',
 					options: store.dictionaries,
 					selected: store.selectedDictionaryName || '',
+					disabled: store.isSessionsLoading || store.isDictionariesLoading,
 					onChange: (opt: string) => store.selectedDictionaryName = opt,
 				},
 				{
@@ -47,6 +50,7 @@ const Control = () => {
 					id: 'msg-type',
 					options: store.dictionary,
 					selected: store.selectedMessageType || '',
+					disabled: store.isSessionsLoading || store.isDictionariesLoading || store.isDictionaryLoading,
 					onChange: (opt: string) => store.selectedMessageType = opt,
 				},
 			],
@@ -59,6 +63,7 @@ const Control = () => {
 					id: 'act',
 					options: store.acts,
 					selected: store.selectedActBox || '',
+					disabled: store.isActsLoading,
 					onChange: (opt: string) => store.selectedActBox = opt,
 				},
 				{
@@ -66,6 +71,7 @@ const Control = () => {
 					id: 'service',
 					options: store.services,
 					selected: store.selectedService || '',
+					disabled: store.isActsLoading || store.isServicesLoading,
 					onChange: (opt: string) => store.selectedService = opt,
 				},
 				{
@@ -75,6 +81,7 @@ const Control = () => {
 						? store.serviceDetails.methods.map(method => method.methodName)
 						: [],
 					selected: store.selectedMethod?.methodName || '',
+					disabled: store.isActsLoading || store.isServicesLoading || store.isMethodsLoading,
 					onChange: (methodName: string) =>
 						store.selectedMethod = store.serviceDetails?.methods
 							.find(method => method.methodName === methodName) || null,
@@ -111,8 +118,20 @@ const Control = () => {
 			<div className="app__row">
 				{
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					controlConfigs.find(config => config.name === store.selectedSchemaType)!.selects.map(props =>
-						<Select key={props.id} {...props} />)
+					controlConfigs.find(config => config.name === store.selectedSchemaType)!.selects.map(props => {
+						return (
+							<>
+								<Select key={props.id} {...props} />
+								{props.disabled &&
+									<SplashScreen />
+								}
+							</>
+						);
+					})
+				}
+
+				{store.isShemaLoading &&
+					<SplashScreen />
 				}
 			</div>
 		</>
