@@ -86,7 +86,7 @@ const Result = ({
 		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
 			<pre>
 				{queryParameter !== null ? (
-					<a href={`http://th2-qa:30443/testviewer/?workspaces=${queryParameter}`}
+					<a href={`https://th2-qa:30443/testviewer/?workspaces=${queryParameter}`}
 					   rel="noreferrer"
 					   target="_blank">report link</a>
 				) : null}
