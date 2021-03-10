@@ -92,7 +92,7 @@ const Control = () => {
 
 	return (
 		<>
-			<div className="app__row">
+			<div key="mode" className="app__row">
 				<h3 className="app__title">Send as</h3>
 				{
 					controlConfigs.map(config => (
@@ -115,23 +115,21 @@ const Control = () => {
 					))
 				}
 			</div>
-			<div className="app__row">
+			<div key="parameters" className="app__row">
 				{
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					controlConfigs.find(config => config.name === store.selectedSchemaType)!.selects.map(props => {
-						return (
-							<>
-								<Select key={props.id} {...props} />
-								{props.disabled &&
-									<SplashScreen />
-								}
-							</>
-						);
-					})
+					controlConfigs.find(config => config.name === store.selectedSchemaType)!.selects.map(props => (
+						<>
+							<Select key={props.id} {...props} />
+							{props.disabled
+									&& <SplashScreen key="splash"/>
+							}
+						</>
+					))
 				}
 
-				{store.isShemaLoading &&
-					<SplashScreen />
+				{store.isShemaLoading
+					&& <SplashScreen />
 				}
 			</div>
 		</>

@@ -17,6 +17,7 @@
 import { hot } from 'react-hot-loader/root';
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
+import { useState } from 'react';
 import Result from './Result';
 import Button from './Button';
 import '../styles/root.scss';
@@ -28,13 +29,21 @@ import SplashScreen from './SplashScreen';
 const App = () => {
 	const store = useStore();
 
+	const [response, setResponse] = useState<{code: number; message: string}>({ code: 200, message: '' });
+
 	const messageEditorRef: React.RefObject<MessageEditorMethods> = React.useRef(null);
 
 	const sendMessage = () => {
 		if (messageEditorRef.current) {
 			const filledMessage = messageEditorRef.current.getFilledMessage();
 			if (filledMessage) {
-				store.sendMessage(filledMessage);
+				store.sendMessage(filledMessage)
+					.then(res => {
+						if (res !== null) {
+							res.text().then(text =>
+								setResponse({ code: res.status, message: text }));
+						}
+					});
 			}
 		}
 	};
@@ -48,22 +57,25 @@ const App = () => {
 				<Control />
 				<div className="app__editor">
 					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
-					{store.isShemaLoading &&
-					<div className="overlay" />}
+					{store.isShemaLoading
+					&& <div className="overlay" />}
 				</div>
 				<div className="app__buttons">
 					<Button>
 						<i className="clear-icon" />
 						<span>Clear</span>
 					</Button>
-					<Button onClick={store.isSending ? () => {} : sendMessage} className={store.isSending ? "disabled" : ""}>
+					<Button
+						onClick={store.isSending ? undefined : sendMessage}
+						className={store.isSending ? 'disabled' : ''}
+					>
 						<span>Send Message</span>
 						{store.isSending ? <SplashScreen/> : <i className="arrow-right-icon" />}
 					</Button>
 				</div>
 				<div className="app__result">
 					<h3 className="app__title">Result</h3>
-					<Result />
+					<Result code={response.code} message={response.message}/>
 				</div>
 			</div>
 		</div>

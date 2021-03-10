@@ -60,21 +60,21 @@ export default class Store {
 
 	@observable selectedSchemaType: SchemaType = 'parsed-message';
 
-	@observable isSessionsLoading: boolean = false;
+	@observable isSessionsLoading = false;
 
-	@observable isDictionariesLoading: boolean = false;
+	@observable isDictionariesLoading = false;
 
-	@observable isDictionaryLoading: boolean = false;
+	@observable isDictionaryLoading = false;
 
-	@observable isActsLoading: boolean = false;
+	@observable isActsLoading = false;
 
-	@observable isServicesLoading: boolean = false;
+	@observable isServicesLoading = false;
 
-	@observable isMethodsLoading: boolean = false;
+	@observable isMethodsLoading = false;
 
-	@observable isSending: boolean = false;
+	@observable isSending = false;
 
-	@observable isShemaLoading: boolean = false;
+	@observable isShemaLoading = false;
 
 	constructor() {
 		this.getDictionaries();
@@ -189,12 +189,15 @@ export default class Store {
 		this.isSessionsLoading = false;
 	};
 
-	sendMessage = async (message: object) => {
+	sendMessage = async (message: object): Promise<Response | null> => {
 		this.isSending = true;
+
+		let result: Response | null = null;
+
 		switch (this.selectedSchemaType) {
 			case 'parsed-message': {
-				if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) return;
-				await api.sendMessage({
+				if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) return null;
+				result = await api.sendMessage({
 					session: this.selectedSession,
 					dictionary: this.selectedDictionaryName,
 					messageType: this.selectedMessageType,
@@ -203,7 +206,7 @@ export default class Store {
 				break;
 			}
 			case 'act': {
-				if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) return;
+				if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) return null;
 				await api.callMethod({
 					fullServiceName: this.selectedService,
 					methodName: this.selectedMethod.methodName,
@@ -214,6 +217,8 @@ export default class Store {
 			default:
 		}
 		this.isSending = false;
+
+		return result;
 	};
 
 	@action

@@ -17,10 +17,83 @@
 import React from 'react';
 import '../styles/result.scss';
 
-const Result = () => (
-	<div className="result">
-		Result
-	</div>
-);
+const Result = ({
+	code,
+	message,
+}: { code: number; message: string }) => {
+	let queryParameter: string | null = null;
+
+	if (message !== null) {
+		try {
+			const data: {
+				eventId: string;
+				session: string;
+				dictionary: string;
+				messageType: string;
+			} = JSON.parse(message);
+
+			const currentTime = new Date().getTime();
+
+			const filterValueFrom = currentTime - (60 * 1000);
+			const filterValueTo = currentTime + (60 * 1000);
+
+			// eslint-disable-next-line no-console
+			console.log(currentTime);
+			console.log(filterValueFrom);
+			console.log(filterValueTo);
+
+			const queryParameterObject = [
+				{
+					events: {
+						filter: {
+							eventTypes: ['act-ui'],
+							names: [],
+							timestampFrom: filterValueFrom,
+							timestampTo: filterValueTo,
+						},
+						panelArea: 50,
+						selectedNodesPath: [
+							data.eventId,
+						],
+						flattenedListView: true,
+					},
+					messages: {
+						timestampFrom: filterValueFrom,
+						timestampTo: filterValueTo,
+					},
+					timeRange: [
+						filterValueFrom,
+						filterValueTo,
+					],
+					interval: 1,
+					layout: [
+						50,
+						50,
+					],
+				},
+			];
+
+			queryParameter = Buffer.from(JSON.stringify(queryParameterObject)).toString('base64');
+		} catch (e) {
+			queryParameter = null;
+			// eslint-disable-next-line no-console
+			console.error(e);
+		}
+	}
+
+	return (
+
+		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
+			<pre>
+				{queryParameter !== null ? (
+					<a href={`http://th2-qa:30443/testviewer/?workspaces=${queryParameter}`}
+					   rel="noreferrer"
+					   target="_blank">report link</a>
+				) : null}
+				{message}
+			</pre>
+		</div>
+	);
+};
 
 export default Result;

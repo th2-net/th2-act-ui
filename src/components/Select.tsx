@@ -21,7 +21,7 @@ interface Props {
     className?: string;
     options: string[];
     selected: string;
-	disabled: boolean
+	disabled: boolean;
     prefix?: string;
 	onChange: (option: string) => void;
 	label?: string;
