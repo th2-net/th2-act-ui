@@ -37,11 +37,6 @@ const Result = ({
 			const filterValueFrom = currentTime - (60 * 1000);
 			const filterValueTo = currentTime + (60 * 1000);
 
-			// eslint-disable-next-line no-console
-			console.log(currentTime);
-			console.log(filterValueFrom);
-			console.log(filterValueTo);
-
 			const queryParameterObject = [
 				{
 					events: {
