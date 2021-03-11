@@ -16,8 +16,8 @@
 
 import { hot } from 'react-hot-loader/root';
 import * as React from 'react';
-import { observer } from 'mobx-react-lite';
 import { useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import Result from './Result';
 import Button from './Button';
 import '../styles/root.scss';
@@ -25,13 +25,35 @@ import MessageEditor, { MessageEditorMethods } from './MessageEditor';
 import { useStore } from '../hooks/useStore';
 import Control from './Control';
 import SplashScreen from './SplashScreen';
+import Store from '../stores/Store';
 
 const App = () => {
-	const store = useStore();
+	const store: Store = useStore();
 
-	const [response, setResponse] = useState<{code: number; message: string}>({ code: 200, message: '' });
+	const [response, setResponse] = useState<{ code: number | null; message: string | null }>({
+		code: null,
+		message: null,
+	});
 
 	const messageEditorRef: React.RefObject<MessageEditorMethods> = React.useRef(null);
+
+	const generateErrorMessage = (): string => {
+		let result = '';
+
+		if (store.selectedSession === null) {
+			result += 'ERROR: session is not selected';
+		}
+
+		if (store.selectedDictionaryName === null) {
+			result += '\nERROR: dictionary is not selected';
+		}
+
+		if (store.selectedMessageType === null) {
+			result += '\nERROR: msg type is not selected';
+		}
+
+		return result;
+	};
 
 	const sendMessage = () => {
 		if (messageEditorRef.current) {
@@ -40,8 +62,17 @@ const App = () => {
 				store.sendMessage(filledMessage)
 					.then(res => {
 						if (res !== null) {
-							res.text().then(text =>
-								setResponse({ code: res.status, message: text }));
+							res.text()
+								.then(text =>
+									setResponse({
+										code: res.status,
+										message: text,
+									}));
+						} else {
+							setResponse({
+								code: 500,
+								message: generateErrorMessage(),
+							});
 						}
 					});
 			}
@@ -54,15 +85,15 @@ const App = () => {
 				<h3 className="app__title">Configuration</h3>
 			</div>
 			<div className="app__body">
-				<Control />
+				<Control/>
 				<div className="app__editor">
-					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
+					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef}/>
 					{store.isShemaLoading
-					&& <div className="overlay" />}
+					&& <div className="overlay"/>}
 				</div>
 				<div className="app__buttons">
 					<Button>
-						<i className="clear-icon" />
+						<i className="clear-icon"/>
 						<span>Clear</span>
 					</Button>
 					<Button
@@ -70,7 +101,7 @@ const App = () => {
 						className={store.isSending ? 'disabled' : ''}
 					>
 						<span>Send Message</span>
-						{store.isSending ? <SplashScreen/> : <i className="arrow-right-icon" />}
+						{store.isSending ? <SplashScreen/> : <i className="arrow-right-icon"/>}
 					</Button>
 				</div>
 				<div className="app__result">

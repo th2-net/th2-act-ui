@@ -20,7 +20,7 @@ import '../styles/result.scss';
 const Result = ({
 	code,
 	message,
-}: { code: number; message: string }) => {
+}: { code: number | null; message: string | null }) => {
 	let queryParameter: string | null = null;
 
 	if (message !== null) {
@@ -68,22 +68,26 @@ const Result = ({
 				},
 			];
 
-			queryParameter = Buffer.from(JSON.stringify(queryParameterObject)).toString('base64');
+			queryParameter = Buffer.from(JSON.stringify(queryParameterObject))
+				.toString('base64');
 		} catch (e) {
 			queryParameter = null;
-			// eslint-disable-next-line no-console
-			console.error(e);
 		}
 	}
 
 	return (
 
-		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
-			<pre>
+		<div className={`result ${code === null ? '' : (code === 200 ? 'ok' : 'error')}`}>
+			<pre className="result-value">
 				{queryParameter !== null ? (
-					<a href={`https://th2-qa:30443/testviewer/?workspaces=${queryParameter}`}
-					   rel="noreferrer"
-					   target="_blank">report link</a>
+					<>
+						<div>
+							Message is sent successfully
+						</div>
+						<a href={`https://th2-qa:30443/testviewer/?workspaces=${queryParameter}`}
+						   rel="noreferrer"
+						   target="_blank">report link</a>
+					</>
 				) : null}
 				{message}
 			</pre>

@@ -17,11 +17,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import {
-	action,
-	computed,
-	observable,
-	reaction,
-	runInAction,
+	action, computed, observable, reaction, runInAction,
 } from 'mobx';
 import api from '../api';
 import { SchemaType } from '../components/Control';
@@ -196,7 +192,11 @@ export default class Store {
 
 		switch (this.selectedSchemaType) {
 			case 'parsed-message': {
-				if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) return null;
+				if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) {
+					this.isSending = false;
+					return null;
+				}
+
 				result = await api.sendMessage({
 					session: this.selectedSession,
 					dictionary: this.selectedDictionaryName,
@@ -206,7 +206,11 @@ export default class Store {
 				break;
 			}
 			case 'act': {
-				if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) return null;
+				if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) {
+					this.isSending = false;
+					return null;
+				}
+
 				await api.callMethod({
 					fullServiceName: this.selectedService,
 					methodName: this.selectedMethod.methodName,
@@ -274,11 +278,14 @@ export default class Store {
 
 	@computed get selectedSchema() {
 		switch (this.selectedSchemaType) {
-			case 'parsed-message': return this.parsedMessage
-				? this.parsedMessage[Object.keys(this.parsedMessage)[0]] as JSONSchema7
-				: null;
-			case 'act': return this.actSchema;
-			default: throw new Error('');
+			case 'parsed-message':
+				return this.parsedMessage
+					? this.parsedMessage[Object.keys(this.parsedMessage)[0]] as JSONSchema7
+					: null;
+			case 'act':
+				return this.actSchema;
+			default:
+				throw new Error('');
 		}
 	}
 

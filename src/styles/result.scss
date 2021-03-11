@@ -13,13 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
- 
-@import "./common/vars"; 
+
+@import "./common/vars";
 
 .result {
 	display: flex;
 	flex-grow: 1;
 	background-color: #fff;
 	border-radius: 6px;
+
+  &-value {
+	margin: 5px;
+	display: flex;
+	flex-direction: column;
+  }
 }
- 
+
+.ok {
+  background-color: #CCFFCC;
+}
+
+.error {
+  background-color: #FFCCCC;
+}
