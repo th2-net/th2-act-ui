@@ -84,7 +84,7 @@ const Result = ({
 						<div>
 							Message is sent successfully
 						</div>
-						<a href={`https://th2-qa:30443/testviewer/?workspaces=${queryParameter}`}
+						<a href={`https://th2-kube-demo:30443/schema-hand/?workspaces=${queryParameter}`}
 						   rel="noreferrer"
 						   target="_blank">report link</a>
 					</>
