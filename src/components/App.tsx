@@ -24,6 +24,12 @@ import MessageEditor, { MessageEditorMethods } from './MessageEditor';
 import { useStore } from '../hooks/useStore';
 import Control from './Control';
 import SplashScreen from './SplashScreen';
+import { ToastProvider } from 'react-toast-notifications';
+import Toast from './notifications/Toast';
+import Notifier from './notifications/Notifier';
+import { registerFetchInterceptor } from '../helpers/fetch-intercept';
+
+registerFetchInterceptor();
 
 const App = () => {
 	const store = useStore();
@@ -41,31 +47,34 @@ const App = () => {
 
 	return (
 		<div className="app">
-			<div className="app__header">
-				<h3 className="app__title">Configuration</h3>
-			</div>
-			<div className="app__body">
-				<Control />
-				<div className="app__editor">
-					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
-					{store.isShemaLoading &&
-					<div className="overlay" />}
+			<ToastProvider placement='top-right' components={{ Toast }} transitionDuration={400}>
+				<div className="app__header">
+					<h3 className="app__title">Configuration</h3>
 				</div>
-				<div className="app__buttons">
-					<Button>
-						<i className="clear-icon" />
-						<span>Clear</span>
-					</Button>
-					<Button onClick={store.isSending ? () => {} : sendMessage} className={store.isSending ? "disabled" : ""}>
-						<span>Send Message</span>
-						{store.isSending ? <SplashScreen/> : <i className="arrow-right-icon" />}
-					</Button>
+				<div className="app__body">
+					<Control />
+					<div className="app__editor">
+						<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
+						{store.isShemaLoading &&
+						<div className="overlay" />}
+					</div>
+					<div className="app__buttons">
+						<Button>
+							<i className="clear-icon" />
+							<span>Clear</span>
+						</Button>
+						<Button onClick={store.isSending ? () => {} : sendMessage} className={store.isSending ? "disabled" : ""}>
+							<span>Send Message</span>
+							{store.isSending ? <SplashScreen/> : <i className="arrow-right-icon" />}
+						</Button>
+					</div>
+					<div className="app__result">
+						<h3 className="app__title">Result</h3>
+						<Result />
+					</div>
 				</div>
-				<div className="app__result">
-					<h3 className="app__title">Result</h3>
-					<Result />
-				</div>
-			</div>
+				<Notifier />
+			</ToastProvider>
 		</div>
 	);
 };

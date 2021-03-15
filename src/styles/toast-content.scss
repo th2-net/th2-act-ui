@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,16 +14,42 @@
  * limitations under the License.
  ******************************************************************************/
 
-$scrollbarThumbBackground: #C4C4C4;
-$scrollbarTrackBackground: #F2F2F2;
-
-$primaryTextColor: #4D4D4D;
-$secondaryTextColor: #808080;
-$secondaryLightTextColor: #999999;
-
-$appBackgroundColor: #e7e7e7;
-
-$spinnerOuterColor: #e7e7e7;
-$spinnerInnerColor: #4D4D4D;
-
-$toastErrorBackground: #ff6666;
+@import './common/vars';
+.toast-content {
+	color: #fff;
+	&__top {
+		display: flex;
+		justify-content: space-between;
+		font-size: 14px;
+		font-weight: bold;
+		gap: 4px;
+		.response-body {
+			@include ellipsis();
+		}
+	}
+	&__middle {
+		word-break: break-all;
+		font-size: 12px;
+	}
+	&__bottom {
+		display: flex;
+		justify-content: flex-end;
+	}
+	.copy-details {
+		margin: 4px 0 0;
+		display: flex;
+		background-color: transparent;
+		color: #fff;
+		cursor: pointer;
+		border: none;
+		&__icon {
+			margin: 0 4px 0 0;
+			@include icon(url(../../resources/icons/toast-copy.svg), 16px, 17px);
+		}
+		&__text {
+			&.copied {
+				color: gray;
+			}
+		}
+	}
+}
