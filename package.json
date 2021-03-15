@@ -25,6 +25,7 @@
     "@types/react-dom": "^16.9.4",
     "core-js": "^3.6.5",
     "cross-env": "^6.0.3",
+    "fetch-intercept": "^2.3.1",
     "lodash.throttle": "^4.1.1",
     "mobx": "^5.15.2",
     "mobx-react-lite": "^1.5.2",
@@ -32,10 +33,12 @@
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-hot-loader": "^4.12.21",
+    "react-toast-notifications": "^2.4.0",
     "regenerator-runtime": "^0.13.5",
     "resize-observer-polyfill": "^1.5.1",
     "setimmediate": "^1.0.5",
-    "use-resize-observer": "^6.1.0"
+    "use-resize-observer": "^6.1.0",
+    "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
@@ -50,6 +53,7 @@
     "@babel/preset-react": "^7.9.4",
     "@babel/preset-typescript": "^7.9.0",
     "@types/react-timeago": "^4.1.1",
+    "@types/react-toast-notifications": "^2.4.0",
     "@typescript-eslint/eslint-plugin": "^2.17.0",
     "@typescript-eslint/parser": "^2.17.0",
     "awesome-typescript-loader": "^5.2.1",

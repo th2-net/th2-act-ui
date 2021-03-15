@@ -28,8 +28,11 @@ import { SchemaType } from '../components/Control';
 import { Dictionary } from '../models/Dictionary';
 import { ParsedMessage } from '../models/Message';
 import Service, { Method } from '../models/Service';
+import NotificationsStore from './NotificationsStore';
 
 export default class Store {
+	notificationsStore = NotificationsStore;
+	
 	@observable dictionaries: Array<string> = [];
 
 	@observable sessions: Array<string> = [];
