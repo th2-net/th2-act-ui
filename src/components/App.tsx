@@ -16,7 +16,6 @@
 
 import { hot } from 'react-hot-loader/root';
 import * as React from 'react';
-import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import Result from './Result';
 import Button from './Button';
@@ -26,55 +25,20 @@ import { useStore } from '../hooks/useStore';
 import Control from './Control';
 import SplashScreen from './SplashScreen';
 import Store from '../stores/Store';
+import { MessageSendingResponse } from '../models/Message';
 
 const App = () => {
 	const store: Store = useStore();
 
-	const [response, setResponse] = useState<{ code: number | null; message: string | null }>({
-		code: null,
-		message: null,
-	});
+	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
 	const messageEditorRef: React.RefObject<MessageEditorMethods> = React.useRef(null);
 
-	const generateErrorMessage = (): string => {
-		let result = '';
-
-		if (store.selectedSession === null) {
-			result += 'ERROR: session is not selected';
-		}
-
-		if (store.selectedDictionaryName === null) {
-			result += '\nERROR: dictionary is not selected';
-		}
-
-		if (store.selectedMessageType === null) {
-			result += '\nERROR: msg type is not selected';
-		}
-
-		return result;
-	};
-
-	const sendMessage = () => {
+	const sendMessage = async () => {
 		if (messageEditorRef.current) {
 			const filledMessage = messageEditorRef.current.getFilledMessage();
 			if (filledMessage) {
-				store.sendMessage(filledMessage)
-					.then(res => {
-						if (res !== null) {
-							res.text()
-								.then(text =>
-									setResponse({
-										code: res.status,
-										message: text,
-									}));
-						} else {
-							setResponse({
-								code: 500,
-								message: generateErrorMessage(),
-							});
-						}
-					});
+				setResponse(await store.sendMessage(filledMessage));
 			}
 		}
 	};
@@ -88,8 +52,7 @@ const App = () => {
 				<Control/>
 				<div className="app__editor">
 					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef}/>
-					{store.isShemaLoading
-					&& <div className="overlay"/>}
+					{store.isSchemaLoading && <div className="overlay"/>}
 				</div>
 				<div className="app__buttons">
 					<Button>
@@ -97,8 +60,8 @@ const App = () => {
 						<span>Clear</span>
 					</Button>
 					<Button
-						onClick={store.isSending ? undefined : sendMessage}
-						className={store.isSending ? 'disabled' : ''}
+						onClick={sendMessage}
+						disabled={!store.isSendingAllowed}
 					>
 						<span>Send Message</span>
 						{store.isSending ? <SplashScreen/> : <i className="arrow-right-icon"/>}
@@ -106,7 +69,7 @@ const App = () => {
 				</div>
 				<div className="app__result">
 					<h3 className="app__title">Result</h3>
-					<Result code={response.code} message={response.message}/>
+					<Result response={response}/>
 				</div>
 			</div>
 		</div>

@@ -128,9 +128,7 @@ const Control = () => {
 					))
 				}
 
-				{store.isShemaLoading
-					&& <SplashScreen />
-				}
+				{store.isSchemaLoading && <SplashScreen />}
 			</div>
 		</>
 	);

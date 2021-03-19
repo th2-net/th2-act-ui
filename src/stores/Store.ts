@@ -22,7 +22,7 @@ import {
 import api from '../api';
 import { SchemaType } from '../components/Control';
 import { Dictionary } from '../models/Dictionary';
-import { ParsedMessage } from '../models/Message';
+import { MessageSendingResponse, ParsedMessage } from '../models/Message';
 import Service, { Method } from '../models/Service';
 
 export default class Store {
@@ -70,7 +70,7 @@ export default class Store {
 
 	@observable isSending = false;
 
-	@observable isShemaLoading = false;
+	@observable isSchemaLoading = false;
 
 	constructor() {
 		this.getDictionaries();
@@ -160,14 +160,14 @@ export default class Store {
 
 	@action
 	getMessageSchema = async (messageType: string, dictinonaryName: string) => {
-		this.isShemaLoading = true;
+		this.isSchemaLoading = true;
 		try {
 			const message = await api.getMessage(messageType, dictinonaryName);
 			this.parsedMessage = message;
 		} catch (error) {
 			console.error('Error occured while fetching message');
 		}
-		this.isShemaLoading = false;
+		this.isSchemaLoading = false;
 	};
 
 	@action
@@ -185,10 +185,10 @@ export default class Store {
 		this.isSessionsLoading = false;
 	};
 
-	sendMessage = async (message: object): Promise<Response | null> => {
+	sendMessage = async (message: object): Promise<MessageSendingResponse | null> => {
 		this.isSending = true;
 
-		let result: Response | null = null;
+		let result: MessageSendingResponse | null = null;
 
 		switch (this.selectedSchemaType) {
 			case 'parsed-message': {
@@ -291,7 +291,7 @@ export default class Store {
 
 	@action
 	getActSchema = async (serviceName: string, methodName: string) => {
-		this.isShemaLoading = true;
+		this.isSchemaLoading = true;
 		if (!this.selectedMethod) return;
 		try {
 			const actMessage = await api.getActSchema(serviceName, methodName);
@@ -301,6 +301,24 @@ export default class Store {
 		} catch (error) {
 			console.error('Error occured while fetching dictionaries');
 		}
-		this.isShemaLoading = false;
+		this.isSchemaLoading = false;
 	};
+
+	@computed
+	get isSendingAllowed(): boolean {
+		switch (this.selectedSchemaType) {
+			case 'parsed-message': {
+				return !!(
+					!this.isSending
+					&& this.selectedSession
+					&& this.selectedDictionaryName
+					&& this.selectedMessageType
+				);
+			}
+			case 'act': {
+				return !!(!this.isSending && this.selectedActBox && this.selectedService && this.selectedMethod);
+			}
+			default: return false;
+		}
+	}
 }

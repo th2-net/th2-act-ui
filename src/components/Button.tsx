@@ -15,21 +15,26 @@
  ***************************************************************************** */
 
 import React from 'react';
+import { createBemBlock } from '../helpers/styleCreators';
 import '../styles/button.scss';
 
 interface Props {
 	children: React.ReactNode;
-	className?: string;
 	onClick?: (event: React.MouseEvent) => void;
+	disabled?: boolean;
 }
 
-const Button = ({ children, className = '', onClick }: Props) => (
-	<div
-		className={`button ${className}`}
-		onClick={onClick}
-		role="button">
-		{children}
-	</div>
-);
+const Button = ({ children, onClick, disabled }: Props) => {
+	const buttonClassName = createBemBlock('button', disabled ? 'disabled' : null);
+
+	return (
+		<div
+			className={buttonClassName}
+			onClick={onClick}
+			role="button">
+			{children}
+		</div>
+	);
+};
 
 export default Button;

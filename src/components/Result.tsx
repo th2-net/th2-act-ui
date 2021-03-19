@@ -15,25 +15,26 @@
  ***************************************************************************** */
 
 import React from 'react';
+import { MessageSendingResponse, ParsedMessageSendingResponse } from '../models/Message';
 import '../styles/result.scss';
 
+const isDev = process.env.NODE_ENV === 'development';
+
 const Result = ({
-	code,
-	message,
-}: { code: number | null; message: string | null }) => {
-	let queryParameter: string | null = null;
+	response,
+}: { response: MessageSendingResponse | null }) => {
+	if (!response) {
+		return (
+			<div className='result' />
+		);
+	}
 
-	if (message !== null) {
+	const { code, message } = response;
+
+	const queryParameter: string | null = (() => {
 		try {
-			const data: {
-				eventId: string;
-				session: string;
-				dictionary: string;
-				messageType: string;
-			} = JSON.parse(message);
-
+			const data: ParsedMessageSendingResponse = JSON.parse(message);
 			const currentTime = new Date().getTime();
-
 			const filterValueFrom = currentTime - (60 * 1000);
 			const filterValueTo = currentTime + (60 * 1000);
 
@@ -68,23 +69,30 @@ const Result = ({
 				},
 			];
 
-			queryParameter = Buffer.from(JSON.stringify(queryParameterObject))
-				.toString('base64');
+			return Buffer.from(
+				JSON.stringify(queryParameterObject),
+			).toString('base64');
 		} catch (e) {
-			queryParameter = null;
+			console.error(e);
+			return null;
 		}
-	}
+	})();
+
+	const rootLink = isDev
+		? 'localhost:9000'
+		: window.location.href
+			.substring(0, window.location.href.indexOf('/act-ui'));
 
 	return (
 
-		<div className={`result ${code === null ? '' : (code === 200 ? 'ok' : 'error')}`}>
+		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
 			<pre className="result-value">
 				{queryParameter !== null ? (
 					<>
 						<div>
 							Message is sent successfully
 						</div>
-						<a href={`https://th2-kube-demo:30443/schema-hand/?workspaces=${queryParameter}`}
+						<a href={`${rootLink}/?workspaces=${queryParameter}`}
 						   rel="noreferrer"
 						   target="_blank">report link</a>
 					</>

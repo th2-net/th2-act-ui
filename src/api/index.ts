@@ -16,8 +16,9 @@
 
 import { Dictionary } from '../models/Dictionary';
 import {
-	JSONSchemaResponce,
+	JSONSchemaResponse,
 	MessageRequestModel,
+	MessageSendingResponse,
 	MethodCallRequestModel,
 	ParsedMessage,
 } from '../models/Message';
@@ -71,12 +72,15 @@ const api = {
 		return null;
 	},
 
-	async sendMessage(request: MessageRequestModel): Promise<Response> {
+	async sendMessage(request: MessageRequestModel): Promise<MessageSendingResponse> {
 		const res = await fetch(
-
-			// eslint-disable-next-line max-len
-			`backend/message/?session=${request.session}&dictionary=${request.dictionary}&messageType=${request.messageType}`,
-
+			`backend/message/?session=${
+				request.session
+			}&dictionary=${
+				request.dictionary
+			}&messageType=${
+				request.messageType
+			}`,
 			{
 				method: 'POST',
 				headers: {
@@ -90,7 +94,12 @@ const api = {
 			console.error(res);
 		}
 
-		return res;
+		const message = await res.text();
+
+		return {
+			code: res.status,
+			message,
+		};
 	},
 
 	async getActsList(): Promise<string[]> {
@@ -129,7 +138,7 @@ const api = {
 		console.error(servicesResponse.statusText);
 		return null;
 	},
-	async getActSchema(serviceName: string, methodName: string): Promise<JSONSchemaResponce | null> {
+	async getActSchema(serviceName: string, methodName: string): Promise<JSONSchemaResponse | null> {
 		const schemaResponse = await fetch(`backend/json_schema/${serviceName}/?method=${methodName}`, {
 			cache: 'no-cache',
 		});

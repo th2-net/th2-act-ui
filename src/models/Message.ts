@@ -41,6 +41,18 @@ export interface MethodCallRequestModel {
 	methodName: string;
 	message: object;
 }
-export interface JSONSchemaResponce {
+export interface JSONSchemaResponse {
 	[methodName: string]: string;
+}
+
+export interface MessageSendingResponse {
+	code: number;
+	message: string;
+}
+
+export interface ParsedMessageSendingResponse {
+	eventId: string;
+	session: string;
+	dictionary: string;
+	messageType: string;
 }
