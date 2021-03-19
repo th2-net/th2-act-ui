@@ -35,6 +35,7 @@ const Control = () => {
 					options: store.sessions,
 					selected: store.selectedSession || '',
 					disabled: store.isSessionsLoading,
+					valid: store.isSchemaApplied ? !!store.selectedSession : true,
 					onChange: (opt: string) => store.selectedSession = opt,
 				},
 				{
@@ -43,6 +44,7 @@ const Control = () => {
 					options: store.dictionaries,
 					selected: store.selectedDictionaryName || '',
 					disabled: store.isSessionsLoading || store.isDictionariesLoading,
+					valid: store.isSchemaApplied ? !!store.selectedDictionaryName : true,
 					onChange: (opt: string) => store.selectedDictionaryName = opt,
 				},
 				{
@@ -51,6 +53,7 @@ const Control = () => {
 					options: store.dictionary,
 					selected: store.selectedMessageType || '',
 					disabled: store.isSessionsLoading || store.isDictionariesLoading || store.isDictionaryLoading,
+					valid: store.isSchemaApplied ? !!store.selectedMessageType : true,
 					onChange: (opt: string) => store.selectedMessageType = opt,
 				},
 			],
@@ -64,6 +67,7 @@ const Control = () => {
 					options: store.acts,
 					selected: store.selectedActBox || '',
 					disabled: store.isActsLoading,
+					valid: store.isSchemaApplied ? !!store.selectedActBox : true,
 					onChange: (opt: string) => store.selectedActBox = opt,
 				},
 				{
@@ -72,6 +76,7 @@ const Control = () => {
 					options: store.services,
 					selected: store.selectedService || '',
 					disabled: store.isActsLoading || store.isServicesLoading,
+					valid: store.isSchemaApplied ? !!store.selectedService : true,
 					onChange: (opt: string) => store.selectedService = opt,
 				},
 				{
@@ -82,6 +87,7 @@ const Control = () => {
 						: [],
 					selected: store.selectedMethod?.methodName || '',
 					disabled: store.isActsLoading || store.isServicesLoading || store.isMethodsLoading,
+					valid: store.isSchemaApplied ? !!store.selectedMethod : true,
 					onChange: (methodName: string) =>
 						store.selectedMethod = store.serviceDetails?.methods
 							.find(method => method.methodName === methodName) || null,

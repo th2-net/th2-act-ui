@@ -17,6 +17,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import React from 'react';
+import { observer } from 'mobx-react-lite';
 import {
 	monaco,
 	EditorDidMount,
@@ -28,6 +29,7 @@ import {
 import { Uri } from 'monaco-editor';
 import { toJS } from 'mobx';
 import { createInitialActMessage } from '../helpers/schema';
+import { useStore } from '../hooks/useStore';
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
@@ -37,7 +39,9 @@ export interface MessageEditorMethods {
 	getFilledMessage: () => object | null;
 }
 
-const MessageEditor = React.forwardRef(({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
+const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
+	const store = useStore();
+
 	const monacoRef = React.useRef<Monaco>();
 	const valueGetter = React.useRef<(() => string) | null>(null);
 	const uri = React.useRef<Uri>();
@@ -101,6 +105,7 @@ const MessageEditor = React.forwardRef(({ messageSchema }: Props, ref: React.Ref
 	const initiateSchema = (message: JSONSchema4 | JSONSchema7) => {
 		const initialSchema = createInitialActMessage(message) || '{}';
 		setCode(initialSchema);
+		store.setIsSchemaApplied(true);
 	};
 
 	React.useImperativeHandle(
@@ -130,6 +135,4 @@ const MessageEditor = React.forwardRef(({ messageSchema }: Props, ref: React.Ref
 	);
 });
 
-MessageEditor.displayName = 'MessageEditor';
-
-export default MessageEditor;
+export default observer(MessageEditor, { forwardRef: true });

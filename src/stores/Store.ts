@@ -72,6 +72,8 @@ export default class Store {
 
 	@observable isSchemaLoading = false;
 
+	@observable isSchemaApplied = false;
+
 	constructor() {
 		this.getDictionaries();
 		this.getSessions();
@@ -132,6 +134,11 @@ export default class Store {
 			},
 		);
 	}
+
+	@action
+	setIsSchemaApplied = (isApplied: boolean) => {
+		this.isSchemaApplied = isApplied;
+	};
 
 	@action
 	getDictionaries = async () => {
@@ -274,6 +281,7 @@ export default class Store {
 
 	@action setSelectedSchemaType = (type: SchemaType) => {
 		this.selectedSchemaType = type;
+		this.setIsSchemaApplied(false);
 	};
 
 	@computed get selectedSchema() {
