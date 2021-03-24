@@ -24,17 +24,21 @@ import MessageEditor, { MessageEditorMethods } from './MessageEditor';
 import { useStore } from '../hooks/useStore';
 import Control from './Control';
 import SplashScreen from './SplashScreen';
+import Store from '../stores/Store';
+import { MessageSendingResponse } from '../models/Message';
 
 const App = () => {
-	const store = useStore();
+	const store: Store = useStore();
+
+	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
 	const messageEditorRef: React.RefObject<MessageEditorMethods> = React.useRef(null);
 
-	const sendMessage = () => {
+	const sendMessage = async () => {
 		if (messageEditorRef.current) {
 			const filledMessage = messageEditorRef.current.getFilledMessage();
 			if (filledMessage) {
-				store.sendMessage(filledMessage);
+				setResponse(await store.sendMessage(filledMessage));
 			}
 		}
 	};
@@ -45,25 +49,27 @@ const App = () => {
 				<h3 className="app__title">Configuration</h3>
 			</div>
 			<div className="app__body">
-				<Control />
+				<Control/>
 				<div className="app__editor">
-					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
-					{store.isShemaLoading &&
-					<div className="overlay" />}
+					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef}/>
+					{store.isSchemaLoading && <div className="overlay"/>}
 				</div>
 				<div className="app__buttons">
 					<Button>
-						<i className="clear-icon" />
+						<i className="clear-icon"/>
 						<span>Clear</span>
 					</Button>
-					<Button onClick={store.isSending ? () => {} : sendMessage} className={store.isSending ? "disabled" : ""}>
+					<Button
+						onClick={sendMessage}
+						disabled={!store.isSendingAllowed}
+					>
 						<span>Send Message</span>
-						{store.isSending ? <SplashScreen/> : <i className="arrow-right-icon" />}
+						{store.isSending ? <SplashScreen/> : <i className="arrow-right-icon"/>}
 					</Button>
 				</div>
 				<div className="app__result">
 					<h3 className="app__title">Result</h3>
-					<Result />
+					<Result response={response}/>
 				</div>
 			</div>
 		</div>

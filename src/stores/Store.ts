@@ -17,16 +17,12 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import {
-	action,
-	computed,
-	observable,
-	reaction,
-	runInAction,
+	action, computed, observable, reaction, runInAction,
 } from 'mobx';
 import api from '../api';
 import { SchemaType } from '../components/Control';
 import { Dictionary } from '../models/Dictionary';
-import { ParsedMessage } from '../models/Message';
+import { MessageSendingResponse, ParsedMessage } from '../models/Message';
 import Service, { Method } from '../models/Service';
 
 export default class Store {
@@ -60,21 +56,23 @@ export default class Store {
 
 	@observable selectedSchemaType: SchemaType = 'parsed-message';
 
-	@observable isSessionsLoading: boolean = false;
+	@observable isSessionsLoading = false;
 
-	@observable isDictionariesLoading: boolean = false;
+	@observable isDictionariesLoading = false;
 
-	@observable isDictionaryLoading: boolean = false;
+	@observable isDictionaryLoading = false;
 
-	@observable isActsLoading: boolean = false;
+	@observable isActsLoading = false;
 
-	@observable isServicesLoading: boolean = false;
+	@observable isServicesLoading = false;
 
-	@observable isMethodsLoading: boolean = false;
+	@observable isMethodsLoading = false;
 
-	@observable isSending: boolean = false;
+	@observable isSending = false;
 
-	@observable isShemaLoading: boolean = false;
+	@observable isSchemaLoading = false;
+
+	@observable isSchemaApplied = false;
 
 	constructor() {
 		this.getDictionaries();
@@ -138,6 +136,11 @@ export default class Store {
 	}
 
 	@action
+	setIsSchemaApplied = (isApplied: boolean) => {
+		this.isSchemaApplied = isApplied;
+	};
+
+	@action
 	getDictionaries = async () => {
 		try {
 			const dictionaryList = await api.getDictionaryList();
@@ -164,14 +167,14 @@ export default class Store {
 
 	@action
 	getMessageSchema = async (messageType: string, dictinonaryName: string) => {
-		this.isShemaLoading = true;
+		this.isSchemaLoading = true;
 		try {
 			const message = await api.getMessage(messageType, dictinonaryName);
 			this.parsedMessage = message;
 		} catch (error) {
 			console.error('Error occured while fetching message');
 		}
-		this.isShemaLoading = false;
+		this.isSchemaLoading = false;
 	};
 
 	@action
@@ -189,12 +192,19 @@ export default class Store {
 		this.isSessionsLoading = false;
 	};
 
-	sendMessage = async (message: object) => {
+	sendMessage = async (message: object): Promise<MessageSendingResponse | null> => {
 		this.isSending = true;
+
+		let result: MessageSendingResponse | null = null;
+
 		switch (this.selectedSchemaType) {
 			case 'parsed-message': {
-				if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) return;
-				await api.sendMessage({
+				if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) {
+					this.isSending = false;
+					return null;
+				}
+
+				result = await api.sendMessage({
 					session: this.selectedSession,
 					dictionary: this.selectedDictionaryName,
 					messageType: this.selectedMessageType,
@@ -203,7 +213,11 @@ export default class Store {
 				break;
 			}
 			case 'act': {
-				if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) return;
+				if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) {
+					this.isSending = false;
+					return null;
+				}
+
 				await api.callMethod({
 					fullServiceName: this.selectedService,
 					methodName: this.selectedMethod.methodName,
@@ -214,6 +228,8 @@ export default class Store {
 			default:
 		}
 		this.isSending = false;
+
+		return result;
 	};
 
 	@action
@@ -265,21 +281,25 @@ export default class Store {
 
 	@action setSelectedSchemaType = (type: SchemaType) => {
 		this.selectedSchemaType = type;
+		this.setIsSchemaApplied(false);
 	};
 
 	@computed get selectedSchema() {
 		switch (this.selectedSchemaType) {
-			case 'parsed-message': return this.parsedMessage
-				? this.parsedMessage[Object.keys(this.parsedMessage)[0]] as JSONSchema7
-				: null;
-			case 'act': return this.actSchema;
-			default: throw new Error('');
+			case 'parsed-message':
+				return this.parsedMessage
+					? this.parsedMessage[Object.keys(this.parsedMessage)[0]] as JSONSchema7
+					: null;
+			case 'act':
+				return this.actSchema;
+			default:
+				throw new Error('');
 		}
 	}
 
 	@action
 	getActSchema = async (serviceName: string, methodName: string) => {
-		this.isShemaLoading = true;
+		this.isSchemaLoading = true;
 		if (!this.selectedMethod) return;
 		try {
 			const actMessage = await api.getActSchema(serviceName, methodName);
@@ -289,6 +309,24 @@ export default class Store {
 		} catch (error) {
 			console.error('Error occured while fetching dictionaries');
 		}
-		this.isShemaLoading = false;
+		this.isSchemaLoading = false;
 	};
+
+	@computed
+	get isSendingAllowed(): boolean {
+		switch (this.selectedSchemaType) {
+			case 'parsed-message': {
+				return !!(
+					!this.isSending
+					&& this.selectedSession
+					&& this.selectedDictionaryName
+					&& this.selectedMessageType
+				);
+			}
+			case 'act': {
+				return !!(!this.isSending && this.selectedActBox && this.selectedService && this.selectedMethod);
+			}
+			default: return false;
+		}
+	}
 }

@@ -78,11 +78,10 @@ export function createInitialActMessage(schema: JSONSchema4 | JSONSchema7) {
 					if (Array.isArray(currentSchema.items)) {
 						return {
 							[title]: [
-								...currentSchema.items
-									.map(
-										(arrayField: JSONSchema4 | JSONSchema7Definition) =>
-											extractSchema(arrayField, '', true),
-									),
+								...(currentSchema.items as Array<object>).map(
+									(arrayField: JSONSchema4 | JSONSchema7Definition) =>
+										extractSchema(arrayField, '', true),
+								),
 							],
 						};
 					}

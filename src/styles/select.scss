@@ -29,6 +29,7 @@
 	color: $primaryTextColor;
 	width: 125px;
 	height: 20px;
+	outline: none;
 
 	background: {
 		image:  url(../../resources/icons/arr1-down.svg);
@@ -57,6 +58,10 @@
 		&:not(:first-child) {
 			padding-left: 20px;
 		}
+	}
+
+	&.invalid {
+		border: 1px solid red;
 	}
  }
  

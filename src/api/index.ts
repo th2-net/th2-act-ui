@@ -16,8 +16,9 @@
 
 import { Dictionary } from '../models/Dictionary';
 import {
-	JSONSchemaResponce,
+	JSONSchemaResponse,
 	MessageRequestModel,
+	MessageSendingResponse,
 	MethodCallRequestModel,
 	ParsedMessage,
 } from '../models/Message';
@@ -25,7 +26,7 @@ import Service from '../models/Service';
 
 const api = {
 	async getDictionaryList(): Promise<string[]> {
-		const dictionariesResponse = await fetch('/dictionaries', {
+		const dictionariesResponse = await fetch('backend/dictionaries', {
 			cache: 'no-cache',
 		});
 
@@ -37,7 +38,7 @@ const api = {
 		return [];
 	},
 	async getSessions(): Promise<string[]> {
-		const sessionsResponse = await fetch('/sessions', {
+		const sessionsResponse = await fetch('backend/sessions', {
 			cache: 'no-cache',
 		});
 
@@ -49,7 +50,7 @@ const api = {
 		return [];
 	},
 	async getDictionary(dictionaryName: string): Promise<Dictionary> {
-		const dictionaryResponse = await fetch(`/${dictionaryName}`, {
+		const dictionaryResponse = await fetch(`backend/${dictionaryName}`, {
 			cache: 'no-cache',
 		});
 
@@ -61,7 +62,7 @@ const api = {
 		return [];
 	},
 	async getMessage(messageType: string, dictionaryName: string): Promise<ParsedMessage | null> {
-		const messageResponse = await fetch(`/${dictionaryName}/${messageType}`);
+		const messageResponse = await fetch(`backend/${dictionaryName}/${messageType}`);
 
 		if (messageResponse.ok) {
 			return messageResponse.json();
@@ -70,9 +71,16 @@ const api = {
 		console.error(messageResponse.statusText);
 		return null;
 	},
-	async sendMessage(request: MessageRequestModel): Promise<void> {
+
+	async sendMessage(request: MessageRequestModel): Promise<MessageSendingResponse> {
 		const res = await fetch(
-			`/message/?session=${request.session}&dictionary=${request.dictionary}&messageType=${request.messageType}`,
+			`backend/message/?session=${
+				request.session
+			}&dictionary=${
+				request.dictionary
+			}&messageType=${
+				request.messageType
+			}`,
 			{
 				method: 'POST',
 				headers: {
@@ -85,9 +93,17 @@ const api = {
 		if (!res.ok) {
 			console.error(res);
 		}
+
+		const message = await res.text();
+
+		return {
+			code: res.status,
+			message,
+		};
 	},
+
 	async getActsList(): Promise<string[]> {
-		const actsResponse = await fetch('/acts', {
+		const actsResponse = await fetch('backend/acts', {
 			cache: 'no-cache',
 		});
 
@@ -99,7 +115,7 @@ const api = {
 		return [];
 	},
 	async getServices(actBox: string): Promise<string[]> {
-		const servicesResponse = await fetch(`/services/${actBox}`, {
+		const servicesResponse = await fetch(`backend/services/${actBox}`, {
 			cache: 'no-cache',
 		});
 
@@ -111,7 +127,7 @@ const api = {
 		return [];
 	},
 	async getServiceDetails(serviceName: string): Promise<Service | null> {
-		const servicesResponse = await fetch(`/service/${serviceName}`, {
+		const servicesResponse = await fetch(`backend/service/${serviceName}`, {
 			cache: 'no-cache',
 		});
 
@@ -122,8 +138,8 @@ const api = {
 		console.error(servicesResponse.statusText);
 		return null;
 	},
-	async getActSchema(serviceName: string, methodName: string): Promise<JSONSchemaResponce | null> {
-		const schemaResponse = await fetch(`/json_schema/${serviceName}/?method=${methodName}`, {
+	async getActSchema(serviceName: string, methodName: string): Promise<JSONSchemaResponse | null> {
+		const schemaResponse = await fetch(`backend/json_schema/${serviceName}/?method=${methodName}`, {
 			cache: 'no-cache',
 		});
 
@@ -136,7 +152,7 @@ const api = {
 	},
 	async callMethod(request: MethodCallRequestModel): Promise<void> {
 		const res = await fetch(
-			`/method/?fullServiceName=${request.fullServiceName}&methodName=${request.methodName}`,
+			`backend/method/?fullServiceName=${request.fullServiceName}&methodName=${request.methodName}`,
 			{
 				method: 'POST',
 				headers: {

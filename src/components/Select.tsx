@@ -15,13 +15,15 @@
  ***************************************************************************** */
 
 import * as React from 'react';
+import { createBemBlock } from '../helpers/styleCreators';
 import '../styles/select.scss';
 
 interface Props {
     className?: string;
     options: string[];
     selected: string;
-	disabled: boolean
+	disabled: boolean;
+	valid: boolean;
     prefix?: string;
 	onChange: (option: string) => void;
 	label?: string;
@@ -33,15 +35,17 @@ export default function Select({
 	selected,
 	disabled,
 	onChange,
+	valid,
 	className = '',
 	label,
 	id,
 }: Props) {
+	const selectClassName = createBemBlock(`options-select ${className}`, !valid ? 'invalid' : null);
 	return (
 		<div className="options-select__root">
 			{label && <label className="options-select__label" htmlFor={id}>{label}</label>}
 			<select
-				className={`options-select ${className}`}
+				className={selectClassName}
 				id={id}
 				value={selected}
 				disabled={disabled}
