@@ -31,52 +31,7 @@ const Result = ({
 
 	const { code, message } = response;
 
-	const queryParameter: string | null = (() => {
-		try {
-			const data: ParsedMessageSendingResponse = JSON.parse(message);
-			const currentTime = new Date().getTime();
-			const filterValueFrom = currentTime - (60 * 1000);
-			const filterValueTo = currentTime + (60 * 1000);
-
-			const queryParameterObject = [
-				{
-					events: {
-						filter: {
-							eventTypes: ['act-ui'],
-							names: [],
-							timestampFrom: filterValueFrom,
-							timestampTo: filterValueTo,
-						},
-						panelArea: 50,
-						selectedNodesPath: [
-							data.eventId,
-						],
-						flattenedListView: true,
-					},
-					messages: {
-						timestampFrom: filterValueFrom,
-						timestampTo: filterValueTo,
-					},
-					timeRange: [
-						filterValueFrom,
-						filterValueTo,
-					],
-					interval: 1,
-					layout: [
-						50,
-						50,
-					],
-				},
-			];
-
-			return Buffer.from(
-				JSON.stringify(queryParameterObject),
-			).toString('base64');
-		} catch (e) {
-			console.error(e);
-			return null;
-		}
-	})();
+	const queryParameter: string | null = (JSON.parse(message) as ParsedMessageSendingResponse).eventId;
 
 	const rootLink = isDev
 		? 'localhost:9000'
@@ -92,7 +47,7 @@ const Result = ({
 						<div>
 							Message is sent successfully
 						</div>
-						<a href={`${rootLink}/?workspaces=${queryParameter}`}
+						<a href={`${rootLink}/?eventId=${queryParameter}`}
 						   rel="noreferrer"
 						   target="_blank">report link</a>
 					</>
