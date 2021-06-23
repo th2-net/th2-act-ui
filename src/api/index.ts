@@ -150,7 +150,7 @@ const api = {
 		console.error(schemaResponse.statusText);
 		return null;
 	},
-	async callMethod(request: MethodCallRequestModel): Promise<void> {
+	async callMethod(request: MethodCallRequestModel): Promise<MessageSendingResponse> {
 		const res = await fetch(
 			`backend/method?fullServiceName=${request.fullServiceName}&methodName=${request.methodName}`,
 			{
@@ -165,6 +165,13 @@ const api = {
 		if (!res.ok) {
 			console.error(res);
 		}
+
+		const message = await res.text();
+
+		return {
+			code: res.status,
+			message,
+		};
 	},
 };
 

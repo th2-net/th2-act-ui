@@ -218,7 +218,7 @@ export default class Store {
 					return null;
 				}
 
-				await api.callMethod({
+				result = await api.callMethod({
 					fullServiceName: this.selectedService,
 					methodName: this.selectedMethod.methodName,
 					message,
