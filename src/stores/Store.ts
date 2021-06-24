@@ -22,7 +22,7 @@ import {
 import api from '../api';
 import { SchemaType } from '../components/Control';
 import { Dictionary } from '../models/Dictionary';
-import { MessageSendingResponse, ParsedMessage } from '../models/Message';
+import { ActSendingResponse, MessageSendingResponse, ParsedMessage } from '../models/Message';
 import Service, { Method } from '../models/Service';
 
 export default class Store {
@@ -195,7 +195,7 @@ export default class Store {
 	sendMessage = async (message: object): Promise<MessageSendingResponse | null> => {
 		this.isSending = true;
 
-		let result: MessageSendingResponse | null = null;
+		let result: MessageSendingResponse | ActSendingResponse | null = null;
 
 		switch (this.selectedSchemaType) {
 			case 'parsed-message': {

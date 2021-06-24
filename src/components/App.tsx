@@ -32,7 +32,7 @@ const App = () => {
 
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
-	const messageEditorRef: React.RefObject<MessageEditorMethods> = React.useRef(null);
+	const messageEditorRef = React.useRef<MessageEditorMethods>(null);
 
 	const sendMessage = async () => {
 		if (messageEditorRef.current) {
@@ -44,32 +44,29 @@ const App = () => {
 	};
 
 	return (
-		<div className="app">
-			<div className="app__header">
-				<h3 className="app__title">Configuration</h3>
+		<div className='app'>
+			<div className='app__header'>
+				<h3 className='app__title'>Configuration</h3>
 			</div>
-			<div className="app__body">
-				<Control/>
-				<div className="app__editor">
-					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef}/>
-					{store.isSchemaLoading && <div className="overlay"/>}
+			<div className='app__body'>
+				<Control />
+				<div className='app__editor'>
+					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
+					{store.isSchemaLoading && <div className='overlay' />}
 				</div>
-				<div className="app__buttons">
+				<div className='app__buttons'>
 					<Button>
-						<i className="clear-icon"/>
+						<i className='clear-icon' />
 						<span>Clear</span>
 					</Button>
-					<Button
-						onClick={sendMessage}
-						disabled={!store.isSendingAllowed}
-					>
+					<Button onClick={sendMessage} disabled={!store.isSendingAllowed}>
 						<span>Send Message</span>
-						{store.isSending ? <SplashScreen/> : <i className="arrow-right-icon"/>}
+						{store.isSending ? <SplashScreen /> : <i className='arrow-right-icon' />}
 					</Button>
 				</div>
-				<div className="app__result">
-					<h3 className="app__title">Result</h3>
-					<Result response={response}/>
+				<div className='app__result'>
+					<h3 className='app__title'>Result</h3>
+					<Result response={response} />
 				</div>
 			</div>
 		</div>
