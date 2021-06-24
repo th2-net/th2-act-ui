@@ -69,7 +69,7 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 								},
 								type: {
 									type: 'string[]',
-									values: ['act-ui'],
+									values: [],
 									negative: false,
 								},
 								name: {
