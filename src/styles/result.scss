@@ -14,25 +14,26 @@
  * limitations under the License.
  ******************************************************************************/
 
-@import "./common/vars";
+@import './common/vars';
 
 .result {
 	display: flex;
 	flex-grow: 1;
 	background-color: #fff;
 	border-radius: 6px;
+	overflow: auto;
 
-  &-value {
-	margin: 5px;
-	display: flex;
-	flex-direction: column;
-  }
+	&-value {
+		margin: 5px;
+		display: flex;
+		flex-direction: column;
+	}
 }
 
 .ok {
-  background-color: #CCFFCC;
+	background-color: #ccffcc;
 }
 
 .error {
-  background-color: #FFCCCC;
+	background-color: #ffcccc;
 }
