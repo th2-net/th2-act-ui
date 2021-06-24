@@ -52,13 +52,54 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 			? window.location.href.slice(0, window.location.href.lastIndexOf('/'))
 			: window.location.href.substring(0, window.location.href.indexOf('/act-ui'));
 
-		let eventId: null | string = null;
-
+		let eventId: string | null = null;
+		let workspaceState: any = [];
 		try {
+			// TODO: this is temporary hot fix, needs to be fixed
 			if (typeof obj === 'object' && obj !== null && 'eventId' in obj) {
-				eventId = (obj as ActSendingResponse | ParsedMessageSendingResponse).eventId;
+			 	eventId = (obj as ActSendingResponse | ParsedMessageSendingResponse).eventId;
+				workspaceState = eventId && typeof eventId === 'string' ? [
+					{
+						events: {
+							filter: {
+								attachedMessageId: {
+									type: 'string',
+									negative: false,
+									values: '',
+								},
+								type: {
+									type: 'string[]',
+									values: ['act-ui'],
+									negative: false,
+								},
+								name: {
+									type: 'string[]',
+									values: [],
+									negative: false,
+								},
+								body: {
+									type: 'string[]',
+									values: [],
+									negative: false,
+								},
+								status: {
+									type: 'switcher',
+									values: 'any',
+								},
+							},
+							panelArea: 50,
+							selectedEventId: eventId,
+							flattenedListView: false,
+						},
+						layout: [50, 50],
+					},
+				] : [];
 			}
-			return eventId ? `${rootLink}/?eventId=${eventId}` : null;
+
+			const url = eventId
+				? `${rootLink}/?workspaces=${window.btoa(JSON.stringify(workspaceState))}`
+				: null;
+			return url;
 		} catch (error) {
 			return null;
 		}
