@@ -187,7 +187,7 @@ export default class Store {
 				this.selectedSession = sessions[0];
 			}
 		} catch (error) {
-			console.error('Error occured while fetching dictionaries');
+			console.error('Error occured while fetching sessions');
 		}
 		this.isSessionsLoading = false;
 	};
@@ -242,7 +242,7 @@ export default class Store {
 				this.selectedActBox = actsList[0];
 			}
 		} catch (error) {
-			console.error('Error occured while fetching dictionaries');
+			console.error('Error occured while fetching acts');
 		}
 		this.isActsLoading = false;
 	};
@@ -257,7 +257,7 @@ export default class Store {
 				this.selectedService = services[0];
 			}
 		} catch (error) {
-			console.error('Error occured while fetching dictionaries');
+			console.error('Error occured while fetching services');
 		}
 		this.isServicesLoading = false;
 	};
@@ -274,7 +274,7 @@ export default class Store {
 				this.selectedMethod = serviceDetails.methods[0];
 			}
 		} catch (error) {
-			console.error('Error occured while fetching dictionaries');
+			console.error('Error occured while fetching service details');
 		}
 		this.isMethodsLoading = false;
 	};
@@ -305,9 +305,9 @@ export default class Store {
 			const actMessage = await api.getActSchema(serviceName, methodName);
 			if (!actMessage) return;
 
-			this.actSchema = JSON.parse(actMessage[this.selectedMethod.inputType]) as JSONSchema4;
+			this.actSchema = actMessage[this.selectedMethod.inputType] as unknown as JSONSchema4;
 		} catch (error) {
-			console.error('Error occured while fetching dictionaries');
+			console.error('Error occured while fetching act schema');
 		}
 		this.isSchemaLoading = false;
 	};
