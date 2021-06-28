@@ -39,7 +39,7 @@ export interface MessageEditorMethods {
 	getFilledMessage: () => object | null;
 }
 
-const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
+const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const store = useStore();
 
 	const monacoRef = React.useRef<Monaco>();
@@ -59,10 +59,12 @@ const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMe
 			} else {
 				monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 					validate: true,
-					schemas: [{
-						uri: 'do.not.load',
-						schema: {},
-					}],
+					schemas: [
+						{
+							uri: 'do.not.load',
+							schema: {},
+						},
+					],
 				});
 			}
 		});
@@ -72,9 +74,8 @@ const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMe
 		if (!monacoRef.current) return;
 		if (messageSchema) {
 			const schema = toJS(messageSchema);
-			uri.current = monacoRef.current.Uri.parse(
-				'://b/$schema.json',
-			);
+			uri.current = monacoRef.current.Uri.parse('://b/$schema.json');
+
 			initiateSchema(messageSchema);
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
@@ -90,10 +91,12 @@ const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMe
 			setCode('{}');
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
-				schemas: [{
-					uri: 'do.not.load',
-					schema: {},
-				}],
+				schemas: [
+					{
+						uri: 'do.not.load',
+						schema: {},
+					},
+				],
 			});
 		}
 	}, [messageSchema]);
@@ -126,13 +129,13 @@ const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMe
 
 	return (
 		<ControlledEditor
-			height="500px"
-			language="json"
+			height='500px'
+			language='json'
 			value={code}
 			onChange={onValueChange}
 			editorDidMount={handleEditorDidMount}
 		/>
 	);
-});
+};
 
 export default observer(MessageEditor, { forwardRef: true });
