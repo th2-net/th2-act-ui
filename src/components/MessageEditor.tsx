@@ -16,6 +16,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
+import ResizeObserver from 'resize-observer-polyfill';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
@@ -39,6 +40,8 @@ export interface MessageEditorMethods {
 	getFilledMessage: () => object | null;
 }
 
+const DEFAULT_EDITOR_HEIGHT = 500;
+
 const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const store = useStore();
 
@@ -50,6 +53,28 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 	const handleEditorDidMount: EditorDidMount = _valueGetter => {
 		valueGetter.current = _valueGetter;
 	};
+
+	const [editorHeight, setEditorHeight] = React.useState(DEFAULT_EDITOR_HEIGHT);
+
+	const editorHeightObserver = React.useRef(
+		new ResizeObserver((entries: ResizeObserverEntry[]) => {
+			setEditorHeight(entries[0]?.contentRect.height || DEFAULT_EDITOR_HEIGHT);
+		}),
+	);
+
+	const rootRef = React.useRef<HTMLDivElement>(null);
+
+	React.useEffect(() => {
+		if (rootRef.current) {
+			editorHeightObserver.current.observe(rootRef.current);
+		}
+
+		return () => {
+			if (rootRef.current) {
+				editorHeightObserver.current.unobserve(rootRef.current);
+			}
+		};
+	}, []);
 
 	React.useEffect(() => {
 		monaco.init().then((_monaco: Monaco) => {
@@ -128,13 +153,15 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 	);
 
 	return (
-		<ControlledEditor
-			height='500px'
-			language='json'
-			value={code}
-			onChange={onValueChange}
-			editorDidMount={handleEditorDidMount}
-		/>
+		<div ref={rootRef} style={{ height: '100%' }}>
+			<ControlledEditor
+				height={editorHeight}
+				language='json'
+				value={code}
+				onChange={onValueChange}
+				editorDidMount={handleEditorDidMount}
+			/>
+		</div>
 	);
 };
 
