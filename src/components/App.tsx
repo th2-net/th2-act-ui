@@ -45,9 +45,6 @@ const App = () => {
 
 	return (
 		<div className='app'>
-			<div className='app__header'>
-				<h3 className='app__title'>Configuration</h3>
-			</div>
 			<div className='app__body'>
 				<Control />
 				<div className='app__editor'>
