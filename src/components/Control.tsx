@@ -121,15 +121,13 @@ const Control = () => {
 					))
 				}
 			</div>
-			<div key="parameters" className="app__row">
+			<div key="parameters" className="app__row app__controls">
 				{
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					controlConfigs.find(config => config.name === store.selectedSchemaType)!.selects.map(props => (
 						<React.Fragment key={props.id}>
 							<Select {...props} />
-							{props.disabled
-									&& <SplashScreen key="splash"/>
-							}
+							{props.disabled	&& <SplashScreen key="splash"/>}
 						</React.Fragment>
 					))
 				}

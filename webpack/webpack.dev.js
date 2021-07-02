@@ -38,7 +38,7 @@ module.exports = webpackMerge(commonConfig, {
         hot: true,
 		proxy: {
 			'/backend': {
-				target: 'http://th2-qa:31467',
+				target: 'http://th2-qa:31464',
 				changeOrigin: true,
 				secure: false,
 				pathRewrite: {
