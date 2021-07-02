@@ -52,10 +52,6 @@ const App = () => {
 					{store.isSchemaLoading && <div className='overlay' />}
 				</div>
 				<div className='app__buttons'>
-					<Button>
-						<i className='clear-icon' />
-						<span>Clear</span>
-					</Button>
 					<Button onClick={sendMessage} disabled={!store.isSendingAllowed}>
 						<span>Send Message</span>
 						{store.isSending ? <SplashScreen /> : <i className='arrow-right-icon' />}

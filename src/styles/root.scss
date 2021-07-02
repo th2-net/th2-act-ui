@@ -59,16 +59,6 @@ ul {
     row-gap: 10px;
     padding: 10px;
 
-    &__header {
-        background-color: $appBackgroundColor;
-        border-radius: 8px;
-        display: flex;
-        display: grid;
-        grid-template-columns: 1fr 250px 250px;
-        align-items: center;
-        padding: 15px 20px;
-    }
-
     &__body {
         padding: 15px 20px;
         background-color: $appBackgroundColor;
@@ -84,10 +74,16 @@ ul {
         text-transform: uppercase;
         display: inline;
         margin-right: 20px;
+        margin-bottom: 5px;
     }
 
     &__row {
         padding: 10px 0;
+    }
+
+    &__controls {
+        display: flex;
+        align-items: center;
     }
 
     &__editor {
