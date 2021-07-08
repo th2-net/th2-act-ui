@@ -6,13 +6,13 @@ This app could be used to manually interact with the system under test. There ar
 1. Sending messages to conn components directly
 2. Invoking act methods
 
-This repository only contains a web app. For act-ui to fucntion properly there is required second component: [act-ui-backend](https://github.com/th2-net/th2-act-ui-backend). It has to be deployed and should be accessible on `{act-ui-path}/backend/*` (if act-ui has link `https://cluster-name/namespace-name/act-ui`, act-ui-backend should be accessible on `https://cluster-name/namespace-name/act-ui/backend/`)
+This repository only contains a web app. For act-ui to function properly there, is required a second component: [act-ui-backend](https://github.com/th2-net/th2-act-ui-backend). It needs to be deployed and should be accessible on `{act-ui-path}/backend/*` (if act-ui contains the link `https://cluster-name/namespace-name/act-ui`, act-ui-backend should be accessible on `https://cluster-name/namespace-name/act-ui/backend/`)
 
 # Architecture
 ![picture](act-ui-architecture-schema.png)
 
 # Configuration
-To include this component in your schema, a following yml file needs to be created
+To include this component in your schema, the following yml file needs to be created
 ```
 apiVersion: th2.exactpro.com/v1
 kind: Th2CoreBox
