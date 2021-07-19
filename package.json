@@ -1,6 +1,6 @@
 {
-	"name": "message-sender-ui",
-	"version": "1.0.17",
+	"name": "act-ui",
+	"version": "1.0.18",
 	"description": "",
 	"main": "index.tsx",
 	"private": true,

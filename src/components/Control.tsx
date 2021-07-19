@@ -32,7 +32,7 @@ const Control = () => {
 				{
 					label: 'Session',
 					id: 'session',
-					options: store.sessions,
+					options: store.sessions.sort(),
 					selected: store.selectedSession || '',
 					disabled: store.isSessionsLoading,
 					valid: store.isSchemaApplied ? !!store.selectedSession : true,
@@ -41,7 +41,7 @@ const Control = () => {
 				{
 					label: 'Dictionary',
 					id: 'dictionary',
-					options: store.dictionaries,
+					options: store.dictionaries.sort(),
 					selected: store.selectedDictionaryName || '',
 					disabled: store.isSessionsLoading || store.isDictionariesLoading,
 					valid: store.isSchemaApplied ? !!store.selectedDictionaryName : true,
@@ -50,7 +50,7 @@ const Control = () => {
 				{
 					label: 'Msg Type',
 					id: 'msg-type',
-					options: store.dictionary,
+					options: store.dictionary.sort(),
 					selected: store.selectedMessageType || '',
 					disabled: store.isSessionsLoading || store.isDictionariesLoading || store.isDictionaryLoading,
 					valid: store.isSchemaApplied ? !!store.selectedMessageType : true,
@@ -64,7 +64,7 @@ const Control = () => {
 				{
 					label: 'Act',
 					id: 'act',
-					options: store.acts,
+					options: store.acts.sort(),
 					selected: store.selectedActBox || '',
 					disabled: store.isActsLoading,
 					valid: store.isSchemaApplied ? !!store.selectedActBox : true,
@@ -73,7 +73,7 @@ const Control = () => {
 				{
 					label: 'Service',
 					id: 'service',
-					options: store.services,
+					options: store.services.sort(),
 					selected: store.selectedService || '',
 					disabled: store.isActsLoading || store.isServicesLoading,
 					valid: store.isSchemaApplied ? !!store.selectedService : true,
@@ -83,7 +83,7 @@ const Control = () => {
 					label: 'Method',
 					id: 'method',
 					options: store.serviceDetails
-						? store.serviceDetails.methods.map(method => method.methodName)
+						? store.serviceDetails.methods.map(method => method.methodName).sort()
 						: [],
 					selected: store.selectedMethod?.methodName || '',
 					disabled: store.isActsLoading || store.isServicesLoading || store.isMethodsLoading,

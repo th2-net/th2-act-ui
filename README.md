@@ -6,7 +6,7 @@ This app could be used to manually interact with the system under test. There ar
 1. Sending messages to conn components directly
 2. Invoking act methods
 
-This repository only contains a web app. For act-ui to function properly there, is required a second component: [act-ui-backend](https://github.com/th2-net/th2-act-ui-backend). It needs to be deployed and should be accessible on `{act-ui-path}/backend/*` (if act-ui contains the link `https://cluster-name/namespace-name/act-ui`, act-ui-backend should be accessible on `https://cluster-name/namespace-name/act-ui/backend/`)
+This repository only contains a web app. For act-ui to function properly, [act-ui-backend](https://github.com/th2-net/th2-act-ui-backend) needs to be deployed at `{act-ui-path}/backend/*` (e.g. if act-ui is deployed at `https://cluster-name/namespace-name/act-ui`, act-ui-backend should be located at `https://cluster-name/namespace-name/act-ui/backend/`)
 
 # Architecture
 ![picture](act-ui-architecture-schema.png)

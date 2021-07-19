@@ -114,7 +114,7 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 					<>
 						<div>Message is sent successfully</div>
 						<a href={link} rel='noreferrer' target='_blank'>
-							report link
+							Go to the send request event (opens in a new tab)
 						</a>
 					</>
 				)}
