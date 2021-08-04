@@ -30,6 +30,10 @@ import { MessageSendingResponse } from '../models/Message';
 const App = () => {
 	const store: Store = useStore();
 
+	window.onbeforeunload = () => { localStorage.setItem('session', '0'); };
+
+	store.startApp();
+
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
 	const messageEditorRef = React.useRef<MessageEditorMethods>(null);
@@ -48,13 +52,15 @@ const App = () => {
 			<div className='app__body'>
 				<Control />
 				<div className='app__editor'>
-					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
+					<MessageEditor messageSchema={store.selectedSchema}
+						ref={messageEditorRef} />
 					{store.isSchemaLoading && <div className='overlay' />}
 				</div>
 				<div className='app__buttons'>
-					<Button onClick={sendMessage} disabled={!store.isSendingAllowed}>
-						<span>Send Message</span>
-						{store.isSending ? <SplashScreen /> : <i className='arrow-right-icon' />}
+					<Button onClick={store.editMessageMode ? store.saveEditedMessage : sendMessage}
+						disabled={!store.isSendingAllowed}>
+						<span>{store.sendButtonTitle}</span>
+						{store.isSending ? <SplashScreen /> : <i className={store.sendButtonIcon} />}
 					</Button>
 				</div>
 				<div className='app__result'>

@@ -31,6 +31,7 @@ import { Uri } from 'monaco-editor';
 import { toJS } from 'mobx';
 import { createInitialActMessage } from '../helpers/schema';
 import { useStore } from '../hooks/useStore';
+import Messages from '../stores/MessageList';
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
@@ -48,6 +49,7 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 	const monacoRef = React.useRef<Monaco>();
 	const valueGetter = React.useRef<(() => string) | null>(null);
 	const uri = React.useRef<Uri>();
+	const { editorCode, setEditorCode } = useStore();
 	const [code, setCode] = React.useState('{}');
 
 	const handleEditorDidMount: EditorDidMount = _valueGetter => {
@@ -128,6 +130,7 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 
 	const onValueChange: ControlledEditorOnChange = (event, value) => {
 		setCode(value || '{}');
+		setEditorCode(value || '{ value is undefined }');
 	};
 
 	const initiateSchema = (message: JSONSchema4 | JSONSchema7) => {
@@ -142,25 +145,32 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 			getFilledMessage: () => {
 				let filledMessage: object | null;
 				try {
-					filledMessage = JSON.parse(code);
+					filledMessage = JSON.parse(editorCode);
 				} catch {
 					filledMessage = null;
 				}
 				return filledMessage;
 			},
 		}),
-		[code],
+		[editorCode],
 	);
 
 	return (
-		<div ref={rootRef} style={{ height: '100%' }}>
-			<ControlledEditor
-				height={editorHeight}
-				language='json'
-				value={code}
-				onChange={onValueChange}
-				editorDidMount={handleEditorDidMount}
-			/>
+		<div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start' }}>
+			<div ref={rootRef} style={{ height: '100%', width: '50%', marginRight: '20px' }}>
+				<ControlledEditor
+					height={editorHeight}
+					language='json'
+					value={code !== '{}' && !store.editMessageMode ? code : editorCode}
+					onChange={onValueChange}
+					editorDidMount={handleEditorDidMount}
+				/>
+			</div>
+			<div style={{
+				width: '50%', marginRight: '20px',
+			}}>
+				<Messages/>
+			</div>
 		</div>
 	);
 };

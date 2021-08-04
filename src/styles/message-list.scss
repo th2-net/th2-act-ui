@@ -1,0 +1,86 @@
+.messageCard{
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    background: #1111;
+    padding: 3px;
+}
+
+.messageCard:hover .deleteButton{
+    visibility: visible;
+}
+
+.deleteButton{
+    visibility: hidden;
+    cursor: pointer;
+}
+
+.mainButton{
+    margin: 10px; 
+    width: 70px;
+    height: 45px;
+}
+
+.circleUnvisible{
+    visibility: hidden;
+    height: 15px;
+    width: 10px;
+    border-radius: 50%;
+    margin-left: 10px;
+}
+
+.circleEdited{
+    height: 15px;
+    width: 10px;
+    border-radius: 50%;
+    background-color:darkorange;
+    border-color: currentColor;
+    margin-left: 10px;
+}
+
+.circleGreen{
+    height: 15px;
+    width: 10px;
+    border-radius: 50%;
+    background-color:chartreuse;
+    border-color: currentColor;
+    margin-left: 10px;
+}
+
+.circleRed{
+    height: 15px;
+    width: 10px;
+    border-radius: 50%;
+    background-color:crimson;
+    border-color: currentColor;
+    margin-left: 10px;
+}
+
+.normalNewMessage{
+    background: #1111;
+    padding: 3px;
+    border-style: dashed;
+    border-color:darkslategrey;
+    visibility:visible;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.hiddenNewMessage{
+    visibility:hidden;
+}
+
+.cardItems{
+    display: flex;
+    flex-direction:column;
+    justify-content:flex-start;
+    margin-left: 50px;
+}
+
+.delayVisible{
+    visibility: visible;
+}
+
+.delayUnvisible{
+    visibility: hidden;
+}

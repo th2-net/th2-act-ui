@@ -20,7 +20,7 @@ import { useStore } from '../hooks/useStore';
 import Select from './Select';
 import SplashScreen from './SplashScreen';
 
-export type SchemaType = 'parsed-message' | 'raw-message' | 'act';
+export type SchemaType = 'parsed-message' | 'raw-message' | 'act' | 'from-list';
 
 const Control = () => {
 	const store = useStore();
@@ -36,7 +36,7 @@ const Control = () => {
 					selected: store.selectedSession || '',
 					disabled: store.isSessionsLoading,
 					valid: store.isSchemaApplied ? !!store.selectedSession : true,
-					onChange: (opt: string) => store.selectedSession = opt,
+					onChange: (opt: string) => store.setSelectedSession(opt),
 				},
 				{
 					label: 'Dictionary',
@@ -45,7 +45,7 @@ const Control = () => {
 					selected: store.selectedDictionaryName || '',
 					disabled: store.isSessionsLoading || store.isDictionariesLoading,
 					valid: store.isSchemaApplied ? !!store.selectedDictionaryName : true,
-					onChange: (opt: string) => store.selectedDictionaryName = opt,
+					onChange: (opt: string) => store.setDictionaryName(opt),
 				},
 				{
 					label: 'Msg Type',
@@ -54,7 +54,7 @@ const Control = () => {
 					selected: store.selectedMessageType || '',
 					disabled: store.isSessionsLoading || store.isDictionariesLoading || store.isDictionaryLoading,
 					valid: store.isSchemaApplied ? !!store.selectedMessageType : true,
-					onChange: (opt: string) => store.selectedMessageType = opt,
+					onChange: (opt: string) => store.setSelectedMessageType(opt),
 				},
 			],
 		},
