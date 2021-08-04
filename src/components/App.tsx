@@ -52,9 +52,10 @@ const App = () => {
 					{store.isSchemaLoading && <div className='overlay' />}
 				</div>
 				<div className='app__buttons'>
-					<Button onClick={sendMessage} disabled={!store.isSendingAllowed}>
-						<span>Send Message</span>
-						{store.isSending ? <SplashScreen /> : <i className='arrow-right-icon' />}
+					<Button onClick={store.editMessageMode ? store.saveEditedMessage : sendMessage}
+						disabled={!store.isSendingAllowed}>
+						<span>{store.sendButtonTitle}</span>
+						{store.isSending ? <SplashScreen /> : <i className={store.sendButtonIcon} />}
 					</Button>
 				</div>
 				<div className='app__result'>

@@ -22,11 +22,15 @@ import {
 import api from '../api';
 import { SchemaType } from '../components/Control';
 import { Dictionary } from '../models/Dictionary';
-import { ActSendingResponse, MessageSendingResponse, ParsedMessage } from '../models/Message';
+import {
+	ActSendingResponse, MessageSendingResponse, ParsedMessage,
+} from '../models/Message';
 import Service, { Method } from '../models/Service';
 
 export default class Store {
 	@observable dictionaries: Array<string> = [];
+
+	@observable sentMessages: Array<string> = [];
 
 	@observable sessions: Array<string> = [];
 
@@ -73,6 +77,121 @@ export default class Store {
 	@observable isSchemaLoading = false;
 
 	@observable isSchemaApplied = false;
+
+	@observable parsedMessagesHistory: string[] = [];
+
+	@observable fromFileMessage = false;
+
+	@observable indicators: string[] = [];
+
+	@observable editorCode = '{}';
+
+	@observable sendButtonTitle = 'Send Message';
+
+	@observable sendButtonIcon = 'arrow-right-icon';
+
+	@observable editMessageMode = false;
+
+	@observable editedMessageIndex = -1;
+
+	@observable editedMessageSendDelay = 0;
+
+	@action setEditedMessageSendDelay = (delay: number) => {
+		this.editedMessageSendDelay = delay;
+	};
+
+	@observable setEditedMessageIndex = (index: number) => {
+		this.editedMessageIndex = index;
+	};
+
+	@action saveEditedMessage = () => {
+		if (this.editedMessageIndex >= 0) {
+			const editedMessage: string = JSON.stringify({
+				session: this.selectedSession,
+				dictionary: this.selectedDictionaryName,
+				messageType: this.selectedMessageType,
+				message: JSON.parse(this.parsedMessagesHistory[this.editedMessageIndex]).message,
+				delay: this.editedMessageSendDelay,
+			});
+			this.parsedMessagesHistory[this.editedMessageIndex] = editedMessage;
+			this.indicators[this.editedMessageIndex] = 'circleEdited';
+			this.editedMessageIndex = -1;
+			this.setEditMessageMode(false);
+		}
+	};
+
+	@action setEditMessageMode=(mode: boolean) => {
+		this.editMessageMode = mode;
+		if (mode === false) {
+			this.setSelectedSession(null);
+			this.setSelectedMessageType(null);
+			this.setDictionaryName(null);
+			this.setSendButtonIcon('arrow-right-icon');
+			this.setSendButtonTitle('Send Message');
+		}
+	};
+
+	@action setSendButtonIcon =(iconClass: string) => {
+		this.sendButtonIcon = iconClass;
+	};
+
+	@action setSendButtonTitle = (title: string) => {
+		this.sendButtonTitle = title;
+	};
+
+	@action setSelectedSession = (session: string | null) => {
+		this.selectedSession = session;
+	};
+
+	@action setSelectedMessageType = (messageType: string | null) => {
+		this.selectedMessageType = messageType;
+	};
+
+	@action setDictionaryName = (dictionary: string | null) => {
+		this.selectedDictionaryName = dictionary;
+	};
+
+	@action setEditorCode = (code: string) => {
+		this.editorCode = code;
+	};
+
+	@action getIndicatorByResult = (code: number): string => {
+		if (code === 200) return 'circleGreen';
+		return 'circleRed';
+	};
+
+    @action addIndicator = (indicatorClass: string) => {
+    	this.indicators.push(indicatorClass);
+    };
+
+    @action changeIndicator = (index: number, indicatorClass: string) => {
+    	this.indicators[index] = indicatorClass;
+    };
+
+	@action deleteIndicator = (index: number): string[] => {
+		const tmpArray: string[] = this.indicators.slice();
+		this.indicators = [];
+		tmpArray.forEach((item, i) => {
+			if (i !== index) {
+				this.addIndicator(item);
+			}
+		});
+		return this.indicators;
+	};
+
+	@action setFromFile = (flag: boolean) => {
+		this.fromFileMessage = flag;
+	};
+
+	@action addParsedMessage = (message: string, indicatorClass?: string) => {
+		this.indicators.push(indicatorClass || 'circleUnvisible');
+		this.parsedMessagesHistory.push(message);
+	};
+
+	@action clearParsedMessages = () => {
+		this.parsedMessagesHistory = [];
+		this.indicators = [];
+	};
 
 	constructor() {
 		this.getDictionaries();
@@ -192,6 +311,7 @@ export default class Store {
 		this.isSessionsLoading = false;
 	};
 
+	@action
 	sendMessage = async (message: object): Promise<MessageSendingResponse | null> => {
 		this.isSending = true;
 
@@ -199,17 +319,34 @@ export default class Store {
 
 		switch (this.selectedSchemaType) {
 			case 'parsed-message': {
-				if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) {
-					this.isSending = false;
-					return null;
-				}
+				if (this.fromFileMessage) {
+					result = await api.sendMessage({
+						session: JSON.parse(message as unknown as string).session,
+						dictionary: JSON.parse(message as unknown as string).dictionary,
+						messageType: JSON.parse(message as unknown as string).messageType,
+						message: JSON.parse(message as unknown as string).message,
+					});
+					this.addParsedMessage(message as unknown as string, this.getIndicatorByResult(result.code));
+				} else {
+					if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) {
+						this.isSending = false;
+						return null;
+					}
 
-				result = await api.sendMessage({
-					session: this.selectedSession,
-					dictionary: this.selectedDictionaryName,
-					messageType: this.selectedMessageType,
-					message,
-				});
+					result = await api.sendMessage({
+						session: this.selectedSession,
+						dictionary: this.selectedDictionaryName,
+						messageType: this.selectedMessageType,
+						message,
+					});
+
+					this.addParsedMessage(JSON.stringify({
+						session: this.selectedSession,
+						dictionary: this.selectedDictionaryName,
+						messageType: this.selectedMessageType,
+						message,
+					}));
+				}
 				break;
 			}
 			case 'act': {
@@ -292,6 +429,10 @@ export default class Store {
 					: null;
 			case 'act':
 				return this.actSchema;
+			case 'from-list':
+				return this.parsedMessage
+					? this.parsedMessage[Object.keys(this.parsedMessage)[0]] as JSONSchema7
+					: null;
 			default:
 				throw new Error('');
 		}
