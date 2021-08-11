@@ -21,6 +21,7 @@ import {
 } from 'mobx';
 import api from '../api';
 import { SchemaType } from '../components/Control';
+import { UntypedField } from '../components/MessageEditor';
 import { Dictionary } from '../models/Dictionary';
 import { ActSendingResponse, MessageSendingResponse, ParsedMessage } from '../models/Message';
 import Service, { Method } from '../models/Service';
@@ -73,6 +74,14 @@ export default class Store {
 	@observable isSchemaLoading = false;
 
 	@observable isSchemaApplied = false;
+
+	@observable positionMarkers: Range[] = [];
+
+	@observable markersInstalled = false;
+
+	@observable isInitial = false;
+
+	markersInitialized = false;
 
 	constructor() {
 		this.getDictionaries();

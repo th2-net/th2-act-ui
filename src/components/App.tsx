@@ -43,12 +43,17 @@ const App = () => {
 		}
 	};
 
+	const messageSchema = store.selectedSchema;
+
 	return (
 		<div className='app'>
 			<div className='app__body'>
 				<Control />
 				<div className='app__editor'>
-					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
+					<MessageEditor
+						messageSchema={messageSchema}
+						ref={messageEditorRef}
+					/>
 					{store.isSchemaLoading && <div className='overlay' />}
 				</div>
 				<div className='app__buttons'>

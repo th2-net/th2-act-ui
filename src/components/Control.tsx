@@ -101,18 +101,18 @@ const Control = () => {
 			<div key="mode" className="app__row">
 				<h3 className="app__title">Send as</h3>
 				{
-					controlConfigs.map(config => (
-						<label key={config.name} htmlFor={config.name}>
+					controlConfigs.map(_config => (
+						<label key={_config.name} htmlFor={_config.name}>
 							<input
 								type="radio"
-								value={config.name}
-								id={config.name}
-								checked={config.name === store.selectedSchemaType}
+								value={_config.name}
+								id={_config.name}
+								checked={_config.name === store.selectedSchemaType}
 								onChange={e => store.setSelectedSchemaType(e.target.value as SchemaType)}
 								name="message-type"
 							/>
 							{
-								config.name
+								_config.name
 									.split('-')
 									.map(part => part.charAt(0).toUpperCase() + part.slice(1))
 									.join(' ')
@@ -124,7 +124,7 @@ const Control = () => {
 			<div key="parameters" className="app__row app__controls">
 				{
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					controlConfigs.find(config => config.name === store.selectedSchemaType)!.selects.map(props => (
+					controlConfigs.find(_config => _config.name === store.selectedSchemaType)!.selects.map(props => (
 						<React.Fragment key={props.id}>
 							<Select {...props} />
 							{props.disabled	&& <SplashScreen key="splash"/>}

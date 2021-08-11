@@ -52,7 +52,7 @@ export const ModalPortal = ({
 	React.useEffect(() => {
 		if (!isOpen && closeDelay !== 0) {
 			setTimeout(() => {
-				setIsShown(isOpen);
+				setIsShown(false);
 			}, closeDelay);
 			return;
 		}
@@ -62,7 +62,7 @@ export const ModalPortal = ({
 
 	return (
 		<Portal>
-			<div style={{ display: isShown ? 'block' : 'none' }}>
+			<div style={{ visibility: isOpen ? 'visible' : 'hidden' }}>
 				{children}
 			</div>
 		</Portal>
