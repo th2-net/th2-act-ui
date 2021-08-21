@@ -15,7 +15,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '../hooks/useStore';
 import '../styles/message-list.scss';
@@ -23,6 +23,7 @@ import '../styles/splitter.scss';
 import SplitView from '../split-view/SplitView';
 import SplitViewPane from '../split-view/SplitViewPane';
 import { nanoid } from '../../node_modules/nanoid';
+import { downloadFile } from '../helpers/downloadFile';
 
 export type Indicator =
 	| 'indicator-unvisible'
@@ -30,13 +31,13 @@ export type Indicator =
 	| 'indicator-successful'
 	| 'indicator-unsuccessful';
 
-export type ParsedMessageItem = {
+export interface ParsedMessageItem {
 	sessionId: string;
 	dictionary: string;
 	messageType: string;
 	message: object | string;
 	delay: number;
-};
+}
 
 export interface ActMessageItem {
 	actBox: string;
@@ -52,43 +53,28 @@ interface EditMessageProps {
 	indicators: Indicator[];
 }
 
-export const Messages = () => {
+const Messages = () => {
 	const store = useStore();
-
-	const downloadFile = (content: string, filename: string, extension: string) => {
-		const file = new Blob([content], { type: extension });
-
-		if (window.navigator.msSaveOrOpenBlob) {
-			window.navigator.msSaveOrOpenBlob(file);
-		} else {
-			const a = document.createElement('a');
-			const url = URL.createObjectURL(file);
-			a.href = url;
-			a.download = filename;
-			document.body.appendChild(a);
-			a.click();
-			document.body.removeChild(a);
-			window.URL.revokeObjectURL(url);
-		}
-	};
+	const [switchValue, setSwitchValue] = useState(false);
 
 	const loadFromFile = (file: FileList | null) => {
 		if (file != null) {
 			const reader = new FileReader();
 			reader.readAsText(file.item(0) as Blob);
 			reader.onload = () => {
-				jsonMessagesFromString(reader.result);
+				if (typeof reader.result === 'string') {
+					jsonMessagesFromString(reader.result);
+				}
 			};
 		}
 	};
 
-	const jsonMessagesFromString = (rawFromFile: string | ArrayBuffer | null) => {
+	const jsonMessagesFromString = (rawFromFile: string) => {
 		try {
-			const json = JSON.parse(rawFromFile as string);
+			const json = JSON.parse(rawFromFile);
 			store.clearParsedMessages();
 
 			for (let i = 0; i < json.length; i++) {
-				json[i].delay = 0;
 				store.addParsedMessage(json[i]);
 			}
 		} catch (error) {
@@ -97,30 +83,32 @@ export const Messages = () => {
 		}
 	};
 
-	const replaySendMessage = (array: ParsedMessageItem[] | ActMessageItem[], index: number) => {
-		if (store.isReplay) {
-			setTimeout(() => {
-				store.sendMessage(array[index], index);
-				// eslint-disable-next-line no-param-reassign
-				index++;
-				if (index === array.length) {
-					switchReplay();
-				} else {
-					replaySendMessage(array, index);
-				}
-			}, array[index].delay);
-		}
-	};
-
-	let switchValue = false;
-	const switchReplay = () => {
-		switchValue = !switchValue;
+	useEffect(() => {
 		if (switchValue) {
 			store.setEditMessageMode(false);
 			store.setReplayMode(true);
 			replaySendMessage(store.getCurrentMessagesArray(), 0);
 		} else {
 			store.setReplayMode(false);
+		}
+	}, [switchValue]);
+
+	const replaySendMessage = (array: ParsedMessageItem[] | ActMessageItem[], index: number) => {
+		if (store.isReplay && array.length > 0 && index < array.length) {
+			setTimeout(() => {
+				store.replayMessage(array[index], index).then(
+					() => {
+						// eslint-disable-next-line no-param-reassign
+						index++;
+						if (index === array.length) {
+							store.setReplayMode(false);
+							setSwitchValue(false);
+						} else {
+							replaySendMessage(array, index);
+						}
+					},
+				);
+			}, array[index].delay);
 		}
 	};
 
@@ -139,11 +127,11 @@ export const Messages = () => {
 				indicators={store.indicators.slice()}
 				editMessageMode={store.editMessageMode}
 				editedMessageIndex={store.editedMessageIndex}
-				eventsPanelArea={store.eventsPanelArea}
+				messageListPanelArea={store.messageListPanelArea}
 				object={store.selectedDictionaryName}
 			/>
 
-			<div>
+			<div className="messageEditAreaControls">
 				<button
 					disabled={store.editMessageMode}
 					className='mainButton'
@@ -159,9 +147,9 @@ export const Messages = () => {
 				</button>
 
 				<button
-					disabled={store.editMessageMode}
+					disabled={store.editMessageMode || store.getCurrentMessagesArray().length === 0}
 					className='mainButton'
-					onClick={switchReplay}>
+					onClick={() => { const nextValue = !switchValue; setSwitchValue(nextValue); }}>
 					{store.isReplay ? 'Stop' : 'Replay'}
 				</button>
 
@@ -226,9 +214,9 @@ const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) =
 interface MessageItemProps extends EditMessageProps {
 	index: number;
 	message: ParsedMessageItem | ActMessageItem;
-	selectMessage: Function;
-	setDelay: Function;
-	deleteMessage: Function;
+	selectMessage: (index: number) => void;
+	setDelay: (index: number) => void;
+	deleteMessage: (index: number) => void;
 }
 
 const MessageItem = ({
@@ -273,7 +261,7 @@ const MessageItem = ({
 );
 
 interface MessageCardControlsProps {
-	deleteMessage: Function;
+	deleteMessage: (index: number) => void;
 	editMessageMode: boolean;
 	index: number;
 	indicator: Indicator;
@@ -387,7 +375,7 @@ const EmbeddedEditor = (props: { schema: string; object: string }) => {
 
 interface MessageEditAreaProps extends EditMessageProps {
 	messages: ParsedMessageItem[] | ActMessageItem[];
-	eventsPanelArea: number;
+	messageListPanelArea: number;
 	object: string | null;
 }
 
@@ -396,14 +384,14 @@ const MessageEditArea = ({
 	indicators,
 	messages,
 	editedMessageIndex,
-	eventsPanelArea,
+	messageListPanelArea,
 	object,
 }: MessageEditAreaProps) => {
 	const store = useStore();
 	return (
 		<div className='messageEditArea'>
 			{store.selectedSchemaType === 'parsed-message' ? (
-				<SplitView panelArea={eventsPanelArea} onPanelAreaChange={store.setPanelArea}>
+				<SplitView panelArea={messageListPanelArea} onPanelAreaChange={store.setPanelArea}>
 					<SplitViewPane>
 						<MessageList
 							messages={messages}
@@ -429,7 +417,4 @@ const MessageEditArea = ({
 	);
 };
 
-observer(MessageEditArea);
-observer(MessageEntity);
-observer(MessageList);
 export default observer(Messages);

@@ -116,6 +116,9 @@ ul {
 .app__editor {
     position: relative;
     overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-column-gap: 20px;
 
     .overlay {
         position: absolute;

@@ -91,7 +91,7 @@ export default class Store {
 
 	@observable editedMessageSendDelay = 0;
 
-	@observable eventsPanelArea = 50;
+	@observable messageListPanelArea = 50;
 
 	@action setSelectedActBox = (actBox: string | null) => {
 		this.selectedActBox = actBox;
@@ -168,7 +168,7 @@ export default class Store {
 
 	@action saveEditedMessage = () => {
 		if (this.editedMessageIndex >= 0) {
-			const message: ParsedMessageItem | ActMessageItem | undefined =	this.buildEditedMessage();
+			const message: ParsedMessageItem | ActMessageItem | undefined = this.buildEditedMessage();
 			if (message !== undefined) {
 				if (this.selectedSchemaType === 'parsed-message') {
 					this.parsedMessagesHistory[this.editedMessageIndex] = message as ParsedMessageItem;
@@ -239,7 +239,7 @@ export default class Store {
 		sessionOrActBox: string | null,
 		dictionaryOrService: string | null,
 		messageTypeOrMethod: string | null,
-		editorCode?: string,
+		editorCode: string,
 	) => {
 		if (this.selectedSchemaType === 'parsed-message') {
 			this.setSelectedSession(sessionOrActBox);
@@ -314,7 +314,7 @@ export default class Store {
 
 	@action
 	public setPanelArea = (panelArea: number) => {
-		this.eventsPanelArea = panelArea;
+		this.messageListPanelArea = panelArea;
 	};
 
 	@action setReplayMode = (flag: boolean) => {
@@ -489,9 +489,43 @@ export default class Store {
 	};
 
 	@action
+	replayMessage = async (message: ParsedMessageItem | ActMessageItem, index: number) => {
+		let result: MessageSendingResponse | ActSendingResponse | null = null;
+		switch (this.selectedSchemaType) {
+			case 'parsed-message': {
+				result = await api.sendMessage({
+					session: (message as ParsedMessageItem).sessionId,
+					dictionary: (message as ParsedMessageItem).dictionary,
+					messageType: (message as ParsedMessageItem).messageType,
+					message: JSON.parse((message as ParsedMessageItem).message as string),
+				});
+				if (index != null) {
+					this.changeIndicator(index, this.getIndicatorByResult(result.code));
+				}
+				// eslint-disable-next-line no-console
+				console.log(this.indicators.toString());
+				break;
+			}
+			case 'act': {
+				result = await api.callMethod({
+					fullServiceName: (message as ActMessageItem).fullServiceName,
+					methodName: (message as ActMessageItem).methodName,
+					message: JSON.parse((message as ActMessageItem).message as string),
+				});
+				if (index != null) {
+					this.changeIndicator(index, this.getIndicatorByResult(result.code));
+				}
+				// eslint-disable-next-line no-console
+				console.log(this.indicators.toString());
+				break;
+			}
+			default:
+		}
+	};
+
+	@action
 	sendMessage = async (
-		message: object | ParsedMessageItem | ActMessageItem,
-		index?: number,
+		message: object,
 	): Promise<MessageSendingResponse | null> => {
 		this.isSending = true;
 
@@ -499,77 +533,50 @@ export default class Store {
 
 		switch (this.selectedSchemaType) {
 			case 'parsed-message': {
-				if (this.isReplay) {
-					result = await api.sendMessage({
-						session: (message as ParsedMessageItem).sessionId,
-						dictionary: (message as ParsedMessageItem).dictionary,
-						messageType: (message as ParsedMessageItem).messageType,
-						message: JSON.parse((message as ParsedMessageItem).message as string),
-					});
-					if (index != null) {
-						this.changeIndicator(index, this.getIndicatorByResult(result.code));
-					}
-					// eslint-disable-next-line no-console
-					console.log(this.indicators.toString());
-				} else {
-					if (
-						!this.selectedDictionaryName
+				if (
+					!this.selectedDictionaryName
 						|| !this.selectedMessageType
 						|| !this.selectedSession
-					) {
-						this.isSending = false;
-						return null;
-					}
-
-					result = await api.sendMessage({
-						session: this.selectedSession,
-						dictionary: this.selectedDictionaryName,
-						messageType: this.selectedMessageType,
-						message,
-					});
-
-					this.addParsedMessage({
-						sessionId: this.selectedSession,
-						dictionary: this.selectedDictionaryName,
-						messageType: this.selectedMessageType,
-						message: JSON.stringify(message),
-						delay: 0,
-					});
+				) {
+					this.isSending = false;
+					return null;
 				}
+
+				result = await api.sendMessage({
+					session: this.selectedSession,
+					dictionary: this.selectedDictionaryName,
+					messageType: this.selectedMessageType,
+					message,
+				});
+
+				this.addParsedMessage({
+					sessionId: this.selectedSession,
+					dictionary: this.selectedDictionaryName,
+					messageType: this.selectedMessageType,
+					message: JSON.stringify(message),
+					delay: 0,
+				});
 				break;
 			}
 			case 'act': {
-				if (this.isReplay) {
-					result = await api.callMethod({
-						fullServiceName: (message as ActMessageItem).fullServiceName,
-						methodName: (message as ActMessageItem).methodName,
-						message: JSON.parse((message as ActMessageItem).message as string),
-					});
-					if (index != null) {
-						this.changeIndicator(index, this.getIndicatorByResult(result.code));
-					}
-					// eslint-disable-next-line no-console
-					console.log(this.indicators.toString());
-				} else {
-					if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) {
-						this.isSending = false;
-						return null;
-					}
-
-					result = await api.callMethod({
-						fullServiceName: this.selectedService,
-						methodName: this.selectedMethod.methodName,
-						message,
-					});
-
-					this.addParsedMessage({
-						actBox: this.selectedActBox,
-						fullServiceName: this.selectedService,
-						methodName: this.selectedMethod.methodName,
-						message: JSON.stringify(message),
-						delay: 0,
-					});
+				if (!this.selectedActBox || !this.selectedService || !this.selectedMethod) {
+					this.isSending = false;
+					return null;
 				}
+
+				result = await api.callMethod({
+					fullServiceName: this.selectedService,
+					methodName: this.selectedMethod.methodName,
+					message,
+				});
+
+				this.addParsedMessage({
+					actBox: this.selectedActBox,
+					fullServiceName: this.selectedService,
+					methodName: this.selectedMethod.methodName,
+					message: JSON.stringify(message),
+					delay: 0,
+				});
 				break;
 			}
 			default:

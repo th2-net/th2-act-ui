@@ -15,17 +15,13 @@
  ***************************************************************************** */
 @import './common/vars';
 
-.messageEditorChild {
-	height: 100%;
-	width: 50%;
-	margin-right: 20px;
-}
-
-.messageEditor {
-	@include display-flex-row;
+.messageEditAreaControls{
+	position: absolute;
+	bottom: 0px;
 }
 
 .messageEntity {
+	width: 200px;
 	cursor: pointer;
 }
 
