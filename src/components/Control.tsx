@@ -36,7 +36,7 @@ const Control = () => {
 					selected: store.selectedSession || '',
 					disabled: store.isSessionsLoading,
 					valid: store.isSchemaApplied ? !!store.selectedSession : true,
-					onChange: (opt: string) => store.setSelectedSession(opt),
+					onChange: (opt: string) => (store.selectedSession = opt),
 				},
 				{
 					label: 'Dictionary',
@@ -45,7 +45,7 @@ const Control = () => {
 					selected: store.selectedDictionaryName || '',
 					disabled: store.isSessionsLoading || store.isDictionariesLoading,
 					valid: store.isSchemaApplied ? !!store.selectedDictionaryName : true,
-					onChange: (opt: string) => store.setDictionaryName(opt),
+					onChange: (opt: string) => (store.selectedDictionaryName = opt),
 				},
 				{
 					label: 'Msg Type',
@@ -57,7 +57,7 @@ const Control = () => {
 						|| store.isDictionariesLoading
 						|| store.isDictionaryLoading,
 					valid: store.isSchemaApplied ? !!store.selectedMessageType : true,
-					onChange: (opt: string) => store.setSelectedMessageType(opt),
+					onChange: (opt: string) => (store.selectedMessageType = opt),
 				},
 			],
 		},
@@ -71,7 +71,7 @@ const Control = () => {
 					selected: store.selectedActBox || '',
 					disabled: store.isActsLoading,
 					valid: store.isSchemaApplied ? !!store.selectedActBox : true,
-					onChange: (opt: string) => store.setSelectedActBox(opt),
+					onChange: (opt: string) => (store.selectedActBox = opt),
 				},
 				{
 					label: 'Service',
@@ -80,7 +80,7 @@ const Control = () => {
 					selected: store.selectedService || '',
 					disabled: store.isActsLoading || store.isServicesLoading,
 					valid: store.isSchemaApplied ? !!store.selectedService : true,
-					onChange: (opt: string) => store.setSelectedService(opt),
+					onChange: (opt: string) => (store.selectedService = opt),
 				},
 				{
 					label: 'Method',

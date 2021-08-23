@@ -47,6 +47,28 @@ export interface ActMessageItem {
 	delay: number;
 }
 
+export function isParsedMessageItem(object: unknown): object is ParsedMessageItem {
+	return (
+		typeof (object as ParsedMessageItem).sessionId === 'string'
+		&& typeof (object as ParsedMessageItem).messageType === 'string'
+		&& typeof (object as ParsedMessageItem).dictionary === 'string'
+		&& typeof (object as ParsedMessageItem).delay === 'number'
+		&& (typeof (object as ParsedMessageItem).message === 'string'
+			|| typeof (object as ParsedMessageItem).message === 'object')
+	);
+}
+
+export function isActMessageItem(object: unknown): object is ActMessageItem {
+	return (
+		typeof (object as ActMessageItem).actBox === 'string'
+		&& typeof (object as ActMessageItem).fullServiceName === 'string'
+		&& typeof (object as ActMessageItem).methodName === 'string'
+		&& typeof (object as ActMessageItem).delay === 'number'
+		&& (typeof (object as ActMessageItem).message === 'string'
+			|| typeof (object as ActMessageItem).message === 'object')
+	);
+}
+
 interface EditMessageProps {
 	editMessageMode: boolean;
 	editedMessageIndex: number;
@@ -79,7 +101,7 @@ const Messages = () => {
 			}
 		} catch (error) {
 			// eslint-disable-next-line no-alert
-			alert('Could not read the file. Please, try to select another file');
+			alert('Failed to read the file. Please, try to select another file');
 		}
 	};
 
@@ -87,7 +109,7 @@ const Messages = () => {
 		if (switchValue) {
 			store.setEditMessageMode(false);
 			store.setReplayMode(true);
-			replaySendMessage(store.getCurrentMessagesArray(), 0);
+			replaySendMessage(store.getCurrentMessagesArray, 0);
 		} else {
 			store.setReplayMode(false);
 		}
@@ -96,25 +118,20 @@ const Messages = () => {
 	const replaySendMessage = (array: ParsedMessageItem[] | ActMessageItem[], index: number) => {
 		if (store.isReplay && array.length > 0 && index < array.length) {
 			setTimeout(() => {
-				store.replayMessage(array[index], index).then(
-					() => {
-						// eslint-disable-next-line no-param-reassign
-						index++;
-						if (index === array.length) {
-							store.setReplayMode(false);
-							setSwitchValue(false);
-						} else {
-							replaySendMessage(array, index);
-						}
-					},
-				);
+				store.replayMessage(array[index], index).then(() => {
+					if (index === array.length - 1) {
+						setSwitchValue(false);
+					} else {
+						replaySendMessage(array, index + 1);
+					}
+				});
 			}, array[index].delay);
 		}
 	};
 
 	const exportFn = () => {
 		downloadFile(
-			JSON.stringify(store.getCurrentMessagesArray()),
+			JSON.stringify(store.getCurrentMessagesArray),
 			store.selectedSchemaType === 'parsed-message' ? 'parsedMessages' : 'actMessages',
 			'application/json',
 		);
@@ -123,7 +140,7 @@ const Messages = () => {
 	return (
 		<div>
 			<MessageEditArea
-				messages={store.getCurrentMessagesArray()}
+				messages={store.getCurrentMessagesArray}
 				indicators={store.indicators.slice()}
 				editMessageMode={store.editMessageMode}
 				editedMessageIndex={store.editedMessageIndex}
@@ -131,7 +148,7 @@ const Messages = () => {
 				object={store.selectedDictionaryName}
 			/>
 
-			<div className="messageEditAreaControls">
+			<div className='messageEditAreaControls'>
 				<button
 					disabled={store.editMessageMode}
 					className='mainButton'
@@ -140,17 +157,26 @@ const Messages = () => {
 				</button>
 
 				<button
-					disabled={store.getCurrentMessagesArray().length === 0}
+					disabled={store.getCurrentMessagesArray.length === 0}
 					className='mainButton'
 					onClick={exportFn}>
 					Export
 				</button>
 
 				<button
-					disabled={store.editMessageMode || store.getCurrentMessagesArray().length === 0}
+					disabled={store.editMessageMode || store.getCurrentMessagesArray.length === 0}
 					className='mainButton'
-					onClick={() => { const nextValue = !switchValue; setSwitchValue(nextValue); }}>
-					{store.isReplay ? 'Stop' : 'Replay'}
+					onClick={() => {
+						const nextValue = !switchValue;
+						setSwitchValue(nextValue);
+					}}>
+					{store.isReplay ? (
+						<p>
+							<div className='spinner'></div>Stop
+						</p>
+					) : (
+						'Replay'
+					)}
 				</button>
 
 				<input
@@ -172,38 +198,39 @@ const Messages = () => {
 
 const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) => {
 	const store = useStore();
-	if (store.selectedSchemaType === 'parsed-message') {
+
+	if (store.selectedSchemaType === 'parsed-message' && isParsedMessageItem(props.message)) {
 		return (
 			<div className='messageEntity'>
 				<p>
 					<b>session: </b>
-					{(props.message as ParsedMessageItem).sessionId}
+					{props.message.sessionId}
 				</p>
 				<p>
 					<b>dictionary: </b>
-					{(props.message as ParsedMessageItem).dictionary}
+					{props.message.dictionary}
 				</p>
 				<p>
 					<b>messageType: </b>
-					{(props.message as ParsedMessageItem).messageType}
+					{props.message.messageType}
 				</p>
 			</div>
 		);
 	}
-	if (store.selectedSchemaType === 'act') {
+	if (store.selectedSchemaType === 'act' && isActMessageItem(props.message)) {
 		return (
 			<div>
 				<p>
 					<b>actBox: </b>
-					{(props.message as ActMessageItem).actBox}
+					{props.message.actBox}
 				</p>
 				<p>
 					<b>fullServiceName: </b>
-					{(props.message as ActMessageItem).fullServiceName}
+					{props.message.fullServiceName}
 				</p>
 				<p>
 					<b>methodName: </b>
-					{(props.message as ActMessageItem).methodName}
+					{props.message.methodName}
 				</p>
 			</div>
 		);
@@ -243,7 +270,9 @@ const MessageItem = ({
 						type='number'
 						defaultValue={message.delay || 0}
 						onChange={e => {
-							setDelay(e.target.value as unknown as number);
+							if (typeof e.target.value === 'number') {
+								setDelay(e.target.value);
+							}
 						}}></input>
 				) : (
 					message.delay
@@ -273,7 +302,7 @@ const MessageCardControls = ({
 	index,
 	indicator,
 }: MessageCardControlsProps) => (
-	<div className='cardItems'>
+	<div className='cardControls'>
 		<button
 			disabled={editMessageMode}
 			className='deleteButton'
@@ -288,7 +317,7 @@ const MessageCardControls = ({
 
 const Indicator = (props: { className: Indicator }) => (
 	<div>
-		<button className={props.className.toString()}></button>
+		<button className={props.className}></button>
 	</div>
 );
 
@@ -305,17 +334,16 @@ const MessageList = ({
 	const store = useStore();
 
 	const deleteMessage = (index: number) => {
-		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const newArray: any[] = [];
 
 		const tmpIndicators: Indicator[] = store.deleteIndicator(index);
-		store
-			.getCurrentMessagesArray()
-			.forEach((item: ParsedMessageItem | ActMessageItem, i: number) => {
+		store.getCurrentMessagesArray.forEach(
+			(item: ParsedMessageItem | ActMessageItem, i: number) => {
 				if (i !== index) {
 					newArray.push(item);
 				}
-			});
+			},
+		);
 		store.clearParsedMessages();
 		newArray.forEach((mess: ParsedMessageItem | ActMessageItem, i) => {
 			store.addParsedMessage(mess, tmpIndicators[i]);
