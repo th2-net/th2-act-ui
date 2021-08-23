@@ -13,4 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
- $splitterBarWidth: 32px;
+
+import * as React from 'react';
+import '../styles/splitter.scss';
+
+interface Props {
+	children: React.ReactNode;
+}
+
+const SplitViewPane = ({ children }: Props) => (
+	<div className='splitter-pane'>
+		<div className='splitter-pane__content'>{children}</div>
+	</div>
+);
+
+export default SplitViewPane;

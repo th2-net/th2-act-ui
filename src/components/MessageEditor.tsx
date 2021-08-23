@@ -114,6 +114,9 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 			});
 		} else {
 			setCode('{}');
+			if (store.editMessageMode) {
+				store.setEditorCode('{}');
+			}
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
 				schemas: [
@@ -127,12 +130,19 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 	}, [messageSchema]);
 
 	const onValueChange: ControlledEditorOnChange = (event, value) => {
-		setCode(value || '{}');
+		if (store.editMessageMode) {
+			store.setEditorCode(value || '{}');
+		} else {
+			setCode(value || '{}');
+		}
 	};
 
 	const initiateSchema = (message: JSONSchema4 | JSONSchema7) => {
 		const initialSchema = createInitialActMessage(message) || '{}';
 		setCode(initialSchema);
+		if (store.editMessageMode) {
+			store.setEditorCode(initialSchema);
+		}
 		store.setIsSchemaApplied(true);
 	};
 
@@ -153,11 +163,11 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 	);
 
 	return (
-		<div ref={rootRef} style={{ height: '100%' }}>
+		<div ref={rootRef}>
 			<ControlledEditor
 				height={editorHeight}
 				language='json'
-				value={code}
+				value={store.editMessageMode ? store.editorCode : code}
 				onChange={onValueChange}
 				editorDidMount={handleEditorDidMount}
 			/>

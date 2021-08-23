@@ -71,7 +71,6 @@ const api = {
 		console.error(messageResponse.statusText);
 		return null;
 	},
-
 	async sendMessage(request: MessageRequestModel): Promise<MessageSendingResponse> {
 		const { session, dictionary, messageType } = request;
 		const res = await fetch(

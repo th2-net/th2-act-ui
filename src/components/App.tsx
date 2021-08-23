@@ -26,9 +26,15 @@ import Control from './Control';
 import SplashScreen from './SplashScreen';
 import Store from '../stores/Store';
 import { MessageSendingResponse } from '../models/Message';
+import Messages from './MessageList';
+import '../styles/message-list.scss';
 
 const App = () => {
 	const store: Store = useStore();
+
+	React.useEffect(() => {
+		store.startApp();
+	}, []);
 
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
@@ -49,12 +55,19 @@ const App = () => {
 				<Control />
 				<div className='app__editor'>
 					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
+					<Messages />
 					{store.isSchemaLoading && <div className='overlay' />}
 				</div>
 				<div className='app__buttons'>
-					<Button onClick={sendMessage} disabled={!store.isSendingAllowed}>
-						<span>Send Message</span>
-						{store.isSending ? <SplashScreen /> : <i className='arrow-right-icon' />}
+					<Button
+						onClick={store.editMessageMode ? store.saveEditedMessage : sendMessage}
+						disabled={!store.isSendingAllowed}>
+						<span>{store.editMessageMode ? 'Save' : 'Send Message'}</span>
+						{store.isSending ? (
+							<SplashScreen />
+						) : (
+							<i className={store.editMessageMode ? '' : 'arrow-right-icon'} />
+						)}
 					</Button>
 				</div>
 				<div className='app__result'>

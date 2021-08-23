@@ -57,43 +57,45 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 		try {
 			// TODO: this is temporary hot fix, needs to be fixed
 			if (typeof obj === 'object' && obj !== null && 'eventId' in obj) {
-			 	eventId = (obj as ActSendingResponse | ParsedMessageSendingResponse).eventId;
-				workspaceState = eventId && typeof eventId === 'string' ? [
-					{
-						events: {
-							filter: {
-								attachedMessageId: {
-									type: 'string',
-									negative: false,
-									values: '',
+				eventId = (obj as ActSendingResponse | ParsedMessageSendingResponse).eventId;
+				workspaceState =					eventId && typeof eventId === 'string'
+					? [
+						{
+							events: {
+								filter: {
+									attachedMessageId: {
+										type: 'string',
+										negative: false,
+										values: '',
+									},
+									type: {
+										type: 'string[]',
+										values: [],
+										negative: false,
+									},
+									name: {
+										type: 'string[]',
+										values: [],
+										negative: false,
+									},
+									body: {
+										type: 'string[]',
+										values: [],
+										negative: false,
+									},
+									status: {
+										type: 'switcher',
+										values: 'any',
+									},
 								},
-								type: {
-									type: 'string[]',
-									values: [],
-									negative: false,
-								},
-								name: {
-									type: 'string[]',
-									values: [],
-									negative: false,
-								},
-								body: {
-									type: 'string[]',
-									values: [],
-									negative: false,
-								},
-								status: {
-									type: 'switcher',
-									values: 'any',
-								},
+								panelArea: 50,
+								selectedEventId: eventId,
+								flattenedListView: false,
 							},
-							panelArea: 50,
-							selectedEventId: eventId,
-							flattenedListView: false,
+							layout: [50, 50],
 						},
-						layout: [50, 50],
-					},
-				] : [];
+						  ]
+					: [];
 			}
 
 			const url = eventId
