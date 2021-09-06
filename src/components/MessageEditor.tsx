@@ -140,9 +140,6 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 	const initiateSchema = (message: JSONSchema4 | JSONSchema7) => {
 		const initialSchema = createInitialActMessage(message) || '{}';
 		setCode(initialSchema);
-		if (store.editMessageMode) {
-			store.setEditorCode(initialSchema);
-		}
 		store.setIsSchemaApplied(true);
 	};
 

@@ -15,59 +15,36 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
+import {
+	Droppable,
+	DroppableProvided,
+	DropResult,
+	DragDropContext,
+	Draggable,
+	DraggableProvided,
+	DraggableStateSnapshot,
+} from 'react-beautiful-dnd';
+import { nanoid } from '../../node_modules/nanoid';
 import { useStore } from '../hooks/useStore';
 import '../styles/message-list.scss';
 import '../styles/splitter.scss';
 import SplitView from '../split-view/SplitView';
 import SplitViewPane from '../split-view/SplitViewPane';
-import { nanoid } from '../../node_modules/nanoid';
 import { downloadFile } from '../helpers/downloadFile';
+import {
+	ParsedMessageItem,
+	ActMessageItem,
+	isParsedMessageItem,
+	isActMessageItem,
+} from '../models/Message';
 
 export type Indicator =
 	| 'indicator-unvisible'
 	| 'indicator-edited'
 	| 'indicator-successful'
 	| 'indicator-unsuccessful';
-
-export interface ParsedMessageItem {
-	sessionId: string;
-	dictionary: string;
-	messageType: string;
-	message: object | string;
-	delay: number;
-}
-
-export interface ActMessageItem {
-	actBox: string;
-	fullServiceName: string;
-	methodName: string;
-	message: object | string;
-	delay: number;
-}
-
-export function isParsedMessageItem(object: unknown): object is ParsedMessageItem {
-	return (
-		typeof (object as ParsedMessageItem).sessionId === 'string'
-		&& typeof (object as ParsedMessageItem).messageType === 'string'
-		&& typeof (object as ParsedMessageItem).dictionary === 'string'
-		&& typeof (object as ParsedMessageItem).delay === 'number'
-		&& (typeof (object as ParsedMessageItem).message === 'string'
-			|| typeof (object as ParsedMessageItem).message === 'object')
-	);
-}
-
-export function isActMessageItem(object: unknown): object is ActMessageItem {
-	return (
-		typeof (object as ActMessageItem).actBox === 'string'
-		&& typeof (object as ActMessageItem).fullServiceName === 'string'
-		&& typeof (object as ActMessageItem).methodName === 'string'
-		&& typeof (object as ActMessageItem).delay === 'number'
-		&& (typeof (object as ActMessageItem).message === 'string'
-			|| typeof (object as ActMessageItem).message === 'object')
-	);
-}
 
 interface EditMessageProps {
 	editMessageMode: boolean;
@@ -77,7 +54,8 @@ interface EditMessageProps {
 
 const Messages = () => {
 	const store = useStore();
-	const [switchValue, setSwitchValue] = useState(false);
+	const [isReplay, setReplayMode] = useState(false);
+	const isReplayRef = useRef(isReplay);
 
 	const loadFromFile = (file: FileList | null) => {
 		if (file != null) {
@@ -106,21 +84,19 @@ const Messages = () => {
 	};
 
 	useEffect(() => {
-		if (switchValue) {
+		isReplayRef.current = isReplay;
+		if (isReplay) {
 			store.setEditMessageMode(false);
-			store.setReplayMode(true);
 			replaySendMessage(store.getCurrentMessagesArray, 0);
-		} else {
-			store.setReplayMode(false);
 		}
-	}, [switchValue]);
+	}, [isReplay]);
 
 	const replaySendMessage = (array: ParsedMessageItem[] | ActMessageItem[], index: number) => {
-		if (store.isReplay && array.length > 0 && index < array.length) {
+		if (isReplayRef.current && array.length > 0 && index < array.length) {
 			setTimeout(() => {
 				store.replayMessage(array[index], index).then(() => {
 					if (index === array.length - 1) {
-						setSwitchValue(false);
+						setReplayMode(false);
 					} else {
 						replaySendMessage(array, index + 1);
 					}
@@ -167,13 +143,12 @@ const Messages = () => {
 					disabled={store.editMessageMode || store.getCurrentMessagesArray.length === 0}
 					className='mainButton'
 					onClick={() => {
-						const nextValue = !switchValue;
-						setSwitchValue(nextValue);
+						setReplayMode(!isReplay);
 					}}>
-					{store.isReplay ? (
-						<p>
+					{isReplay ? (
+						<div style={{ display: 'flex' }}>
 							<div className='spinner'></div>Stop
-						</p>
+						</div>
 					) : (
 						'Replay'
 					)}
@@ -186,9 +161,7 @@ const Messages = () => {
 					type='file'
 					accept='.json'
 					onChange={e => {
-						if (e != null) {
-							loadFromFile(e?.target.files);
-						}
+						loadFromFile(e.target.files);
 					}}
 				/>
 			</div>
@@ -197,9 +170,7 @@ const Messages = () => {
 };
 
 const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) => {
-	const store = useStore();
-
-	if (store.selectedSchemaType === 'parsed-message' && isParsedMessageItem(props.message)) {
+	if (isParsedMessageItem(props.message)) {
 		return (
 			<div className='messageEntity'>
 				<p>
@@ -217,7 +188,7 @@ const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) =
 			</div>
 		);
 	}
-	if (store.selectedSchemaType === 'act' && isActMessageItem(props.message)) {
+	if (isActMessageItem(props.message)) {
 		return (
 			<div>
 				<p>
@@ -235,7 +206,7 @@ const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) =
 			</div>
 		);
 	}
-	return <div></div>;
+	return null;
 };
 
 interface MessageItemProps extends EditMessageProps {
@@ -255,39 +226,42 @@ const MessageItem = ({
 	deleteMessage,
 	editMessageMode,
 	editedMessageIndex,
-}: MessageItemProps) => (
-	<div className='messageCard'>
-		<div
-			onClick={() => {
-				selectMessage(index);
-			}}>
-			<MessageEntity message={message} />
-			<p>
-				<b>delay: </b>
-				{editMessageMode && editedMessageIndex === index ? (
-					<input
-						className='delayInput'
-						type='number'
-						defaultValue={message.delay || 0}
-						onChange={e => {
-							if (typeof e.target.value === 'number') {
-								setDelay(e.target.value);
-							}
-						}}></input>
-				) : (
-					message.delay
-				)}
-				ms
-			</p>
+}: MessageItemProps) => {
+	const [delay, setDelayValue] = useState(message.delay.toString());
+	return (
+		<div className='messageCard'>
+			<div
+				onClick={() => {
+					selectMessage(index);
+				}}>
+				<MessageEntity message={message} />
+				<p>
+					<b>delay: </b>
+					{editMessageMode && editedMessageIndex === index ? (
+						<input
+							className='delayInput'
+							type='number'
+							value={delay}
+							onChange={e => {
+								setDelay(Number(e.target.value));
+								setDelayValue(e.target.value);
+							}}
+						/>
+					) : (
+						message.delay
+					)}
+					ms
+				</p>
+			</div>
+			<MessageCardControls
+				deleteMessage={deleteMessage}
+				editMessageMode={editMessageMode}
+				index={index}
+				indicator={indicators[index]}
+			/>
 		</div>
-		<MessageCardControls
-			deleteMessage={deleteMessage}
-			editMessageMode={editMessageMode}
-			index={index}
-			indicator={indicators[index]}
-		/>
-	</div>
-);
+	);
+};
 
 interface MessageCardControlsProps {
 	deleteMessage: (index: number) => void;
@@ -354,41 +328,105 @@ const MessageList = ({
 		store.setEditedMessageSendDelay(delay);
 	};
 
-	return (
-		<div className='scrolledBlock'>
-			<ul>
-				<li>
-					{editMessageMode ? (
-						<div
-							className={'normalNewMessage'}
-							onClick={() => {
-								store.setEditMessageMode(false);
-							}}>
-							New Message
-						</div>
-					) : null}
-				</li>
+	const dragEndHandler = (result: DropResult) => {
+		store.clearIndicators();
+		const { destination, source } = result;
+		if (!destination) {
+			return;
+		}
+		if (destination.droppableId === source.droppableId && destination.index === source.index) {
+			return;
+		}
+		store.reorderMessagesArray(destination.index, source.index, messages[source.index]);
+	};
 
-				{((messages as ParsedMessageItem[]) || (messages as ActMessageItem[])).map(
-					(item: ParsedMessageItem | ActMessageItem, index: number) => (
-						<li key={nanoid()} className='messageItem'>
-							<MessageItem
-								index={index}
-								message={item}
-								indicators={indicators}
-								editMessageMode={editMessageMode}
-								editedMessageIndex={editedMessageIndex}
-								selectMessage={store.selectMessage}
-								deleteMessage={deleteMessage}
-								setDelay={setDelay}
-							/>
-						</li>
-					),
-				)}
-			</ul>
-		</div>
+	return (
+		<DragDropContext onDragEnd={dragEndHandler}>
+			<div className='scrolledBlock'>
+				<Droppable droppableId='droppableId'>
+					{(provided: DroppableProvided) => (
+						<ul {...provided.droppableProps} ref={provided.innerRef}>
+							<li>
+								{editMessageMode ? (
+									<div
+										className={'normalNewMessage'}
+										onClick={() => {
+											store.setEditMessageMode(false);
+										}}>
+										New Message
+									</div>
+								) : null}
+							</li>
+							{(
+								(messages as ParsedMessageItem[]) || (messages as ActMessageItem[])
+							).map((item: ParsedMessageItem | ActMessageItem, index: number) => (
+								<DraggableMessageItem
+									key={item.id}
+									keyId={item.id || nanoid()}
+									index={index}
+									message={item}
+									indicators={indicators}
+									editMessageMode={editMessageMode}
+									editedMessageIndex={editedMessageIndex}
+									selectMessage={store.selectMessage}
+									deleteMessage={deleteMessage}
+									setDelay={setDelay}
+								/>
+							))}
+							{provided.placeholder}
+						</ul>
+					)}
+				</Droppable>
+			</div>
+		</DragDropContext>
 	);
 };
+
+interface DraggableMessageItemProps extends MessageItemProps {
+	keyId: string;
+}
+
+const DraggableMessageItem = ({
+	index,
+	message,
+	indicators,
+	selectMessage,
+	setDelay,
+	deleteMessage,
+	editMessageMode,
+	editedMessageIndex,
+	keyId,
+}: DraggableMessageItemProps) => (
+	<Draggable draggableId={keyId} index={index} key={keyId}>
+		{(prov: DraggableProvided, snapshot: DraggableStateSnapshot) => (
+			<li
+				{...prov.draggableProps}
+				ref={prov.innerRef}
+				key={keyId}
+				draggable={true}
+				className={snapshot.isDragging ? 'messageItemDragging' : 'messageItem'}>
+				<div className='message'>
+					<div className='handler'>
+						<div
+							style={{ visibility: editMessageMode ? 'hidden' : 'visible' }}
+							{...prov.dragHandleProps}
+							className='move'></div>
+					</div>
+					<MessageItem
+						index={index}
+						message={message}
+						indicators={indicators}
+						editMessageMode={editMessageMode}
+						editedMessageIndex={editedMessageIndex}
+						selectMessage={selectMessage}
+						deleteMessage={deleteMessage}
+						setDelay={setDelay}
+					/>
+				</div>
+			</li>
+		)}
+	</Draggable>
+);
 
 const EmbeddedEditor = (props: { schema: string; object: string }) => {
 	const url = `http://localhost:3000?schema=${props.schema}&${

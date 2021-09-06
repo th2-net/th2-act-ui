@@ -32,7 +32,7 @@ const Control = () => {
 				{
 					label: 'Session',
 					id: 'session',
-					options: store.sessions.sort(),
+					options: store.sessions.slice().sort(),
 					selected: store.selectedSession || '',
 					disabled: store.isSessionsLoading,
 					valid: store.isSchemaApplied ? !!store.selectedSession : true,
@@ -41,21 +41,21 @@ const Control = () => {
 				{
 					label: 'Dictionary',
 					id: 'dictionary',
-					options: store.dictionaries.sort(),
+					options: store.dictionaries.slice().sort(),
 					selected: store.selectedDictionaryName || '',
-					disabled: store.isSessionsLoading || store.isDictionariesLoading,
+					disabled: store.isSessionsLoading || store.isDictionariesLoading || store.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedDictionaryName : true,
 					onChange: (opt: string) => (store.selectedDictionaryName = opt),
 				},
 				{
 					label: 'Msg Type',
 					id: 'msg-type',
-					options: store.dictionary.sort(),
+					options: store.dictionary.slice().sort(),
 					selected: store.selectedMessageType || '',
 					disabled:
 						store.isSessionsLoading
 						|| store.isDictionariesLoading
-						|| store.isDictionaryLoading,
+						|| store.isDictionaryLoading || store.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedMessageType : true,
 					onChange: (opt: string) => (store.selectedMessageType = opt),
 				},
@@ -67,7 +67,7 @@ const Control = () => {
 				{
 					label: 'Act',
 					id: 'act',
-					options: store.acts.sort(),
+					options: store.acts.slice().sort(),
 					selected: store.selectedActBox || '',
 					disabled: store.isActsLoading,
 					valid: store.isSchemaApplied ? !!store.selectedActBox : true,
@@ -76,9 +76,9 @@ const Control = () => {
 				{
 					label: 'Service',
 					id: 'service',
-					options: store.services.sort(),
+					options: store.services.slice().sort(),
 					selected: store.selectedService || '',
-					disabled: store.isActsLoading || store.isServicesLoading,
+					disabled: store.isActsLoading || store.isServicesLoading || store.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedService : true,
 					onChange: (opt: string) => (store.selectedService = opt),
 				},
@@ -86,11 +86,12 @@ const Control = () => {
 					label: 'Method',
 					id: 'method',
 					options: store.serviceDetails
-						? store.serviceDetails.methods.map(method => method.methodName).sort()
+						? store.serviceDetails.methods.map(method => method.methodName).slice().sort()
 						: [],
 					selected: store.selectedMethod?.methodName || '',
 					disabled:
-						store.isActsLoading || store.isServicesLoading || store.isMethodsLoading,
+						store.isActsLoading || store.isServicesLoading || store.isMethodsLoading
+						|| store.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedMethod : true,
 					onChange: (methodName: string) => store.setSelectedMethod(methodName),
 				},
@@ -129,7 +130,7 @@ const Control = () => {
 						.selects.map(props => (
 							<React.Fragment key={props.id}>
 								<Select {...props} />
-								{props.disabled && <SplashScreen key='splash' />}
+								{(props.disabled && !store.editMessageMode) && <SplashScreen key='splash' />}
 							</React.Fragment>
 						))
 				}

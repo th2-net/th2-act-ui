@@ -14,19 +14,25 @@
  * limitations under the License.
  ***************************************************************************** */
 
-export const downloadFile = (content: string, filename: string, extension: string) => {
-	const file = new Blob([content], { type: extension });
+type localStorageKeys =
+	| 'parsedMessagesHistory'
+	| 'actMessagesHistory'
+	| 'selectedSessionId'
+	| 'selectedDictionaryName'
+	| 'editParsedMessageMode'
+	| 'editActMessageMode'
+	| 'selectedActBox'
+	| 'editedParsedMessageIndex'
+	| 'editedActMessageIndex'
+	| 'selectedService'
+	| 'selectedMessageType'
+	| 'selectedMethodName'
+	| 'selectedSchemaType';
 
-	if (window.navigator.msSaveOrOpenBlob) {
-		window.navigator.msSaveOrOpenBlob(file);
-	} else {
-		const a = document.createElement('a');
-		const url = URL.createObjectURL(file);
-		a.href = url;
-		a.download = filename;
-		document.body.appendChild(a);
-		a.click();
-		document.body.removeChild(a);
-		window.URL.revokeObjectURL(url);
-	}
-};
+export function setInLocalStorage(key: localStorageKeys, value: string) {
+	localStorage.setItem(key, value);
+}
+
+export function getFromLocalStorage(key: localStorageKeys): string | null {
+	return localStorage.getItem(key);
+}

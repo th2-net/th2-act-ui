@@ -19,18 +19,23 @@ import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import {
 	action, computed, observable, reaction, runInAction,
 } from 'mobx';
+import { useEffect } from 'react';
+import { nanoid } from '../../node_modules/nanoid';
 import api from '../api';
 import { SchemaType } from '../components/Control';
 import { Dictionary } from '../models/Dictionary';
-import { ActSendingResponse, MessageSendingResponse, ParsedMessage } from '../models/Message';
-import Service, { Method } from '../models/Service';
 import {
+	ActSendingResponse,
+	MessageSendingResponse,
+	ParsedMessage,
 	ParsedMessageItem,
 	ActMessageItem,
-	Indicator,
-	isActMessageItem,
 	isParsedMessageItem,
-} from '../components/MessageList';
+	isActMessageItem,
+} from '../models/Message';
+import Service, { Method } from '../models/Service';
+import { Indicator } from '../components/MessageList';
+import { setInLocalStorage, getFromLocalStorage } from '../helpers/localStorageManager';
 
 export default class Store {
 	@observable dictionaries: Array<string> = [];
@@ -85,8 +90,6 @@ export default class Store {
 
 	@observable actMessagesHistory: ActMessageItem[] = [];
 
-	@observable isReplay = false;
-
 	@observable indicators: Indicator[] = [];
 
 	@observable editorCode = '{}';
@@ -98,6 +101,30 @@ export default class Store {
 	@observable editedMessageSendDelay = 0;
 
 	@observable messageListPanelArea = 50;
+
+	@action clearIndicators = () => {
+		for (let i = 0; i < this.indicators.length; i++) {
+			this.indicators[i] = 'indicator-unvisible';
+		}
+	};
+
+	@action reorderMessagesArray = (
+		destinationIndex: number,
+		sourceIndex: number,
+		draggableMessage: ParsedMessageItem | ActMessageItem,
+	) => {
+		if (isParsedMessageItem(draggableMessage)) {
+			const parsedMessageHistoryCopy = this.parsedMessagesHistory.slice();
+			parsedMessageHistoryCopy.splice(sourceIndex, 1);
+			parsedMessageHistoryCopy.splice(destinationIndex, 0, draggableMessage);
+			this.parsedMessagesHistory = parsedMessageHistoryCopy;
+		} else if (isActMessageItem(draggableMessage)) {
+			const actMessagesHistoryCopy = this.actMessagesHistory.slice();
+			actMessagesHistoryCopy.splice(sourceIndex, 1);
+			actMessagesHistoryCopy.splice(destinationIndex, 0, draggableMessage);
+			this.actMessagesHistory = actMessagesHistoryCopy;
+		}
+	};
 
 	@action setSelectedMethod = (methodName: string | null) => {
 		if (this.selectedService) {
@@ -115,9 +142,9 @@ export default class Store {
 	@observable setEditedMessageIndex = (index: number) => {
 		this.editedMessageIndex = index;
 		if (this.selectedSchemaType === 'parsed-message') {
-			localStorage.setItem('editedParsedMessageIndex', index.toString());
+			setInLocalStorage('editedParsedMessageIndex', index.toString());
 		} else if (this.selectedSchemaType === 'act') {
-			localStorage.setItem('editedActMessageIndex', index.toString());
+			setInLocalStorage('editedActMessageIndex', index.toString());
 		}
 	};
 
@@ -153,8 +180,9 @@ export default class Store {
 
 	@action saveEditedMessage = () => {
 		if (this.editedMessageIndex >= 0) {
-			const message: ParsedMessageItem | ActMessageItem | undefined =				this.buildEditedMessage();
+			const message: ParsedMessageItem | ActMessageItem | undefined = this.buildEditedMessage();
 			if (message !== undefined) {
+				message.id = nanoid();
 				if (this.selectedSchemaType === 'parsed-message' && isParsedMessageItem(message)) {
 					this.parsedMessagesHistory[this.editedMessageIndex] = message;
 				} else if (this.selectedSchemaType === 'act' && isActMessageItem(message)) {
@@ -162,7 +190,6 @@ export default class Store {
 				}
 				this.indicators[this.editedMessageIndex] = 'indicator-edited';
 			}
-
 			this.setEditMessageMode(false);
 		}
 	};
@@ -173,9 +200,9 @@ export default class Store {
 			this.setEditedMessageIndex(-1);
 		}
 		if (this.selectedSchemaType === 'parsed-message') {
-			localStorage.setItem('editParsedMessageMode', mode.toString());
+			setInLocalStorage('editParsedMessageMode', mode.toString());
 		} else if (this.selectedSchemaType === 'act') {
-			localStorage.setItem('editActMessageMode', mode.toString());
+			setInLocalStorage('editActMessageMode', mode.toString());
 		}
 	};
 
@@ -195,7 +222,6 @@ export default class Store {
 				this.actMessagesHistory[index].message as string,
 			);
 		}
-
 		this.setEditMessageMode(true);
 		this.setEditedMessageIndex(index);
 	};
@@ -223,11 +249,6 @@ export default class Store {
 
 	@action setEditorCode = (code: string) => {
 		this.editorCode = code;
-	};
-
-	@action getIndicatorByResult = (code: number): Indicator => {
-		if (code === 200) return 'indicator-successful';
-		return 'indicator-unsuccessful';
 	};
 
 	@action addIndicator = (indicatorClass: Indicator) => {
@@ -260,19 +281,17 @@ export default class Store {
 		this.messageListPanelArea = panelArea;
 	};
 
-	@action setReplayMode = (flag: boolean) => {
-		this.isReplay = flag;
-	};
-
 	@action addParsedMessage = (
 		message: ParsedMessageItem | ActMessageItem,
 		indicatorClass?: Indicator,
 	) => {
 		this.addIndicator(indicatorClass || 'indicator-unvisible');
-		if (this.selectedSchemaType === 'parsed-message' && isParsedMessageItem(message)) {
-			this.parsedMessagesHistory.push(message);
-		} else if (this.selectedSchemaType === 'act' && isActMessageItem(message)) {
-			this.actMessagesHistory.push(message);
+		const messageWithId: ParsedMessageItem | ActMessageItem = message;
+		messageWithId.id = nanoid();
+		if (isParsedMessageItem(messageWithId)) {
+			this.parsedMessagesHistory.push(messageWithId);
+		} else if (isActMessageItem(messageWithId)) {
+			this.actMessagesHistory.push(messageWithId);
 		}
 	};
 
@@ -290,41 +309,44 @@ export default class Store {
 	};
 
 	@action startApp = () => {
-		const actMessageList = localStorage.getItem('actMessagesHistory')
-			? localStorage.getItem('actMessagesHistory')
-			: '';
+		const actMessageList = getFromLocalStorage('actMessagesHistory') || '';
 		localStorage.removeItem('actMessagesHistory');
 		this.actMessagesHistory = [];
 		if (actMessageList !== '') {
-			this.actMessagesHistory = JSON.parse(actMessageList as string);
+			JSON.parse(actMessageList).forEach((element: ActMessageItem) => {
+				this.addParsedMessage(element);
+			});
 		}
 
-		const parsedMessageList = localStorage.getItem('parsedMessagesHistory')
-			? localStorage.getItem('parsedMessagesHistory')
-			: '';
+		const parsedMessageList = getFromLocalStorage('parsedMessagesHistory') || '';
 		localStorage.removeItem('parsedMessagesHistory');
 		this.parsedMessagesHistory = [];
 		if (parsedMessageList !== '') {
-			this.parsedMessagesHistory = JSON.parse(parsedMessageList as string);
+			JSON.parse(parsedMessageList).forEach((element: ParsedMessageItem) => {
+				this.addParsedMessage(element);
+			});
 		}
-		this.selectedSession = localStorage.getItem('selectedSessionId');
-		this.selectedDictionaryName = localStorage.getItem('selectedDictionary');
-		this.selectedMessageType = localStorage.getItem('selectedMessageType');
-		this.selectedActBox = localStorage.getItem('selectedActBox');
-		this.selectedService = localStorage.getItem('selectedService');
-		this.setSelectedMethod(localStorage.getItem('selectedMethodName'));
+		this.selectedSession = getFromLocalStorage('selectedSessionId');
+		this.selectedDictionaryName = getFromLocalStorage('selectedDictionaryName');
+		this.selectedMessageType = getFromLocalStorage('selectedMessageType');
+		this.selectedActBox = getFromLocalStorage('selectedActBox');
+		this.selectedService = getFromLocalStorage('selectedService');
+		this.setSelectedMethod(getFromLocalStorage('selectedMethodName'));
 
 		this.setSelectedSchemaType(
-			localStorage.getItem('selectedSchemaType')
-				? (localStorage.getItem('selectedSchemaType') as SchemaType)
-				: this.selectedSchemaType,
+			(getFromLocalStorage('selectedSchemaType') as SchemaType) || this.selectedSchemaType,
 		);
 	};
 
 	constructor() {
-		this.getDictionaries();
+		let count = 0;
+		this.getDictionaries().then(() => count++);
 		this.getSessions();
 		this.getActs();
+
+		useEffect(() => {
+			this.startApp();
+		}, [this.dictionaries, this.sessions, this.acts]);
 
 		reaction(
 			() => this.selectedActBox,
@@ -338,7 +360,7 @@ export default class Store {
 					});
 				}
 				if (!this.editMessageMode) {
-					localStorage.setItem('selectedActBox', selectedActBox || '');
+					setInLocalStorage('selectedActBox', selectedActBox || '');
 				}
 			},
 		);
@@ -358,7 +380,7 @@ export default class Store {
 					this.selectedMethod = null;
 				}
 				if (!this.editMessageMode) {
-					localStorage.setItem('selectedService', selectedService || '');
+					setInLocalStorage('selectedService', selectedService || '');
 				}
 			},
 		);
@@ -370,7 +392,7 @@ export default class Store {
 					this.getActSchema(this.selectedService, selectedMethod.methodName);
 				}
 				if (!this.editMessageMode) {
-					localStorage.setItem('selectedMethodName', selectedMethod?.methodName || '');
+					setInLocalStorage('selectedMethodName', selectedMethod?.methodName || '');
 				}
 			},
 		);
@@ -379,7 +401,7 @@ export default class Store {
 			() => this.selectedSession,
 			selectedSession => {
 				if (!this.editMessageMode) {
-					localStorage.setItem('selectedSessionId', selectedSession || '');
+					setInLocalStorage('selectedSessionId', selectedSession || '');
 				}
 			},
 		);
@@ -391,7 +413,7 @@ export default class Store {
 					this.getDictionary(dictinonaryName);
 				}
 				if (!this.editMessageMode) {
-					localStorage.setItem('selectedDictionaryName', dictinonaryName || '');
+					setInLocalStorage('selectedDictionaryName', dictinonaryName || '');
 				}
 			},
 		);
@@ -405,7 +427,7 @@ export default class Store {
 					this.parsedMessage = null;
 				}
 				if (!this.editMessageMode) {
-					localStorage.setItem('selectedMessageType', messageType || '');
+					setInLocalStorage('selectedMessageType', messageType || '');
 				}
 			},
 		);
@@ -413,14 +435,14 @@ export default class Store {
 		reaction(
 			() => this.parsedMessagesHistory.slice(),
 			parsedMessageHistory => {
-				localStorage.setItem('parsedMessagesHistory', JSON.stringify(parsedMessageHistory));
+				setInLocalStorage('parsedMessagesHistory', JSON.stringify(parsedMessageHistory));
 			},
 		);
 
 		reaction(
 			() => this.actMessagesHistory.slice(),
 			actMessagesHistory => {
-				localStorage.setItem('actMessagesHistory', JSON.stringify(actMessagesHistory));
+				setInLocalStorage('actMessagesHistory', JSON.stringify(actMessagesHistory));
 			},
 		);
 	}
@@ -490,42 +512,34 @@ export default class Store {
 		this.isSessionsLoading = false;
 	};
 
-	@action
 	replayMessage = async (message: ParsedMessageItem | ActMessageItem, index: number) => {
 		let result: MessageSendingResponse | ActSendingResponse | null = null;
-		switch (this.selectedSchemaType) {
-			case 'parsed-message': {
-				if (isParsedMessageItem(message)) {
-					result = await api.sendMessage({
-						session: message.sessionId,
-						dictionary: message.dictionary,
-						messageType: message.messageType,
-						message: JSON.parse(message.message as string),
-					});
-					if (index != null) {
-						this.changeIndicator(index, this.getIndicatorByResult(result.code));
-					}
-					// eslint-disable-next-line no-console
-					console.log(this.indicators.toString());
-				}
-				break;
+		if (isParsedMessageItem(message)) {
+			result = await api.sendMessage({
+				session: message.sessionId,
+				dictionary: message.dictionary,
+				messageType: message.messageType,
+				message: JSON.parse(message.message as string),
+			});
+			if (index != null) {
+				this.changeIndicator(
+					index,
+					result.code === 200 ? 'indicator-successful' : 'indicator-unsuccessful',
+				);
 			}
-			case 'act': {
-				if (isActMessageItem(message)) {
-					result = await api.callMethod({
-						fullServiceName: message.fullServiceName,
-						methodName: message.methodName,
-						message: JSON.parse(message.message as string),
-					});
-					if (index != null) {
-						this.changeIndicator(index, this.getIndicatorByResult(result.code));
-					}
-					// eslint-disable-next-line no-console
-					console.log(this.indicators.toString());
-				}
-				break;
+		}
+		if (isActMessageItem(message)) {
+			result = await api.callMethod({
+				fullServiceName: message.fullServiceName,
+				methodName: message.methodName,
+				message: JSON.parse(message.message as string),
+			});
+			if (index != null) {
+				this.changeIndicator(
+					index,
+					result.code === 200 ? 'indicator-successful' : 'indicator-unsuccessful',
+				);
 			}
-			default:
 		}
 	};
 
@@ -638,7 +652,7 @@ export default class Store {
 	};
 
 	@action setSelectedSchemaType = (type: SchemaType) => {
-		localStorage.setItem('selectedSchemaType', type);
+		setInLocalStorage('selectedSchemaType', type);
 		this.indicators = [];
 		this.selectedSchemaType = type;
 		this.prepareForSelectedSchemaType(type);
@@ -650,20 +664,16 @@ export default class Store {
 			case 'parsed-message':
 				this.parsedMessagesHistory.forEach(() => this.addIndicator('indicator-unvisible'));
 
-				this.setEditMessageMode(localStorage.getItem('editParsedMessageMode') === 'true');
+				this.setEditMessageMode(getFromLocalStorage('editParsedMessageMode') === 'true');
 
-				this.editedMessageIndex = localStorage.getItem('editedParsedMessageIndex')
-					? (localStorage.getItem('editedParsedMessageIndex') as unknown as number)
-					: -1;
+				this.editedMessageIndex = Number(getFromLocalStorage('editedParsedMessageIndex')) || -1;
 				break;
 			case 'act':
 				this.actMessagesHistory.forEach(() => this.addIndicator('indicator-unvisible'));
 
-				this.setEditMessageMode(localStorage.getItem('editActMessageMode') === 'true');
+				this.setEditMessageMode(getFromLocalStorage('editActMessageMode') === 'true');
 
-				this.editedMessageIndex = localStorage.getItem('editedActMessageIndex')
-					? (localStorage.getItem('editedActMessageIndex') as unknown as number)
-					: -1;
+				this.editedMessageIndex = Number(getFromLocalStorage('editedActMessageIndex')) || -1;
 
 				break;
 			default:

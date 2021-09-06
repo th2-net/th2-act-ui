@@ -32,10 +32,6 @@ import '../styles/message-list.scss';
 const App = () => {
 	const store: Store = useStore();
 
-	React.useEffect(() => {
-		store.startApp();
-	}, []);
-
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
 	const messageEditorRef = React.useRef<MessageEditorMethods>(null);

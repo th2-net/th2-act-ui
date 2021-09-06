@@ -63,3 +63,37 @@ export interface ActSendingResponse {
 	fullServiceName: string;
 	responseMessage: string;
 }
+
+export interface ParsedMessageItem {
+	sessionId: string;
+	dictionary: string;
+	messageType: string;
+	message: object | string;
+	delay: number;
+	id?: string;
+}
+
+export interface ActMessageItem {
+	actBox: string;
+	fullServiceName: string;
+	methodName: string;
+	message: object | string;
+	delay: number;
+	id?: string;
+}
+
+export function isParsedMessageItem(object: unknown): object is ParsedMessageItem {
+	return (
+		typeof object === 'object'
+		&& object !== null
+		&& typeof (object as ParsedMessageItem).sessionId === 'string'
+	);
+}
+
+export function isActMessageItem(object: unknown): object is ActMessageItem {
+	return (
+		typeof object === 'object'
+		&& object !== null
+		&& typeof (object as ActMessageItem).actBox === 'string'
+	);
+}
