@@ -420,7 +420,7 @@ const MessageEditor = ({
 						lenses.push(
 							{
 								command: {
-									id: usedLens ? '' : 'vs.editor.ICodeEditor:1:GET_SCHEMA',
+									id: 'vs.editor.ICodeEditor:1:GET_SCHEMA',
 									title: usedLens ? usedLens.schemaName : 'Get Schema',
 									arguments: [range, marker.startLineNumber],
 								},
