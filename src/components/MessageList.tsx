@@ -33,6 +33,7 @@ import '../styles/splitter.scss';
 import SplitView from '../split-view/SplitView';
 import SplitViewPane from '../split-view/SplitViewPane';
 import { downloadFile } from '../helpers/downloadFile';
+import { reorderArray } from '../helpers/reorderArrayWithDragAndDrop';
 import {
 	ParsedMessageItem,
 	ActMessageItem,
@@ -339,7 +340,10 @@ const MessageList = ({
 		if (destination.droppableId === source.droppableId && destination.index === source.index) {
 			return;
 		}
-		messageListDataStore.reorderMessagesArray(destination.index, source.index, messages[source.index]);
+		const array = messageListDataStore.getCurrentMessagesArray;
+		reorderArray(destination.index,
+			source.index, messages[source.index],
+		 	{ array });
 	};
 
 	return (

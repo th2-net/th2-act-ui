@@ -30,7 +30,7 @@ import { Indicator } from '../components/MessageList';
 import { setInLocalStorage, getFromLocalStorage } from '../helpers/localStorageManager';
 
 export default class MessageListDataStore {
-    @observable parsedMessagesHistory: ParsedMessageItem[] = [];
+	@observable parsedMessagesHistory: ParsedMessageItem[] = [];
 
 	@observable actMessagesHistory: ActMessageItem[] = [];
 
@@ -38,91 +38,102 @@ export default class MessageListDataStore {
 
 	@observable editorCode = '{}';
 
-    @observable editMessageMode = false;
+	@observable editMessageMode = false;
 
 	@observable editedMessageIndex = -1;
 
 	@observable editedMessageSendDelay = 0;
 
-    buildEditedMessage = (): ParsedMessageItem | ActMessageItem | undefined => {
-    	if (this.store.selectedSchemaType === 'parsed-message') {
-    		if (this.store.selectedSession && this.store.selectedDictionaryName && this.store.selectedMessageType) {
-    			const editedMessage: ParsedMessageItem = {
-    				sessionId: this.store.selectedSession,
-    				dictionary: this.store.selectedDictionaryName,
-    				messageType: this.store.selectedMessageType,
-    				message: this.editorCode,
-    				delay: this.editedMessageSendDelay,
-    			};
-    			return editedMessage;
-    		}
-    		return undefined;
-    	}
-    	if (this.store.selectedSchemaType === 'act') {
-    		if (this.store.selectedActBox && this.store.selectedService && this.store.selectedMethod) {
-    			const editedMessage: ActMessageItem = {
-    				actBox: this.store.selectedActBox,
-    				fullServiceName: this.store.selectedService,
-    				methodName: this.store.selectedMethod?.methodName,
-    				message: this.editorCode,
-    				delay: this.editedMessageSendDelay,
-    			};
-    			return editedMessage;
-    		}
-    		return undefined;
-    	}
-    	return undefined;
-    };
+	buildEditedMessage = (): ParsedMessageItem | ActMessageItem | undefined => {
+		if (this.store.selectedSchemaType === 'parsed-message') {
+			if (
+				this.store.selectedSession
+				&& this.store.selectedDictionaryName
+				&& this.store.selectedMessageType
+			) {
+				const editedMessage: ParsedMessageItem = {
+					sessionId: this.store.selectedSession,
+					dictionary: this.store.selectedDictionaryName,
+					messageType: this.store.selectedMessageType,
+					message: this.editorCode,
+					delay: this.editedMessageSendDelay,
+				};
+				return editedMessage;
+			}
+			return undefined;
+		}
+		if (this.store.selectedSchemaType === 'act') {
+			if (
+				this.store.selectedActBox
+				&& this.store.selectedService
+				&& this.store.selectedMethod
+			) {
+				const editedMessage: ActMessageItem = {
+					actBox: this.store.selectedActBox,
+					fullServiceName: this.store.selectedService,
+					methodName: this.store.selectedMethod?.methodName,
+					message: this.editorCode,
+					delay: this.editedMessageSendDelay,
+				};
+				return editedMessage;
+			}
+			return undefined;
+		}
+		return undefined;
+	};
 
-    @action saveEditedMessage = () => {
-    	if (this.editedMessageIndex >= 0) {
-    		const message: ParsedMessageItem | ActMessageItem | undefined = this.buildEditedMessage();
-    		if (message !== undefined) {
-    			message.id = nanoid();
-    			if (this.store.selectedSchemaType === 'parsed-message' && isParsedMessageItem(message)) {
-    				this.parsedMessagesHistory[this.editedMessageIndex] = message;
-    			} else if (this.store.selectedSchemaType === 'act' && isActMessageItem(message)) {
-    				this.actMessagesHistory[this.editedMessageIndex] = message;
-    			}
-    			this.indicators[this.editedMessageIndex] = 'indicator-edited';
-    		}
-    		this.setEditMessageMode(false);
-    	}
-    };
+	@action saveEditedMessage = () => {
+		if (this.editedMessageIndex >= 0) {
+			const message: ParsedMessageItem | ActMessageItem | undefined = this.buildEditedMessage();
+			if (message !== undefined) {
+				message.id = nanoid();
+				if (
+					this.store.selectedSchemaType === 'parsed-message'
+					&& isParsedMessageItem(message)
+				) {
+					this.parsedMessagesHistory[this.editedMessageIndex] = message;
+				} else if (this.store.selectedSchemaType === 'act' && isActMessageItem(message)) {
+					this.actMessagesHistory[this.editedMessageIndex] = message;
+				}
+				this.indicators[this.editedMessageIndex] = 'indicator-edited';
+			}
+			this.setEditMessageMode(false);
+		}
+	};
 
-    @action selectMessage = (index: number) => {
-    	if (this.store.selectedSchemaType === 'parsed-message') {
-    		this.setEditorProperties(
-    			this.parsedMessagesHistory[index].sessionId,
-    			this.parsedMessagesHistory[index].dictionary,
-    			this.parsedMessagesHistory[index].messageType,
+	@action selectMessage = (index: number) => {
+		if (this.store.selectedSchemaType === 'parsed-message') {
+			this.setEditorProperties(
+				this.parsedMessagesHistory[index].sessionId,
+				this.parsedMessagesHistory[index].dictionary,
+				this.parsedMessagesHistory[index].messageType,
 				this.parsedMessagesHistory[index].message as string,
-    		);
-    	} else if (this.store.selectedSchemaType === 'act') {
-    		this.setEditorProperties(
-    			this.actMessagesHistory[index].actBox,
-    			this.actMessagesHistory[index].fullServiceName,
-    			this.actMessagesHistory[index].methodName,
+			);
+		} else if (this.store.selectedSchemaType === 'act') {
+			this.setEditorProperties(
+				this.actMessagesHistory[index].actBox,
+				this.actMessagesHistory[index].fullServiceName,
+				this.actMessagesHistory[index].methodName,
 				this.actMessagesHistory[index].message as string,
-    		);
-    	}
-    	this.setEditMessageMode(true);
-    	this.setEditedMessageIndex(index);
-    };
+			);
+		}
+		this.setEditMessageMode(true);
+		this.setEditedMessageIndex(index);
+	};
 
-    @action addParsedMessage = (
-    	message: ParsedMessageItem | ActMessageItem,
-    	indicatorClass?: Indicator,
-    ) => {
-    	this.addIndicator(indicatorClass || 'indicator-unvisible');
-    	const messageWithId: ParsedMessageItem | ActMessageItem = message;
-    	messageWithId.id = nanoid();
-    	if (isParsedMessageItem(messageWithId)) {
-    		this.parsedMessagesHistory.push(messageWithId);
-    	} else if (isActMessageItem(messageWithId)) {
-    		this.actMessagesHistory.push(messageWithId);
-    	}
-    };
+	@action addParsedMessage = (
+		message: ParsedMessageItem | ActMessageItem,
+		indicatorClass?: Indicator,
+	) => {
+		this.addIndicator(indicatorClass || 'indicator-unvisible');
+		const messageWithId: ParsedMessageItem | ActMessageItem = message;
+		messageWithId.id = nanoid();
+		if (isParsedMessageItem(messageWithId)) {
+			this.parsedMessagesHistory.push(messageWithId);
+		} else if (isActMessageItem(messageWithId)) {
+			this.actMessagesHistory.push(messageWithId);
+		}
+	};
 
 	@action clearParsedMessages = () => {
 		if (this.store.selectedSchemaType === 'parsed-message') {
@@ -137,27 +148,9 @@ export default class MessageListDataStore {
 		}
 	};
 
-    @action reorderMessagesArray = (
-    	destinationIndex: number,
-    	sourceIndex: number,
-    	draggableMessage: ParsedMessageItem | ActMessageItem,
-    ) => {
-    	if (isParsedMessageItem(draggableMessage)) {
-    		const parsedMessageHistoryCopy = this.parsedMessagesHistory.slice();
-    		parsedMessageHistoryCopy.splice(sourceIndex, 1);
-    		parsedMessageHistoryCopy.splice(destinationIndex, 0, draggableMessage);
-    		this.parsedMessagesHistory = parsedMessageHistoryCopy;
-    	} else if (isActMessageItem(draggableMessage)) {
-    		const actMessagesHistoryCopy = this.actMessagesHistory.slice();
-    		actMessagesHistoryCopy.splice(sourceIndex, 1);
-    		actMessagesHistoryCopy.splice(destinationIndex, 0, draggableMessage);
-    		this.actMessagesHistory = actMessagesHistoryCopy;
-    	}
-    };
-
-    @action setEditorCode = (code: string) => {
-    	this.editorCode = code;
-    };
+	@action setEditorCode = (code: string) => {
+		this.editorCode = code;
+	};
 
 	setEditorProperties = (
 		sessionOrActBox: string | null,
@@ -180,15 +173,15 @@ export default class MessageListDataStore {
 		}
 	};
 
-    @action clearIndicators = () => {
-    	for (let i = 0; i < this.indicators.length; i++) {
-    		this.indicators[i] = 'indicator-unvisible';
-    	}
-    };
+	@action clearIndicators = () => {
+		for (let i = 0; i < this.indicators.length; i++) {
+			this.indicators[i] = 'indicator-unvisible';
+		}
+	};
 
-    @action addIndicator = (indicatorClass: Indicator) => {
-    	this.indicators.push(indicatorClass);
-    };
+	@action addIndicator = (indicatorClass: Indicator) => {
+		this.indicators.push(indicatorClass);
+	};
 
 	@action changeIndicator = (index: number, indicatorClass: Indicator) => {
 		this.indicators[index] = indicatorClass;
@@ -205,9 +198,9 @@ export default class MessageListDataStore {
 		return this.indicators;
 	};
 
-    @action setEditedMessageSendDelay = (delay: number) => {
-    	this.editedMessageSendDelay = delay;
-    };
+	@action setEditedMessageSendDelay = (delay: number) => {
+		this.editedMessageSendDelay = delay;
+	};
 
 	@observable setEditedMessageIndex = (index: number) => {
 		this.editedMessageIndex = index;
@@ -218,61 +211,59 @@ export default class MessageListDataStore {
 		}
 	};
 
-    @action setEditMessageMode = (mode: boolean) => {
-    	this.editMessageMode = mode;
-    	if (mode === false) {
-    		this.setEditedMessageIndex(-1);
-    	}
-    	if (this.store.selectedSchemaType === 'parsed-message') {
-    		setInLocalStorage('editParsedMessageMode', mode.toString());
-    	} else if (this.store.selectedSchemaType === 'act') {
-    		setInLocalStorage('editActMessageMode', mode.toString());
-    	}
-    };
+	@action setEditMessageMode = (mode: boolean) => {
+		this.editMessageMode = mode;
+		if (mode === false) {
+			this.setEditedMessageIndex(-1);
+		}
+		if (this.store.selectedSchemaType === 'parsed-message') {
+			setInLocalStorage('editParsedMessageMode', mode.toString());
+		} else if (this.store.selectedSchemaType === 'act') {
+			setInLocalStorage('editActMessageMode', mode.toString());
+		}
+	};
 
-    prepareForSelectedSchemaType = (type: SchemaType) => {
-    	switch (type) {
-    		case 'parsed-message':
-    			this.parsedMessagesHistory.forEach(() =>
-    				this.addIndicator('indicator-unvisible'));
+	prepareForSelectedSchemaType = (type: SchemaType) => {
+		switch (type) {
+			case 'parsed-message':
+				this.parsedMessagesHistory.forEach(() => this.addIndicator('indicator-unvisible'));
 
-    			this.setEditMessageMode(getFromLocalStorage('editParsedMessageMode') === 'true');
+				this.setEditMessageMode(getFromLocalStorage('editParsedMessageMode') === 'true');
 
-    			this.editedMessageIndex = Number(getFromLocalStorage('editedParsedMessageIndex')) || -1;
-    			break;
-    		case 'act':
-    			this.actMessagesHistory.forEach(() =>
-    				this.addIndicator('indicator-unvisible'));
+				this.editedMessageIndex = Number(getFromLocalStorage('editedParsedMessageIndex')) || -1;
+				break;
+			case 'act':
+				this.actMessagesHistory.forEach(() => this.addIndicator('indicator-unvisible'));
 
-    			this.setEditMessageMode(getFromLocalStorage('editActMessageMode') === 'true');
+				this.setEditMessageMode(getFromLocalStorage('editActMessageMode') === 'true');
 
-    			this.editedMessageIndex = Number(getFromLocalStorage('editedActMessageIndex')) || -1;
+				this.editedMessageIndex = Number(getFromLocalStorage('editedActMessageIndex')) || -1;
 
-    			break;
-    		default:
-    			throw new Error('');
-    	}
-    };
+				break;
+			default:
+				throw new Error('');
+		}
+	};
 
-    @computed get getCurrentMessagesArray() {
-    	return this.store.selectedSchemaType === 'parsed-message'
-    		? this.parsedMessagesHistory
-    		: this.actMessagesHistory;
-    }
+	@computed get getCurrentMessagesArray() {
+		return this.store.selectedSchemaType === 'parsed-message'
+			? this.parsedMessagesHistory
+			: this.actMessagesHistory;
+	}
 
-    constructor(private store: Store) {
-    	reaction(
-    		() => this.parsedMessagesHistory.slice(),
-    		parsedMessageHistory => {
-    			setInLocalStorage('parsedMessagesHistory', JSON.stringify(parsedMessageHistory));
-    		},
-    	);
+	constructor(private store: Store) {
+		reaction(
+			() => this.parsedMessagesHistory.slice(),
+			parsedMessageHistory => {
+				setInLocalStorage('parsedMessagesHistory', JSON.stringify(parsedMessageHistory));
+			},
+		);
 
-    	reaction(
-    		() => this.actMessagesHistory.slice(),
-    		actMessagesHistory => {
-    			setInLocalStorage('actMessagesHistory', JSON.stringify(actMessagesHistory));
-    		},
-    	);
-    }
+		reaction(
+			() => this.actMessagesHistory.slice(),
+			actMessagesHistory => {
+				setInLocalStorage('actMessagesHistory', JSON.stringify(actMessagesHistory));
+			},
+		);
+	}
 }
