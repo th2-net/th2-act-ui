@@ -29,12 +29,16 @@ import * as monacoEditor from 'monaco-editor';
 import { toJS } from 'mobx';
 import { createInitialActMessage } from '../helpers/schema';
 import { useStore } from '../hooks/useStore';
+// eslint-disable-next-line import/named
+import { UsedLens } from './App';
 import api from '../api';
 import { ModalPortal } from './Portal';
 import GetSchemaModal from './GetSchemaModal';
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
+	usedLenses: UsedLens[];
+	setUsedLenses: (lenses: UsedLens[]) => void;
 }
 
 export interface MessageEditorMethods {
@@ -49,7 +53,10 @@ export type UntypedField = {
 	ref?: string;
 };
 
-const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
+const MessageEditor = ({
+	messageSchema,
+	usedLenses,
+}: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const store = useStore();
 
 	const monacoRef = React.useRef<Monaco>();
@@ -63,6 +70,7 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 	const [isOpen, setIsOpen] = React.useState(false);
 	const [objectPath, setObjectPath] = React.useState('');
 	const [cursorPosition, setCursorPosition] = React.useState<monacoEditor.IPosition>();
+	const [numberLastUsedLense, setNumberLastUsedLense] = React.useState<number>();
 
 	const handleEditorDidMount: OnMount = (editor, monaco) => {
 		editorRef.current = editor;
@@ -95,6 +103,7 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 		if (actionsDispose) actionsDispose.dispose();
 		if (lensesDispose) lensesDispose.dispose();
 		untypedDefinitions.splice(0, untypedDefinitions.length);
+		usedLenses.splice(0, usedLenses.length);
 		if (!monacoRef.current) return;
 		if (messageSchema) {
 			const schema = toJS(messageSchema);
@@ -187,7 +196,7 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 				let filledMessage: object | null;
 				try {
 					filledMessage = JSON.parse(code);
-				} catch {
+				} catch (e) {
 					filledMessage = null;
 				}
 				return filledMessage;
@@ -200,7 +209,8 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 		id: 'GET_SCHEMA',
 		label: 'Get additional schema',
 		title: 'Getting additional schema',
-		run: (editor: monacoEditor.editor.ICodeEditor, range: monacoEditor.IRange) => getSchemaDialog(range, editor),
+		run: (editor: monacoEditor.editor.ICodeEditor, range: monacoEditor.IRange, numberLineLense: number) =>
+			getSchemaDialog(range, editor, numberLineLense),
 		contextMenuOrder: 1,
 		contextMenuGroupId: '1_modification',
 	};
@@ -262,7 +272,11 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 		return { path, position };
 	};
 
-	const getSchemaDialog = async (range?: monacoEditor.IRange, editor?: monacoEditor.editor.ICodeEditor) => {
+	const getSchemaDialog = async (
+		range?: monacoEditor.IRange,
+		editor?: monacoEditor.editor.ICodeEditor,
+		numberLineLense?: number,
+	) => {
 		const nestingAndPosition = range && editor
 			? getPathByRange({ lineNumber: range.startLineNumber, column: range.startColumn }, editor)
 			: getPathByCursor();
@@ -270,6 +284,7 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 		setObjectPath(path);
 		setCursorPosition(position);
 		setIsOpen(true);
+		setNumberLastUsedLense(numberLineLense);
 	};
 
 	const onSelectHandler = async (value: string) => {
@@ -281,6 +296,10 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 			if (monacoRef.current?.languages.json.jsonDefaults.diagnosticsOptions.schemas && cursorPosition) {
 				const schema = monacoRef.current?.languages.json.jsonDefaults.diagnosticsOptions.schemas[0].schema;
 				updateSchema(additionalSchema[messageType], schema);
+			}
+			if (numberLastUsedLense) {
+				usedLenses.push({ lineNumber: numberLastUsedLense, schemaName: value });
+				setNumberLastUsedLense(undefined);
 			}
 		}
 	};
@@ -302,7 +321,6 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 		if (lines && initialAdditionsSchema && cursorPosition) {
 			lines[cursorPosition.lineNumber - 1] = lines[cursorPosition.lineNumber - 1].replace(/},*/, '');
 			initialAdditionsSchema.splice(0, 1);
-			initialAdditionsSchema[initialAdditionsSchema.length - 1] += ',';
 			lines.splice(cursorPosition.lineNumber, 0, ...initialAdditionsSchema);
 			const newValue = lines.join('\n');
 			editorRef.current?.getModel()?.setValue(newValue);
@@ -398,12 +416,13 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 							marker.endLineNumber,
 							marker.endColumn,
 						);
+						const usedLens = usedLenses.find(used => used.lineNumber === marker.startLineNumber);
 						lenses.push(
 							{
 								command: {
-									id: 'vs.editor.ICodeEditor:1:GET_SCHEMA',
-									title: 'Get schema',
-									arguments: [range],
+									id: usedLens ? '' : 'vs.editor.ICodeEditor:1:GET_SCHEMA',
+									title: usedLens ? usedLens.schemaName : 'Get Schema',
+									arguments: [range, marker.startLineNumber],
 								},
 								id: marker.startLineNumber.toString(),
 								range,

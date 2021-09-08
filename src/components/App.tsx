@@ -15,6 +15,8 @@
  ***************************************************************************** */
 
 import { hot } from 'react-hot-loader/root';
+// eslint-disable-next-line import/no-unresolved
+import { languages } from 'monaco-editor';
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
 import Result from './Result';
@@ -27,10 +29,17 @@ import SplashScreen from './SplashScreen';
 import Store from '../stores/Store';
 import { MessageSendingResponse } from '../models/Message';
 
+export type UsedLens = {
+	lineNumber: number;
+	schemaName: string;
+};
+
 const App = () => {
 	const store: Store = useStore();
 
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
+
+	const [usedLenses, setUsedLenses] = React.useState<UsedLens[]>([]);
 
 	const messageEditorRef = React.useRef<MessageEditorMethods>(null);
 
@@ -53,6 +62,8 @@ const App = () => {
 					<MessageEditor
 						messageSchema={messageSchema}
 						ref={messageEditorRef}
+						usedLenses={usedLenses}
+						setUsedLenses={setUsedLenses}
 					/>
 					{store.isSchemaLoading && <div className='overlay' />}
 				</div>
