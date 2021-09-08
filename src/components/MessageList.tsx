@@ -54,6 +54,7 @@ interface EditMessageProps {
 
 const Messages = () => {
 	const store = useStore();
+	const messageListDataStore = store.messageListDataStore;
 	const [isReplay, setReplayMode] = useState(false);
 	const isReplayRef = useRef(isReplay);
 
@@ -72,10 +73,10 @@ const Messages = () => {
 	const jsonMessagesFromString = (rawFromFile: string) => {
 		try {
 			const json = JSON.parse(rawFromFile);
-			store.clearParsedMessages();
+			messageListDataStore.clearParsedMessages();
 
 			for (let i = 0; i < json.length; i++) {
-				store.addParsedMessage(json[i]);
+				messageListDataStore.addParsedMessage(json[i]);
 			}
 		} catch (error) {
 			// eslint-disable-next-line no-alert
@@ -86,8 +87,8 @@ const Messages = () => {
 	useEffect(() => {
 		isReplayRef.current = isReplay;
 		if (isReplay) {
-			store.setEditMessageMode(false);
-			replaySendMessage(store.getCurrentMessagesArray, 0);
+			messageListDataStore.setEditMessageMode(false);
+			replaySendMessage(messageListDataStore.getCurrentMessagesArray, 0);
 		}
 	}, [isReplay]);
 
@@ -107,7 +108,7 @@ const Messages = () => {
 
 	const exportFn = () => {
 		downloadFile(
-			JSON.stringify(store.getCurrentMessagesArray),
+			JSON.stringify(messageListDataStore.getCurrentMessagesArray),
 			store.selectedSchemaType === 'parsed-message' ? 'parsedMessages' : 'actMessages',
 			'application/json',
 		);
@@ -116,31 +117,32 @@ const Messages = () => {
 	return (
 		<div>
 			<MessageEditArea
-				messages={store.getCurrentMessagesArray}
-				indicators={store.indicators.slice()}
-				editMessageMode={store.editMessageMode}
-				editedMessageIndex={store.editedMessageIndex}
-				messageListPanelArea={store.messageListPanelArea}
+				messages={messageListDataStore.getCurrentMessagesArray}
+				indicators={messageListDataStore.indicators.slice()}
+				editMessageMode={messageListDataStore.editMessageMode}
+				editedMessageIndex={messageListDataStore.editedMessageIndex}
+				messageListPanelArea={50}
 				object={store.selectedDictionaryName}
 			/>
 
 			<div className='messageEditAreaControls'>
 				<button
-					disabled={store.editMessageMode}
+					disabled={messageListDataStore.editMessageMode}
 					className='mainButton'
-					onClick={store.clearParsedMessages}>
+					onClick={messageListDataStore.clearParsedMessages}>
 					Clear
 				</button>
 
 				<button
-					disabled={store.getCurrentMessagesArray.length === 0}
+					disabled={messageListDataStore.getCurrentMessagesArray.length === 0}
 					className='mainButton'
 					onClick={exportFn}>
 					Export
 				</button>
 
 				<button
-					disabled={store.editMessageMode || store.getCurrentMessagesArray.length === 0}
+					disabled={messageListDataStore.editMessageMode
+						|| messageListDataStore.getCurrentMessagesArray.length === 0}
 					className='mainButton'
 					onClick={() => {
 						setReplayMode(!isReplay);
@@ -155,7 +157,7 @@ const Messages = () => {
 				</button>
 
 				<input
-					disabled={store.editMessageMode}
+					disabled={messageListDataStore.editMessageMode}
 					value=''
 					id='file'
 					type='file'
@@ -305,31 +307,31 @@ const MessageList = ({
 	editMessageMode,
 	editedMessageIndex,
 }: MessageListProps) => {
-	const store = useStore();
+	const messageListDataStore = useStore().messageListDataStore;
 
 	const deleteMessage = (index: number) => {
 		const newArray: any[] = [];
 
-		const tmpIndicators: Indicator[] = store.deleteIndicator(index);
-		store.getCurrentMessagesArray.forEach(
+		const tmpIndicators: Indicator[] = messageListDataStore.deleteIndicator(index);
+		messageListDataStore.getCurrentMessagesArray.forEach(
 			(item: ParsedMessageItem | ActMessageItem, i: number) => {
 				if (i !== index) {
 					newArray.push(item);
 				}
 			},
 		);
-		store.clearParsedMessages();
+		messageListDataStore.clearParsedMessages();
 		newArray.forEach((mess: ParsedMessageItem | ActMessageItem, i) => {
-			store.addParsedMessage(mess, tmpIndicators[i]);
+			messageListDataStore.addParsedMessage(mess, tmpIndicators[i]);
 		});
 	};
 
 	const setDelay = (delay: number) => {
-		store.setEditedMessageSendDelay(delay);
+		messageListDataStore.setEditedMessageSendDelay(delay);
 	};
 
 	const dragEndHandler = (result: DropResult) => {
-		store.clearIndicators();
+		messageListDataStore.clearIndicators();
 		const { destination, source } = result;
 		if (!destination) {
 			return;
@@ -337,7 +339,7 @@ const MessageList = ({
 		if (destination.droppableId === source.droppableId && destination.index === source.index) {
 			return;
 		}
-		store.reorderMessagesArray(destination.index, source.index, messages[source.index]);
+		messageListDataStore.reorderMessagesArray(destination.index, source.index, messages[source.index]);
 	};
 
 	return (
@@ -351,7 +353,7 @@ const MessageList = ({
 									<div
 										className={'normalNewMessage'}
 										onClick={() => {
-											store.setEditMessageMode(false);
+											messageListDataStore.setEditMessageMode(false);
 										}}>
 										New Message
 									</div>
@@ -368,7 +370,7 @@ const MessageList = ({
 									indicators={indicators}
 									editMessageMode={editMessageMode}
 									editedMessageIndex={editedMessageIndex}
-									selectMessage={store.selectMessage}
+									selectMessage={messageListDataStore.selectMessage}
 									deleteMessage={deleteMessage}
 									setDelay={setDelay}
 								/>
@@ -454,10 +456,11 @@ const MessageEditArea = ({
 	object,
 }: MessageEditAreaProps) => {
 	const store = useStore();
+	const [panelArea, setPanelArea] = useState(messageListPanelArea);
 	return (
 		<div className='messageEditArea'>
 			{store.selectedSchemaType === 'parsed-message' ? (
-				<SplitView panelArea={messageListPanelArea} onPanelAreaChange={store.setPanelArea}>
+				<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
 					<SplitViewPane>
 						<MessageList
 							messages={messages}

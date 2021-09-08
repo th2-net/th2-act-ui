@@ -31,6 +31,7 @@ import '../styles/message-list.scss';
 
 const App = () => {
 	const store: Store = useStore();
+	const messageListDataStore = store.messageListDataStore;
 
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
@@ -56,13 +57,14 @@ const App = () => {
 				</div>
 				<div className='app__buttons'>
 					<Button
-						onClick={store.editMessageMode ? store.saveEditedMessage : sendMessage}
+						onClick={messageListDataStore.editMessageMode
+							 ? messageListDataStore.saveEditedMessage : sendMessage}
 						disabled={!store.isSendingAllowed}>
-						<span>{store.editMessageMode ? 'Save' : 'Send Message'}</span>
+						<span>{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}</span>
 						{store.isSending ? (
 							<SplashScreen />
 						) : (
-							<i className={store.editMessageMode ? '' : 'arrow-right-icon'} />
+							<i className={messageListDataStore.editMessageMode ? '' : 'arrow-right-icon'} />
 						)}
 					</Button>
 				</div>
