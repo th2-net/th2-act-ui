@@ -19,13 +19,13 @@ export const reorderArray = (
 	destinationIndex: number,
 	sourceIndex: number,
 	draggableMessage: any,
-	model: {array: any[]},
+	sourceArray: {array: any[]},
 ) => {
-	const arrayCopy = model.array.slice();
+	const arrayCopy = sourceArray.array.slice();
 	arrayCopy.splice(sourceIndex, 1);
 	arrayCopy.splice(destinationIndex, 0, draggableMessage);
 	for (let i = 0; i < arrayCopy.length; i++) {
 		// eslint-disable-next-line no-param-reassign
-		model.array[i] = arrayCopy[i];
+		sourceArray.array[i] = arrayCopy[i];
 	}
 };

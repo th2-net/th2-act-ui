@@ -26,7 +26,7 @@ import Control from './Control';
 import SplashScreen from './SplashScreen';
 import Store from '../stores/Store';
 import { MessageSendingResponse } from '../models/Message';
-import Messages from './MessageList';
+import MessageHistory from './MessageHistory';
 import '../styles/message-list.scss';
 
 const App = () => {
@@ -52,7 +52,7 @@ const App = () => {
 				<Control />
 				<div className='app__editor'>
 					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
-					<Messages />
+					<MessageHistory />
 					{store.isSchemaLoading && <div className='overlay' />}
 				</div>
 				<div className='app__buttons'>

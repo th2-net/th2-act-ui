@@ -19,7 +19,6 @@ import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import {
 	action, computed, observable, reaction, runInAction,
 } from 'mobx';
-import { useEffect } from 'react';
 import api from '../api';
 import { SchemaType } from '../components/Control';
 import { Dictionary } from '../models/Dictionary';
@@ -126,14 +125,14 @@ export default class Store {
 		);
 	};
 
-	constructor() {
+	prepareApp = async () => {
 		this.getDictionaries();
 		this.getSessions();
 		this.getActs();
+	};
 
-		useEffect(() => {
-			this.startApp();
-		}, [this.dictionaries, this.sessions, this.acts]);
+	constructor() {
+		this.prepareApp().then(this.startApp);
 
 		reaction(
 			() => this.selectedActBox,
