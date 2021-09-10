@@ -260,7 +260,7 @@ export default class Store {
 			if (message === null) {
 				localStorage.removeItem('selectedMessageType');
 				this.selectedMessageType = null;
-				// this.setEditorCode('{}');
+				this.messageListDataStore.setEditorCode('{}');
 			}
 			this.parsedMessage = message;
 		} catch (error) {
@@ -284,7 +284,7 @@ export default class Store {
 		this.isSessionsLoading = false;
 	};
 
-	replayMessage = async (message: ParsedMessageItem | ActMessageItem, index: number) => {
+	@action replayMessage = async (message: ParsedMessageItem | ActMessageItem, index: number) => {
 		let result: MessageSendingResponse | ActSendingResponse | null = null;
 		if (isParsedMessageItem(message)) {
 			result = await api.sendMessage({
@@ -304,12 +304,10 @@ export default class Store {
 				methodName: message.methodName,
 				message: JSON.parse(message.message as string),
 			});
-			if (index != null) {
-				this.messageListDataStore.changeIndicator(
-					index,
-					result.code === 200 ? 'indicator-successful' : 'indicator-unsuccessful',
-				);
-			}
+			this.messageListDataStore.changeIndicator(
+				index,
+				result.code === 200 ? 'indicator-successful' : 'indicator-unsuccessful',
+			);
 		}
 	};
 
@@ -343,6 +341,7 @@ export default class Store {
 					messageType: this.selectedMessageType,
 					message: JSON.stringify(message),
 					delay: 0,
+					indicator: 'indicator-unvisible',
 				});
 				break;
 			}
@@ -364,6 +363,7 @@ export default class Store {
 					methodName: this.selectedMethod.methodName,
 					message: JSON.stringify(message),
 					delay: 0,
+					indicator: 'indicator-unvisible',
 				});
 				break;
 			}
@@ -423,7 +423,6 @@ export default class Store {
 
 	@action setSelectedSchemaType = (type: SchemaType) => {
 		setInLocalStorage('selectedSchemaType', type);
-		this.messageListDataStore.clearIndicators();
 		this.selectedSchemaType = type;
 		this.messageListDataStore.prepareForSelectedSchemaType(type);
 		this.setIsSchemaApplied(false);

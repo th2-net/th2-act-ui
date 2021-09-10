@@ -21,13 +21,10 @@ import { useStore } from '../hooks/useStore';
 import '../styles/message-list.scss';
 import '../styles/splitter.scss';
 import { downloadFile } from '../helpers/downloadFile';
-import {
-	ParsedMessageItem,
-	ActMessageItem,
-} from '../models/Message';
+import { ParsedMessageItem, ActMessageItem } from '../models/Message';
 import DictionaryEditArea from './DictionaryEditorArea';
 
-const MessageHistory = () => {
+const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }) => {
 	const store = useStore();
 	const messageListDataStore = store.messageListDataStore;
 	const [isReplay, setReplayMode] = useState(false);
@@ -63,6 +60,7 @@ const MessageHistory = () => {
 		isReplayRef.current = isReplay;
 		if (isReplay) {
 			messageListDataStore.setEditMessageMode(false);
+			messageListDataStore.clearIndicators();
 			replaySendMessage(messageListDataStore.getCurrentMessagesArray, 0);
 		}
 	}, [isReplay]);
@@ -92,10 +90,7 @@ const MessageHistory = () => {
 	return (
 		<div>
 			<DictionaryEditArea
-				messages={messageListDataStore.getCurrentMessagesArray}
-				indicators={messageListDataStore.indicators.slice()}
-				editMessageMode={messageListDataStore.editMessageMode}
-				editedMessageId={messageListDataStore.editedMessageId}
+				messages={props.messages.slice()}
 				messageListPanelArea={50}
 				object={store.selectedDictionaryName}
 			/>
@@ -118,7 +113,7 @@ const MessageHistory = () => {
 				<button
 					disabled={
 						messageListDataStore.editMessageMode
-						|| messageListDataStore.getCurrentMessagesArray.length === 0
+                        || messageListDataStore.getCurrentMessagesArray.length === 0
 					}
 					className='mainButton'
 					onClick={() => {

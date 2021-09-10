@@ -18,20 +18,14 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
-	Droppable,
-	DroppableProvided,
-	DropResult,
-	DragDropContext,
+	Droppable, DroppableProvided, DropResult, DragDropContext,
 } from 'react-beautiful-dnd';
 import { nanoid } from '../../node_modules/nanoid';
 import { useStore } from '../hooks/useStore';
 import '../styles/message-list.scss';
 import '../styles/splitter.scss';
 import { reorderArray } from '../helpers/reorderArrayWithDragAndDrop';
-import {
-	ParsedMessageItem,
-	ActMessageItem,
-} from '../models/Message';
+import { ParsedMessageItem, ActMessageItem } from '../models/Message';
 import DraggableMessageItem from './MessageItem';
 
 export type Indicator =
@@ -40,44 +34,12 @@ export type Indicator =
 	| 'indicator-successful'
 	| 'indicator-unsuccessful';
 
-export interface EditMessageProps {
-	editMessageMode: boolean;
-	editedMessageId: string;
-	indicators: Indicator[];
-}
-
-interface MessageListProps extends EditMessageProps {
+const MessageList = (props: {
 	messages: ParsedMessageItem[] | ActMessageItem[];
-}
-
-const MessageList = ({
-	indicators,
-	messages,
-	editMessageMode,
-	editedMessageId,
-}: MessageListProps) => {
-	const messageListDataStore = useStore().messageListDataStore;
-
-	const deleteMessage = (id: string) => {
-		const newArray: any[] = [];
-
-		messageListDataStore.getCurrentMessagesArray.forEach(
-			(item: ParsedMessageItem | ActMessageItem, i: number) => {
-				if (item.id !== id) {
-					newArray.push(item);
-					messageListDataStore.deleteIndicator(i);
-				}
-			},
-		);
-		messageListDataStore.clearParsedMessages();
-		newArray.forEach((mess: ParsedMessageItem | ActMessageItem, i) => {
-			messageListDataStore.addParsedMessage(mess, messageListDataStore.indicators[i]);
-		});
-	};
-
-	const setDelay = (delay: number) => {
-		messageListDataStore.setEditedMessageSendDelay(delay);
-	};
+	editMessageMode: boolean;
+}) => {
+	const store = useStore();
+	const messageListDataStore = store.messageListDataStore;
 
 	const dragEndHandler = (result: DropResult) => {
 		messageListDataStore.clearIndicators();
@@ -89,7 +51,7 @@ const MessageList = ({
 			return;
 		}
 		const array = messageListDataStore.getCurrentMessagesArray;
-		reorderArray(destination.index, source.index, messages[source.index], { array });
+		reorderArray(destination.index, source.index, array[source.index], { array });
 	};
 
 	return (
@@ -99,7 +61,7 @@ const MessageList = ({
 					{(provided: DroppableProvided) => (
 						<ul {...provided.droppableProps} ref={provided.innerRef}>
 							<li>
-								{editMessageMode ? (
+								{props.editMessageMode ? (
 									<div
 										className={'normalNewMessage'}
 										onClick={() => {
@@ -110,19 +72,14 @@ const MessageList = ({
 								) : null}
 							</li>
 							{(
-								(messages as ParsedMessageItem[]) || (messages as ActMessageItem[])
+								(props.messages as ParsedMessageItem[])
+								|| (props.messages as ActMessageItem[])
 							).map((item: ParsedMessageItem | ActMessageItem, index: number) => (
 								<DraggableMessageItem
 									key={item.id}
 									keyId={item.id || nanoid()}
 									index={index}
 									message={item}
-									indicators={indicators}
-									editMessageMode={editMessageMode}
-									editedMessageId={editedMessageId}
-									selectMessage={messageListDataStore.selectMessage}
-									deleteMessage={deleteMessage}
-									setDelay={setDelay}
 								/>
 							))}
 							{provided.placeholder}

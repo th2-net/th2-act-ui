@@ -16,11 +16,7 @@
  ***************************************************************************** */
 
 import React, { useState } from 'react';
-import {
-	Draggable,
-	DraggableProvided,
-	DraggableStateSnapshot,
-} from 'react-beautiful-dnd';
+import { Draggable, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import '../styles/message-list.scss';
 import {
 	ParsedMessageItem,
@@ -28,110 +24,84 @@ import {
 	isParsedMessageItem,
 	isActMessageItem,
 } from '../models/Message';
-import { Indicator, EditMessageProps } from './MessageList';
+import { Indicator } from './MessageList';
+import { useStore } from '../hooks/useStore';
 
-interface MessageCardControlsProps {
-	deleteMessage: (id: string) => void;
-	editMessageMode: boolean;
-	id: string;
-	indicator: Indicator;
-}
-
-interface MessageItemProps extends EditMessageProps {
+interface MessageItemProps {
 	index: number;
 	message: ParsedMessageItem | ActMessageItem;
-	selectMessage: (id: string) => void;
-	setDelay: (value: number) => void;
-	deleteMessage: (id: string) => void;
 }
 
 interface DraggableMessageItemProps extends MessageItemProps {
 	keyId: string;
 }
 
-const DraggableMessageItem = ({
-	index,
-	message,
-	indicators,
-	selectMessage,
-	setDelay,
-	deleteMessage,
-	editMessageMode,
-	editedMessageId,
-	keyId,
-}: DraggableMessageItemProps) => (
-	<Draggable draggableId={keyId} index={index} key={keyId}>
-		{(prov: DraggableProvided, snapshot: DraggableStateSnapshot) => (
-			<li
-				{...prov.draggableProps}
-				ref={prov.innerRef}
-				key={keyId}
-				draggable={true}
-				className={snapshot.isDragging ? 'messageItemDragging' : 'messageItem'}>
-				<div className='message'>
-					<div className='handler'>
-						<div
-							style={{ visibility: editMessageMode ? 'hidden' : 'visible' }}
-							{...prov.dragHandleProps}
-							className='move'></div>
+const DraggableMessageItem = ({ index, message, keyId }: DraggableMessageItemProps) => {
+	const messageListDataStore = useStore().messageListDataStore;
+	return (
+		<Draggable draggableId={keyId} index={index} key={keyId}>
+			{(prov: DraggableProvided, snapshot: DraggableStateSnapshot) => (
+				<li
+					{...prov.draggableProps}
+					ref={prov.innerRef}
+					key={keyId}
+					draggable={true}
+					className={snapshot.isDragging ? 'messageItemDragging' : 'messageItem'}>
+					<div className='message'>
+						<div className='handler'>
+							<div
+								style={{
+									visibility: messageListDataStore.editMessageMode
+										? 'hidden'
+										: 'visible',
+								}}
+								{...prov.dragHandleProps}
+								className='move'></div>
+						</div>
+						<MessageItem index={index} message={message} />
 					</div>
-					<MessageItem
-						index={index}
-						message={message}
-						indicators={indicators}
-						editMessageMode={editMessageMode}
-						editedMessageId={editedMessageId}
-						selectMessage={selectMessage}
-						deleteMessage={deleteMessage}
-						setDelay={setDelay}
-					/>
-				</div>
-			</li>
-		)}
-	</Draggable>
-);
+				</li>
+			)}
+		</Draggable>
+	);
+};
 
-const MessageItem = ({
-	index,
-	message,
-	indicators,
-	selectMessage,
-	setDelay,
-	deleteMessage,
-	editMessageMode,
-	editedMessageId,
-}: MessageItemProps) => {
+const MessageItem = ({ index, message }: MessageItemProps) => {
 	const [delay, setDelayValue] = useState(message.delay.toString());
+	const messageListDataStore = useStore().messageListDataStore;
 	return (
 		<div className='messageCard'>
 			<div
 				onClick={() => {
-					selectMessage(message.id || '');
+					messageListDataStore.selectMessage(message.id || '');
 				}}>
 				<MessageEntity message={message} />
 				<p>
 					<b>delay: </b>
-					{editMessageMode && editedMessageId === message.id ? (
-						<input
-							className='delayInput'
-							type='number'
-							value={delay}
-							onChange={e => {
-								setDelay(Number(e.target.value));
-								setDelayValue(e.target.value);
-							}}
-						/>
-					) : (
-						message.delay
-					)}
+					{messageListDataStore.editMessageMode
+					&& messageListDataStore.editedMessageId === message.id ? (
+							<input
+								className='delayInput'
+								type='number'
+								value={delay}
+								onChange={e => {
+									messageListDataStore.setEditedMessageSendDelay(
+										Number(e.target.value),
+									);
+									setDelayValue(e.target.value);
+								}}
+							/>
+						) : (
+							message.delay
+						)}
 					ms
 				</p>
 			</div>
 			<MessageCardControls
-				deleteMessage={deleteMessage}
-				editMessageMode={editMessageMode}
 				id={message.id || ''}
-				indicator={indicators[index]}
+				indicator={message.indicator}
+				message={message}
+				index={index}
 			/>
 		</div>
 	);
@@ -177,25 +147,31 @@ const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) =
 	return null;
 };
 
-const MessageCardControls = ({
-	deleteMessage,
-	editMessageMode,
-	id,
-	indicator,
-}: MessageCardControlsProps) => (
-	<div className='cardControls'>
-		<button
-			disabled={editMessageMode}
-			className='deleteButton'
-			onClick={() => {
-				deleteMessage(id);
-			}}>
-			x
-		</button>
-		<div>
-			<button className={indicator}></button>
+const MessageCardControls = (props: {
+	id: string;
+	indicator: Indicator;
+	message: ParsedMessageItem | ActMessageItem;
+	index: number;
+}) => {
+	const messageListDataStore = useStore().messageListDataStore;
+	return (
+		<div className='cardControls'>
+			<button
+				disabled={messageListDataStore.editMessageMode}
+				className='deleteButton'
+				onClick={() => {
+					messageListDataStore.deleteMessage(props.id);
+				}}>
+				x
+			</button>
+			<div>
+				<button
+					className={
+						messageListDataStore.getCurrentMessagesArray.slice()[props.index].indicator
+					}></button>
+			</div>
 		</div>
-	</div>
-);
+	);
+};
 
 export default DraggableMessageItem;

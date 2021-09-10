@@ -16,6 +16,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
+import { Indicator } from '../components/MessageList';
 
 export type Message = ParsedMessage | JSONSchema4;
 
@@ -71,6 +72,7 @@ export interface ParsedMessageItem {
 	message: object | string;
 	delay: number;
 	id?: string;
+	indicator: Indicator;
 }
 
 export interface ActMessageItem {
@@ -80,6 +82,7 @@ export interface ActMessageItem {
 	message: object | string;
 	delay: number;
 	id?: string;
+	indicator: Indicator;
 }
 
 export function isParsedMessageItem(object: unknown): object is ParsedMessageItem {

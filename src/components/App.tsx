@@ -52,19 +52,30 @@ const App = () => {
 				<Control />
 				<div className='app__editor'>
 					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
-					<MessageHistory />
+					<MessageHistory
+						messages={store.messageListDataStore.parsedMessagesHistory.slice()}
+					/>
 					{store.isSchemaLoading && <div className='overlay' />}
 				</div>
 				<div className='app__buttons'>
 					<Button
-						onClick={messageListDataStore.editMessageMode
-							 ? messageListDataStore.saveEditedMessage : sendMessage}
+						onClick={
+							messageListDataStore.editMessageMode
+								? messageListDataStore.saveEditedMessage
+								: sendMessage
+						}
 						disabled={!store.isSendingAllowed}>
-						<span>{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}</span>
+						<span>
+							{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}
+						</span>
 						{store.isSending ? (
 							<SplashScreen />
 						) : (
-							<i className={messageListDataStore.editMessageMode ? '' : 'arrow-right-icon'} />
+							<i
+								className={
+									messageListDataStore.editMessageMode ? '' : 'arrow-right-icon'
+								}
+							/>
 						)}
 					</Button>
 				</div>

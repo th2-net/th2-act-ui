@@ -20,8 +20,8 @@ import '../styles/message-list.scss';
 import '../styles/splitter.scss';
 import SplitView from '../split-view/SplitView';
 import SplitViewPane from '../split-view/SplitViewPane';
-import { ParsedMessageItem, ActMessageItem } from '../models/Message';
-import MessageList, { EditMessageProps } from './MessageList';
+import MessageList from './MessageList';
+import { ActMessageItem, ParsedMessageItem } from '../models/Message';
 
 const EmbeddedEditor = (props: { schema: string; object: string }) => {
 	const url = `http://localhost:3000?schema=${props.schema}&${
@@ -34,45 +34,32 @@ const EmbeddedEditor = (props: { schema: string; object: string }) => {
 	);
 };
 
-interface DictionaryEditAreaProps extends EditMessageProps {
-	messages: ParsedMessageItem[] | ActMessageItem[];
+const DictionaryEditArea = (props: {
 	messageListPanelArea: number;
 	object: string | null;
-}
-
-const DictionaryEditArea = ({
-	editMessageMode,
-	indicators,
-	messages,
-	editedMessageId,
-	messageListPanelArea,
-	object,
-}: DictionaryEditAreaProps) => {
+	messages: ParsedMessageItem[] | ActMessageItem[];
+}) => {
 	const store = useStore();
-	const [panelArea, setPanelArea] = useState(messageListPanelArea);
+	const [panelArea, setPanelArea] = useState(props.messageListPanelArea);
 	return (
 		<div className='messageEditArea'>
 			{store.selectedSchemaType === 'parsed-message' ? (
 				<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
 					<SplitViewPane>
 						<MessageList
-							messages={messages}
-							indicators={indicators}
-							editMessageMode={editMessageMode}
-							editedMessageId={editedMessageId}
+							messages={props.messages.slice()}
+							editMessageMode={store.messageListDataStore.editMessageMode}
 						/>
 					</SplitViewPane>
 
 					<SplitViewPane>
-						<EmbeddedEditor schema='schema-qa' object={object || ''} />
+						<EmbeddedEditor schema='schema-qa' object={props.object || ''} />
 					</SplitViewPane>
 				</SplitView>
 			) : (
 				<MessageList
-					messages={messages}
-					indicators={indicators}
-					editMessageMode={editMessageMode}
-					editedMessageId={editedMessageId}
+					messages={props.messages.slice()}
+					editMessageMode={store.messageListDataStore.editMessageMode}
 				/>
 			)}
 		</div>
