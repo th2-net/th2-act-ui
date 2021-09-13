@@ -74,7 +74,11 @@ const MessageItem = ({ index, message }: MessageItemProps) => {
 		<div className='messageCard'>
 			<div
 				onClick={() => {
-					messageListDataStore.selectMessage(message.id || '');
+					const selection = window.getSelection();
+					if (selection && selection?.toString().length === 0) {
+						console.log(selection.toString().length);
+						messageListDataStore.selectMessage(message.id || '');
+					}
 				}}>
 				<MessageEntity message={message} />
 				<p>
