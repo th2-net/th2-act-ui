@@ -23,13 +23,13 @@ import SplitViewPane from '../split-view/SplitViewPane';
 import MessageList from './MessageList';
 import { ActMessageItem, ParsedMessageItem } from '../models/Message';
 
-const EmbeddedEditor = (props: { schema: string; object: string }) => {
+export const EmbeddedEditor = (props: { schema: string; object: string; className?: string }) => {
 	const url = `http://localhost:3000?schema=${props.schema}&${
 		props.object == null ? '' : `object=${props.object}`
 	}&editorMode=dictionaryEditor&embedded=true`;
 	return (
-		<div className='scrolledBlock'>
-			<iframe className='embeddedEditor' src={url}></iframe>
+		<div className={props.className ? 'tabEmbeddedEditor' : 'scrolledBlock'}>
+			<iframe className={props.className ? props.className : 'embeddedEditor'} src={url}></iframe>
 		</div>
 	);
 };

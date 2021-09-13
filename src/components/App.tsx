@@ -28,10 +28,13 @@ import Store from '../stores/Store';
 import { MessageSendingResponse } from '../models/Message';
 import MessageHistory from './MessageHistory';
 import '../styles/message-list.scss';
+import { Tab, Tabs, AppBar } from '../../node_modules/@material-ui/core';
+import { EmbeddedEditor } from './DictionaryEditorArea';
 
 const App = () => {
 	const store: Store = useStore();
 	const messageListDataStore = store.messageListDataStore;
+	const [value, setValue] = React.useState(0);
 
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
@@ -46,44 +49,58 @@ const App = () => {
 		}
 	};
 
+	const selectTab = (e: React.ChangeEvent<{}>, tab: number) => {
+		setValue(tab);
+	};
+
 	return (
 		<div className='app'>
-			<div className='app__body'>
-				<Control />
-				<div className='app__editor'>
-					<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
-					<MessageHistory
-						messages={store.messageListDataStore.parsedMessagesHistory.slice()}
-					/>
-					{store.isSchemaLoading && <div className='overlay' />}
-				</div>
-				<div className='app__buttons'>
-					<Button
-						onClick={
-							messageListDataStore.editMessageMode
-								? messageListDataStore.saveEditedMessage
-								: sendMessage
-						}
-						disabled={!store.isSendingAllowed}>
-						<span>
-							{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}
-						</span>
-						{store.isSending ? (
-							<SplashScreen />
-						) : (
-							<i
-								className={
-									messageListDataStore.editMessageMode ? '' : 'arrow-right-icon'
-								}
-							/>
-						)}
-					</Button>
-				</div>
-				<div className='app__result'>
-					<h3 className='app__title'>Result</h3>
-					<Result response={response} />
-				</div>
+			<Tabs value={value} onChange={selectTab}>
+				<Tab label='Result' className='tab'></Tab>
+				<Tab label='History' className='tab'></Tab>
+				<Tab label='Dictionary' className='tab'></Tab>
+			</Tabs>
+			{value === 0 ? <div className='app__result'>
+				<h3 className='app__title'>Result</h3>
+				<Result response={response} />
 			</div>
+				: value === 1
+					? <div className='app__body'>
+						<Control />
+						<div className='app__editor'>
+							<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
+							<MessageHistory
+								messages={store.messageListDataStore.parsedMessagesHistory.slice()}
+							/>
+							{store.isSchemaLoading && <div className='overlay' />}
+						</div>
+						<div className='app__buttons'>
+							<Button
+								onClick={
+									messageListDataStore.editMessageMode
+										? messageListDataStore.saveEditedMessage
+										: sendMessage
+								}
+								disabled={!store.isSendingAllowed}>
+								<span>
+									{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}
+								</span>
+								{store.isSending ? (
+									<SplashScreen />
+								) : (
+									<i
+										className={
+											messageListDataStore.editMessageMode ? '' : 'arrow-right-icon'
+										}
+									/>
+								)}
+							</Button>
+						</div>
+					</div>
+					: <EmbeddedEditor schema='schema-qa'
+						object={store.selectedDictionaryName || ''} />
+
+			}
 		</div>
 	);
 };
