@@ -65,7 +65,10 @@ const MessageList = (props: {
 									<div
 										className={'normalNewMessage'}
 										onClick={() => {
-											messageListDataStore.setEditMessageMode(false);
+											const selection = window.getSelection();
+											if (selection?.toString().length === 0) {
+												messageListDataStore.setEditMessageMode(false);
+											}
 										}}>
 										New Message
 									</div>

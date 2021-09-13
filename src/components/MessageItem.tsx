@@ -45,7 +45,7 @@ const DraggableMessageItem = ({ index, message, keyId }: DraggableMessageItemPro
 					{...prov.draggableProps}
 					ref={prov.innerRef}
 					key={keyId}
-					draggable={true}
+					draggable={false}
 					className={snapshot.isDragging ? 'messageItemDragging' : 'messageItem'}>
 					<div className='message'>
 						<div className='handler'>
@@ -56,6 +56,7 @@ const DraggableMessageItem = ({ index, message, keyId }: DraggableMessageItemPro
 										: 'visible',
 								}}
 								{...prov.dragHandleProps}
+								draggable={true}
 								className='move'></div>
 						</div>
 						<MessageItem index={index} message={message} />

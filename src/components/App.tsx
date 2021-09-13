@@ -28,7 +28,7 @@ import Store from '../stores/Store';
 import { MessageSendingResponse } from '../models/Message';
 import MessageHistory from './MessageHistory';
 import '../styles/message-list.scss';
-import { Tab, Tabs, AppBar } from '../../node_modules/@material-ui/core';
+import { Tab, Tabs } from '../../node_modules/@material-ui/core';
 import { EmbeddedEditor } from './DictionaryEditorArea';
 
 const App = () => {
