@@ -72,8 +72,8 @@ const MessageList = (props: {
 								) : null}
 							</li>
 							{(
-								(props.messages as ParsedMessageItem[])
-								|| (props.messages as ActMessageItem[])
+								(messageListDataStore.getCurrentMessagesArray as ParsedMessageItem[])
+								|| (messageListDataStore.getCurrentMessagesArray as ActMessageItem[])
 							).map((item: ParsedMessageItem | ActMessageItem, index: number) => (
 								<DraggableMessageItem
 									key={item.id}

@@ -40,7 +40,7 @@ export interface MessageEditorMethods {
 	getFilledMessage: () => object | null;
 }
 
-const DEFAULT_EDITOR_HEIGHT = 500;
+const DEFAULT_EDITOR_HEIGHT = 700;
 
 const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const store = useStore();

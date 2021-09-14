@@ -181,6 +181,7 @@
  
  .splitter-pane {
 	 height: 100%;
+	 overflow: hidden;
 	 display: flex;
  
 	 &__content {

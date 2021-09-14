@@ -68,15 +68,28 @@
 
 .embeddedEditor {
 	width: 100%;
-	height: 800px;
+	height: 650px;
 }
 .scrolledBlock {
 	height: 100%;
 	overflow-y: scroll;
 }
 
+.mesEditor{
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
 .messageEditArea {
 	height: 550px;
+}
+
+.historyTab{
+	height: 100%;
+	width:100%;
+	display: grid;
+	grid-template-rows: 3fr 1fr;
 }
 
 .messageCard {

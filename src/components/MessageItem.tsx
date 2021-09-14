@@ -76,7 +76,6 @@ const MessageItem = ({ index, message }: MessageItemProps) => {
 				onClick={() => {
 					const selection = window.getSelection();
 					if (selection && selection?.toString().length === 0) {
-						console.log(selection.toString().length);
 						messageListDataStore.selectMessage(message.id || '');
 					}
 				}}>

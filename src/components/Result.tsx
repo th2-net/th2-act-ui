@@ -53,6 +53,7 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 			: window.location.href.substring(0, window.location.href.indexOf('/act-ui'));
 
 		let eventId: string | null = null;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let workspaceState: any = [];
 		try {
 			// TODO: this is temporary hot fix, needs to be fixed

@@ -22,7 +22,7 @@ import '../styles/message-list.scss';
 import '../styles/splitter.scss';
 import { downloadFile } from '../helpers/downloadFile';
 import { ParsedMessageItem, ActMessageItem } from '../models/Message';
-import DictionaryEditArea from './DictionaryEditorArea';
+import MessageList from './MessageList';
 
 const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }) => {
 	const store = useStore();
@@ -88,12 +88,9 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 	};
 
 	return (
-		<div>
-			<DictionaryEditArea
-				messages={props.messages.slice()}
-				messageListPanelArea={50}
-				object={store.selectedDictionaryName}
-			/>
+		<div className='historyTab'>
+			<MessageList messages={props.messages}
+			 editMessageMode={messageListDataStore.editMessageMode}/>
 
 			<div className='messageEditAreaControls'>
 				<button
