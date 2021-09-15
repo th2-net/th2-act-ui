@@ -26,6 +26,7 @@ import {
 } from '../models/Message';
 import { Indicator } from './MessageList';
 import { useStore } from '../hooks/useStore';
+import { InputAdornment, TextField } from '../../node_modules/@material-ui/core';
 
 interface MessageItemProps {
 	index: number;
@@ -48,7 +49,7 @@ const DraggableMessageItem = ({ index, message, keyId }: DraggableMessageItemPro
 					draggable={false}
 					className={snapshot.isDragging ? 'messageItemDragging' : 'messageItem'}>
 					<div className='message'>
-						<div className='handler'>
+						<div className='dragHandlerContainer'>
 							<div
 								style={{
 									visibility: messageListDataStore.editMessageMode
@@ -57,7 +58,7 @@ const DraggableMessageItem = ({ index, message, keyId }: DraggableMessageItemPro
 								}}
 								{...prov.dragHandleProps}
 								draggable={true}
-								className='move'></div>
+								className='dragHandler'></div>
 						</div>
 						<MessageItem index={index} message={message} />
 					</div>
@@ -80,26 +81,23 @@ const MessageItem = ({ index, message }: MessageItemProps) => {
 					}
 				}}>
 				<MessageEntity message={message} />
-				<p>
-					<b>delay: </b>
-					{messageListDataStore.editMessageMode
-					&& messageListDataStore.editedMessageId === message.id ? (
-							<input
-								className='delayInput'
-								type='number'
-								value={delay}
-								onChange={e => {
-									messageListDataStore.setEditedMessageSendDelay(
-										Number(e.target.value),
-									);
-									setDelayValue(e.target.value);
-								}}
-							/>
-						) : (
-							message.delay
-						)}
-					ms
-				</p>
+				<b style={{ marginRight: '10px' }}>delay:</b>
+				<TextField
+					variant='standard'
+					className='delayInput'
+					type='number'
+					InputProps={{
+						endAdornment: <InputAdornment position="end">ms</InputAdornment>,
+						  }}
+					size='small'
+					value={delay}
+					onChange={e => {
+						messageListDataStore.setEditedMessageSendDelay(
+							Number(e.target.value),
+						);
+						setDelayValue(e.target.value);
+					}}
+				/>
 			</div>
 			<MessageCardControls
 				id={message.id || ''}
@@ -118,13 +116,9 @@ const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) =
 				<p>
 					<b>session: </b>
 					{props.message.sessionId}
-				</p>
-				<p>
-					<b>dictionary: </b>
+					<b> dictionary: </b>
 					{props.message.dictionary}
-				</p>
-				<p>
-					<b>messageType: </b>
+					<b> messageType: </b>
 					{props.message.messageType}
 				</p>
 			</div>

@@ -67,7 +67,7 @@ const App = () => {
 						</SplitViewPane>
 
 						<SplitViewPane>
-							<div>
+							<div className='mainGrid'>
 								<Tabs value={value} onChange={selectTab}>
 									<Tab label='Result' className='tab'/>
 									<Tab label='History' className='tab'/>

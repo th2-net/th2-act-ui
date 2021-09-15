@@ -339,7 +339,7 @@ export default class Store {
 					sessionId: this.selectedSession,
 					dictionary: this.selectedDictionaryName,
 					messageType: this.selectedMessageType,
-					message: JSON.stringify(message),
+					message: JSON.stringify(message, null, 4),
 					delay: 0,
 					indicator: 'indicator-unvisible',
 				});
@@ -361,7 +361,7 @@ export default class Store {
 					actBox: this.selectedActBox,
 					fullServiceName: this.selectedService,
 					methodName: this.selectedMethod.methodName,
-					message: JSON.stringify(message),
+					message: JSON.stringify(message, null, 4),
 					delay: 0,
 					indicator: 'indicator-unvisible',
 				});

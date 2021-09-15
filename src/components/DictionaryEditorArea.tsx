@@ -14,17 +14,12 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React, { useState } from 'react';
-import { useStore } from '../hooks/useStore';
+import React from 'react';
 import '../styles/message-list.scss';
 import '../styles/splitter.scss';
-import SplitView from '../split-view/SplitView';
-import SplitViewPane from '../split-view/SplitViewPane';
-import MessageList from './MessageList';
-import { ActMessageItem, ParsedMessageItem } from '../models/Message';
 
 export const EmbeddedEditor = (props: { schema: string; object: string; className?: string }) => {
-	const url = `http://localhost:3000?schema=${props.schema}&${
+	const url = `http://10.44.17.234:3000?schema=${props.schema}&${
 		props.object == null ? '' : `object=${props.object}`
 	}&editorMode=dictionaryEditor&embedded=true`;
 	return (
@@ -33,37 +28,3 @@ export const EmbeddedEditor = (props: { schema: string; object: string; classNam
 		</div>
 	);
 };
-
-const DictionaryEditArea = (props: {
-	messageListPanelArea: number;
-	object: string | null;
-	messages: ParsedMessageItem[] | ActMessageItem[];
-}) => {
-	const store = useStore();
-	const [panelArea, setPanelArea] = useState(props.messageListPanelArea);
-	return (
-		<div className='messageEditArea'>
-			{store.selectedSchemaType === 'parsed-message' ? (
-				<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
-					<SplitViewPane>
-						<MessageList
-							messages={props.messages.slice()}
-							editMessageMode={store.messageListDataStore.editMessageMode}
-						/>
-					</SplitViewPane>
-
-					<SplitViewPane>
-						<EmbeddedEditor schema='schema-qa' object={props.object || ''} />
-					</SplitViewPane>
-				</SplitView>
-			) : (
-				<MessageList
-					messages={props.messages.slice()}
-					editMessageMode={store.messageListDataStore.editMessageMode}
-				/>
-			)}
-		</div>
-	);
-};
-
-export default DictionaryEditArea;

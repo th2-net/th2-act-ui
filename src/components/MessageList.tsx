@@ -60,20 +60,9 @@ const MessageList = (props: {
 				<Droppable droppableId='droppableId'>
 					{(provided: DroppableProvided) => (
 						<ul {...provided.droppableProps} ref={provided.innerRef}>
-							<li>
-								{props.editMessageMode ? (
-									<div
-										className={'normalNewMessage'}
-										onClick={() => {
-											messageListDataStore.setEditMessageMode(false);
-										}}>
-										New Message
-									</div>
-								) : null}
-							</li>
 							{(
-								(messageListDataStore.getCurrentMessagesArray as ParsedMessageItem[])
-								|| (messageListDataStore.getCurrentMessagesArray as ActMessageItem[])
+								(props.messages as ParsedMessageItem[])
+								|| (props.messages as ActMessageItem[])
 							).map((item: ParsedMessageItem | ActMessageItem, index: number) => (
 								<DraggableMessageItem
 									key={item.id}
