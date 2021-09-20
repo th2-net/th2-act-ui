@@ -144,7 +144,7 @@ const MessageEditor = ({
 				if (
 					obj[key].additionalProperties
 					&& typeof obj[key].additionalProperties === 'object'
-					&& obj[key].additionalProperties.additionalProperties
+					&& typeof obj[key].additionalProperties.additionalProperties === 'boolean'
 				) {
 					untypedDefinitions.push({
 						fieldName: key,
@@ -319,14 +319,52 @@ const MessageEditor = ({
 		const initialAdditionsSchema = createInitialActMessage(additionalSchema)?.split('\n');
 		const lines = editorRef.current?.getModel()?.getLinesContent();
 		if (lines && initialAdditionsSchema && cursorPosition) {
-			lines[cursorPosition.lineNumber - 1] = lines[cursorPosition.lineNumber - 1].replace(/},*/, '');
+			const cleanedLines = removeOldValue(lines);
+			const startIndex = cursorPosition.lineNumber - 1;
+			const notLastField = /},/.test(cleanedLines[startIndex]);
+			cleanedLines[startIndex] = cleanedLines[startIndex].replace(/},*/, '');
 			initialAdditionsSchema.splice(0, 1);
-			lines.splice(cursorPosition.lineNumber, 0, ...initialAdditionsSchema);
-			const newValue = lines.join('\n');
+			if (notLastField) initialAdditionsSchema[initialAdditionsSchema.length - 1] += ',';
+			cleanedLines.splice(cursorPosition.lineNumber, 0, ...initialAdditionsSchema);
+			const newValue = cleanedLines.join('\n');
 			editorRef.current?.getModel()?.setValue(newValue);
 			editorRef.current?.trigger('anyString', 'editor.action.formatDocument', '');
 		}
 		setNewSchema(currentSchema);
+	};
+
+	const removeOldValue = (lines: string[]) => {
+		const model = editorRef.current?.getModel();
+		const newLines = [...lines];
+		if (cursorPosition && model && !newLines[cursorPosition.lineNumber - 1].includes('{}')) {
+			const startRemoveIndex = cursorPosition.lineNumber;
+			let endRemoveIndex: undefined | number;
+			let word: null | string = null;
+			let searchPosition: monacoEditor.IRange = {
+				startLineNumber: cursorPosition.lineNumber + 1,
+				endColumn: cursorPosition.column + 1,
+				startColumn: cursorPosition.column - 1,
+				endLineNumber: cursorPosition.lineNumber + 1,
+			};
+			while (searchPosition.startLineNumber !== newLines.length + 1) {
+				word = model.getValueInRange(searchPosition);
+				if (word.trim() === '}' || word.trim() === '},') {
+					endRemoveIndex = searchPosition.startLineNumber;
+					break;
+				}
+				searchPosition = {
+					startLineNumber: searchPosition.startLineNumber + 1,
+					endColumn: searchPosition.endColumn,
+					startColumn: searchPosition.startColumn,
+					endLineNumber: searchPosition.endLineNumber + 1,
+				};
+			}
+			if (endRemoveIndex) {
+				newLines.splice(startRemoveIndex, endRemoveIndex - startRemoveIndex);
+				newLines[startRemoveIndex - 1] += word?.trim();
+			}
+		}
+		return newLines;
 	};
 
 	const requestSchema = async (messageType: string, dictionaryName: string) => {
