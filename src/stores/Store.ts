@@ -1,3 +1,4 @@
+/* eslint-disable no-alert */
 /** ****************************************************************************
  * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
@@ -287,27 +288,41 @@ export default class Store {
 	@action replayMessage = async (message: ParsedMessageItem | ActMessageItem, index: number) => {
 		let result: MessageSendingResponse | ActSendingResponse | null = null;
 		if (isParsedMessageItem(message)) {
-			result = await api.sendMessage({
-				session: message.sessionId,
-				dictionary: message.dictionary,
-				messageType: message.messageType,
-				message: JSON.parse(message.message as string),
-			});
-			this.messageListDataStore.changeIndicator(
-				index,
-				result.code === 200 ? 'indicator-successful' : 'indicator-unsuccessful',
-			);
+			try {
+				result = await api.sendMessage({
+					session: message.sessionId,
+					dictionary: message.dictionary,
+					messageType: message.messageType,
+					message: JSON.parse(message.message as string),
+				});
+				this.messageListDataStore.changeIndicator(
+					index,
+					result.code === 200 ? 'indicator-successful' : 'indicator-unsuccessful',
+				);
+			} catch (error) {
+				alert('Error while sending');
+				this.messageListDataStore.changeIndicator(
+					index, 'indicator-unsuccessful',
+				);
+			}
 		}
 		if (isActMessageItem(message)) {
-			result = await api.callMethod({
-				fullServiceName: message.fullServiceName,
-				methodName: message.methodName,
-				message: JSON.parse(message.message as string),
-			});
-			this.messageListDataStore.changeIndicator(
-				index,
-				result.code === 200 ? 'indicator-successful' : 'indicator-unsuccessful',
-			);
+			try {
+				result = await api.callMethod({
+					fullServiceName: message.fullServiceName,
+					methodName: message.methodName,
+					message: JSON.parse(message.message as string),
+				});
+				this.messageListDataStore.changeIndicator(
+					index,
+					result.code === 200 ? 'indicator-successful' : 'indicator-unsuccessful',
+				);
+			} catch (error) {
+				alert('Error while sending');
+				this.messageListDataStore.changeIndicator(
+					index, 'indicator-unsuccessful',
+				);
+			}
 		}
 	};
 

@@ -165,7 +165,9 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 			<ControlledEditor
 				height={editorHeight}
 				language='json'
-				value={messageListDataStore.editMessageMode ? messageListDataStore.editorCode : code}
+				value={
+					messageListDataStore.editMessageMode ? messageListDataStore.editorCode : code
+				}
 				onChange={onValueChange}
 				editorDidMount={handleEditorDidMount}
 			/>

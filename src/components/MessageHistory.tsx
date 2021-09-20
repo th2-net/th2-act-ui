@@ -89,18 +89,21 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 
 	return (
 		<div className='historyTab'>
-			{messageListDataStore.editMessageMode
-				? <div
+			{messageListDataStore.editMessageMode ? (
+				<div
 					className={'normalNewMessage'}
 					onClick={() => {
 						messageListDataStore.setEditMessageMode(false);
 					}}>
-									New Message
-				</div> : <div></div>}
+					New Message
+				</div>
+			) : (
+				<div></div>
+			)}
 
-			<MessageList messages={props.messages} editMessageMode={messageListDataStore.editMessageMode}/>
+			<MessageList messages={props.messages} />
 
-			<div className='messageEditAreaControls'>
+			<div>
 				<button
 					disabled={messageListDataStore.editMessageMode}
 					className='mainButton'
@@ -118,7 +121,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 				<button
 					disabled={
 						messageListDataStore.editMessageMode
-                        || messageListDataStore.getCurrentMessagesArray.length === 0
+						|| messageListDataStore.getCurrentMessagesArray.length === 0
 					}
 					className='mainButton'
 					onClick={() => {

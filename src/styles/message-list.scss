@@ -15,20 +15,16 @@
  ***************************************************************************** */
 @import './common/vars';
 
-.messageEditAreaControls {
-	bottom: 0px;
-}
-
 .messageEntity {
 	width: 100%;
 	cursor: pointer;
 }
 
-.messageItem:hover .messageCard{
+.messageItem:hover .messageCard {
 	background-color: #cccccc;
 }
 
-.message{
+.message {
 	@include display-flex-row;
 }
 
@@ -36,32 +32,32 @@
 	margin-bottom: 10px;
 }
 
-.messageItemDragging .messageCard{
+.messageItemDragging .messageCard {
 	background-color: #cccccc;
 	border: 1px solid #b0b0b0;
 	box-shadow: 5px 5px 5px #494949;
 }
 
-.dragHandlerContainer{
-	display:flex;
+.dragHandlerContainer {
+	display: flex;
 	flex-direction: column;
 	justify-content: start;
 	background-color: transparent;
 	width: 25px;
 }
 
-.dragHandler{
+.dragHandler {
 	background-image: url('../../resources/icons/burger.svg');
 	background-repeat: no-repeat;
 	background-size: contain;
 	height: 25px;
 }
 
-.dragHandler:hover{
-	cursor:grabbing;
+.dragHandler:hover {
+	cursor: grabbing;
 }
 
-.tab:hover{
+.tab:hover {
 	background-color: #cccccc;
 }
 
@@ -71,21 +67,34 @@
 }
 .scrolledBlock {
 	padding: 10px;
-	max-height: 550px;;
+	max-height: 555px;
 	width: 100%;
 	overflow-y: scroll;
 }
 
-.historyTab{
+.historyTab {
+	height: inherit;
 	display: grid;
-	grid-template-rows: minmax(10px, max-content) auto 50px;
+	grid-template-rows: minmax(10px, max-content) auto 30px;
 	grid-row-gap: 10px;
+}
+
+.editedMessage {
+	@include display-flex-row;
+	@extend .messageCardSample;
+	background: rgba(116, 116, 116, 0.067);
+	border: 2px solid rgb(255, 61, 54);
 }
 
 .messageCard {
 	@include display-flex-row;
-	background: #1111;
+	@extend .messageCardSample;
 	border: 1px solid #b0b0b0;
+	background: #1111;
+}
+
+.messageCardSample {
+	@include display-flex-row;
 	border-radius: 4px;
 	padding: 3px;
 	overflow: hidden;
@@ -104,7 +113,7 @@
 .mainButton {
 	margin-right: 5px;
 	width: 70px;
-	height: 45px;
+	height: 30px;
 }
 
 .indicator {
@@ -160,7 +169,7 @@
 	margin-right: 4px;
 }
 
-.mainGrid{
+.appGrid {
 	position: absolute;
 	height: 100%;
 	width: 100%;

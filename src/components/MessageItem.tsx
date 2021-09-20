@@ -16,6 +16,7 @@
  ***************************************************************************** */
 
 import React, { useState } from 'react';
+import { observer } from 'mobx-react-lite';
 import { Draggable, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import '../styles/message-list.scss';
 import {
@@ -68,11 +69,16 @@ const DraggableMessageItem = ({ index, message, keyId }: DraggableMessageItemPro
 	);
 };
 
-const MessageItem = ({ index, message }: MessageItemProps) => {
+const MessageItem = observer(({ index, message }: MessageItemProps) => {
 	const [delay, setDelayValue] = useState(message.delay.toString());
 	const messageListDataStore = useStore().messageListDataStore;
 	return (
-		<div className='messageCard'>
+		<div
+			className={
+				messageListDataStore.editedMessageId === message.id
+					? 'editedMessage'
+					: 'messageCard'
+			}>
 			<div
 				onClick={() => {
 					const selection = window.getSelection();
@@ -87,14 +93,12 @@ const MessageItem = ({ index, message }: MessageItemProps) => {
 					className='delayInput'
 					type='number'
 					InputProps={{
-						endAdornment: <InputAdornment position="end">ms</InputAdornment>,
-						  }}
+						endAdornment: <InputAdornment position='end'>ms</InputAdornment>,
+					}}
 					size='small'
 					value={delay}
 					onChange={e => {
-						messageListDataStore.setEditedMessageSendDelay(
-							Number(e.target.value),
-						);
+						messageListDataStore.setEditedMessageSendDelay(Number(e.target.value));
 						setDelayValue(e.target.value);
 					}}
 				/>
@@ -107,7 +111,7 @@ const MessageItem = ({ index, message }: MessageItemProps) => {
 			/>
 		</div>
 	);
-};
+});
 
 const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) => {
 	if (isParsedMessageItem(props.message)) {
@@ -145,31 +149,34 @@ const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) =
 	return null;
 };
 
-const MessageCardControls = (props: {
-	id: string;
-	indicator: Indicator;
-	message: ParsedMessageItem | ActMessageItem;
-	index: number;
-}) => {
-	const messageListDataStore = useStore().messageListDataStore;
-	return (
-		<div className='cardControls'>
-			<button
-				disabled={messageListDataStore.editMessageMode}
-				className='deleteButton'
-				onClick={() => {
-					messageListDataStore.deleteMessage(props.id);
-				}}>
-				x
-			</button>
-			<div>
+const MessageCardControls = observer(
+	(props: {
+		id: string;
+		indicator: Indicator;
+		message: ParsedMessageItem | ActMessageItem;
+		index: number;
+	}) => {
+		const messageListDataStore = useStore().messageListDataStore;
+		return (
+			<div className='cardControls'>
 				<button
-					className={
-						messageListDataStore.getCurrentMessagesArray.slice()[props.index].indicator
-					}></button>
+					disabled={messageListDataStore.editMessageMode}
+					className='deleteButton'
+					onClick={() => {
+						messageListDataStore.deleteMessage(props.id);
+					}}>
+					x
+				</button>
+				<div>
+					<button
+						className={
+							messageListDataStore.getCurrentMessagesArray.slice()[props.index]
+								.indicator
+						}></button>
+				</div>
 			</div>
-		</div>
-	);
-};
+		);
+	},
+);
 
-export default DraggableMessageItem;
+export default observer(DraggableMessageItem);

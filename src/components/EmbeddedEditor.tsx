@@ -18,13 +18,9 @@ import React from 'react';
 import '../styles/message-list.scss';
 import '../styles/splitter.scss';
 
-export const EmbeddedEditor = (props: { schema: string; object: string; className?: string }) => {
+export const EmbeddedEditor = (props: { schema: string; object: string }) => {
 	const url = `http://10.44.17.234:3000?schema=${props.schema}&${
-		props.object == null ? '' : `object=${props.object}`
+		props.object && `object=${props.object}`
 	}&editorMode=dictionaryEditor&embedded=true`;
-	return (
-		<div className={props.className ? 'tabEmbeddedEditor' : 'scrolledBlock'}>
-			<iframe className={props.className ? props.className : 'embeddedEditor'} src={url}></iframe>
-		</div>
-	);
+	return <iframe className='embeddedEditor' src={url}></iframe>;
 };

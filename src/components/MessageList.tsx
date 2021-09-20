@@ -34,10 +34,7 @@ export type Indicator =
 	| 'indicator-successful'
 	| 'indicator-unsuccessful';
 
-const MessageList = (props: {
-	messages: ParsedMessageItem[] | ActMessageItem[];
-	editMessageMode: boolean;
-}) => {
+const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }) => {
 	const store = useStore();
 	const messageListDataStore = store.messageListDataStore;
 

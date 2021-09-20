@@ -29,14 +29,14 @@ import { MessageSendingResponse } from '../models/Message';
 import MessageHistory from './MessageHistory';
 import '../styles/message-list.scss';
 import { Tab, Tabs } from '../../node_modules/@material-ui/core';
-import { EmbeddedEditor } from './DictionaryEditorArea';
+import { EmbeddedEditor } from './EmbeddedEditor';
 import SplitView from '../split-view/SplitView';
 import SplitViewPane from '../split-view/SplitViewPane';
 
 const App = () => {
 	const store: Store = useStore();
 	const messageListDataStore = store.messageListDataStore;
-	const [value, setValue] = React.useState(0);
+	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
@@ -52,7 +52,7 @@ const App = () => {
 	};
 
 	const selectTab = (e: React.ChangeEvent<{}>, tab: number) => {
-		setValue(tab);
+		setCurrentTab(tab);
 	};
 
 	return (
@@ -63,30 +63,36 @@ const App = () => {
 					<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
 						<SplitViewPane>
 							<MessageEditor
-								messageSchema={store.selectedSchema} ref={messageEditorRef} />
+								messageSchema={store.selectedSchema}
+								ref={messageEditorRef}
+							/>
 						</SplitViewPane>
 
 						<SplitViewPane>
-							<div className='mainGrid'>
-								<Tabs value={value} onChange={selectTab}>
-									<Tab label='Result' className='tab'/>
-									<Tab label='History' className='tab'/>
-									<Tab label='Dictionary' className='tab'/>
+							<div className='appGrid'>
+								<Tabs value={currentTab} onChange={selectTab}>
+									<Tab label='Result' className='tab' />
+									<Tab label='History' className='tab' />
+									<Tab label='Dictionary' className='tab' />
 								</Tabs>
-								{value === 0
-									? <div>
+								{currentTab === 0 ? (
+									<div>
 										<h3 className='app__title'>Result</h3>
 										<Result response={response} />
 									</div>
-									: value === 1
-										? <MessageHistory
-											messages={messageListDataStore.getCurrentMessagesArray.slice()}/>
-										: <EmbeddedEditor schema='schema-qa'
-											object={store.selectedDictionaryName || ''} />}
+								) : currentTab === 1 ? (
+									<MessageHistory
+										messages={messageListDataStore.getCurrentMessagesArray.slice()}
+									/>
+								) : (
+									<EmbeddedEditor
+										schema='schema-qa'
+										object={store.selectedDictionaryName || ''}
+									/>
+								)}
 							</div>
 						</SplitViewPane>
 					</SplitView>
-
 					{store.isSchemaLoading && <div className='overlay' />}
 				</div>
 				<div className='app__buttons'>
@@ -113,7 +119,6 @@ const App = () => {
 				</div>
 			</div>
 		</div>
-
 	);
 };
 
