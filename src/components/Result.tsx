@@ -21,6 +21,7 @@ import {
 	ParsedMessageSendingResponse,
 } from '../models/Message';
 import '../styles/result.scss';
+import ResultMonacoEditor from './ResultMonacoEditor';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -108,21 +109,11 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 		}
 	};
 
-	const { link, content } = parseContent();
+	const { content } = parseContent();
 
 	return (
 		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
-			<pre className='result-value'>
-				{link && (
-					<>
-						<div>Message is sent successfully</div>
-						<a href={link} rel='noreferrer' target='_blank'>
-							Go to the send request event (opens in a new tab)
-						</a>
-					</>
-				)}
-				{content}
-			</pre>
+			<ResultMonacoEditor value = {content}></ResultMonacoEditor>
 		</div>
 	);
 };
