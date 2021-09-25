@@ -18,8 +18,8 @@
 import {
 	action, computed, observable, reaction,
 } from 'mobx';
+import { nanoid } from 'nanoid';
 import { SchemaType } from '../components/Control';
-import { nanoid } from '../../node_modules/nanoid';
 import {
 	ParsedMessageItem,
 	ActMessageItem,

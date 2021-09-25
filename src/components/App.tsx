@@ -17,6 +17,7 @@
 import { hot } from 'react-hot-loader/root';
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
+import { Tab, Tabs } from '@material-ui/core';
 import Result from './Result';
 import Button from './Button';
 import '../styles/root.scss';
@@ -28,7 +29,6 @@ import Store from '../stores/Store';
 import { MessageSendingResponse } from '../models/Message';
 import MessageHistory from './MessageHistory';
 import '../styles/message-list.scss';
-import { Tab, Tabs } from '../../node_modules/@material-ui/core';
 import { EmbeddedEditor } from './EmbeddedEditor';
 import SplitView from '../split-view/SplitView';
 import SplitViewPane from '../split-view/SplitViewPane';

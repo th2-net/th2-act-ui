@@ -13,13 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
-
-import React from 'react';
-import '../styles/embedded-editor.scss';
-
-export const EmbeddedEditor = (props: { schema: string; object: string }) => {
-	const url = `http://10.44.17.234:3000?schema=${props.schema}&${
-		props.object && `object=${props.object}`
-	}&editorMode=dictionaryEditor&embedded=true`;
-	return <iframe className='embedded-editor' src={url}></iframe>;
-};
+ 
+.embedded-editor{
+    width: 100%;
+	height: 650px;
+}

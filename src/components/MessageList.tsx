@@ -20,7 +20,7 @@ import { observer } from 'mobx-react-lite';
 import {
 	Droppable, DroppableProvided, DropResult, DragDropContext,
 } from 'react-beautiful-dnd';
-import { nanoid } from '../../node_modules/nanoid';
+import { nanoid } from 'nanoid';
 import { useStore } from '../hooks/useStore';
 import '../styles/message-list.scss';
 import '../styles/splitter.scss';
@@ -53,7 +53,7 @@ const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }
 
 	return (
 		<DragDropContext onDragEnd={dragEndHandler}>
-			<div className='scrolledBlock'>
+			<div className='message-list'>
 				<Droppable droppableId='droppableId'>
 					{(provided: DroppableProvided) => (
 						<ul {...provided.droppableProps} ref={provided.innerRef}>

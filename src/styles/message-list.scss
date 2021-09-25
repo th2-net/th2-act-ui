@@ -15,6 +15,83 @@
  ***************************************************************************** */
 @import './common/vars';
 
+.message-list {
+	padding: 10px;
+	max-height: 555px;
+	width: 100%;
+	overflow-y: scroll;
+
+	&__item {
+		@include display-flex-row;
+		margin-bottom: 10px;
+
+		&_dragging .messageCard {
+			background-color: #cccccc;
+			border: 1px solid #b0b0b0;
+			box-shadow: 5px 5px 5px #494949;
+		}
+	}
+
+	&__drag-handler-container {
+		display: flex;
+		flex-direction: column;
+		justify-content: start;
+		background-color: transparent;
+		width: 25px;
+	}
+
+	&__drag-handler {
+		background-image: url('../../resources/icons/burger.svg');
+		background-repeat: no-repeat;
+		background-size: contain;
+		height: 25px;
+	}
+
+	&__drag-handler:hover {
+		cursor: grabbing;
+	}
+
+	&__message-card {
+		@include display-flex-row;
+		@extend .messageCardSample;
+		border: 1px solid #b0b0b0;
+		background: #1111;
+
+		&_edited {
+			@include display-flex-row;
+			@extend .messageCardSample;
+			background: rgba(116, 116, 116, 0.067);
+			border: 2px solid rgb(255, 61, 54);
+		}
+
+		&-controls {
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-start;
+			align-items: center;
+			margin-left: auto;
+		}
+	}
+
+	&__message-card:hover &__delete-message-btn{
+		visibility: visible;
+	}
+
+	&__delay-input {
+		width: 100px;
+	}
+
+	&__message-content {
+		width: 100%;
+		cursor: pointer;
+	}
+
+	&__delete-message-btn {
+		visibility: hidden;
+		cursor: pointer;
+	}
+}
+
 .messageEntity {
 	width: 100%;
 	cursor: pointer;

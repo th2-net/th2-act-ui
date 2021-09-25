@@ -20,12 +20,14 @@ import Editor, { monaco, Monaco } from '@monaco-editor/react';
 const ResultMonacoEditor = (props: { value: string }) => {
 	const monacoEditor = React.useRef<Monaco>();
 
-	monaco.init().then((_monaco: Monaco) => {
-		monacoEditor.current = _monaco;
-		monacoEditor.current.languages.json.jsonDefaults.setDiagnosticsOptions({
-			validate: false,
+	React.useEffect(() => {
+		monaco.init().then((_monaco: Monaco) => {
+			monacoEditor.current = _monaco;
+			monacoEditor.current.languages.json.jsonDefaults.setDiagnosticsOptions({
+				validate: false,
+			});
 		});
-	});
+	}, []);
 
 	return (
 		<Editor

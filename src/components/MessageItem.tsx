@@ -19,6 +19,7 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Draggable, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import '../styles/message-list.scss';
+import { InputAdornment, TextField } from '@material-ui/core';
 import {
 	ParsedMessageItem,
 	ActMessageItem,
@@ -27,7 +28,6 @@ import {
 } from '../models/Message';
 import { Indicator } from './MessageList';
 import { useStore } from '../hooks/useStore';
-import { InputAdornment, TextField } from '../../node_modules/@material-ui/core';
 
 interface MessageItemProps {
 	index: number;
@@ -48,21 +48,19 @@ const DraggableMessageItem = ({ index, message, keyId }: DraggableMessageItemPro
 					ref={prov.innerRef}
 					key={keyId}
 					draggable={false}
-					className={snapshot.isDragging ? 'messageItemDragging' : 'messageItem'}>
-					<div className='message'>
-						<div className='dragHandlerContainer'>
-							<div
-								style={{
-									visibility: messageListDataStore.editMessageMode
-										? 'hidden'
-										: 'visible',
-								}}
-								{...prov.dragHandleProps}
-								draggable={true}
-								className='dragHandler'></div>
-						</div>
-						<MessageItem index={index} message={message} />
+					className={snapshot.isDragging ? 'message-list__item_dragging' : 'message-list__item'}>
+					<div className='message-list__drag-handler-container'>
+						<div
+							style={{
+								visibility: messageListDataStore.editMessageMode
+									? 'hidden'
+									: 'visible',
+							}}
+							{...prov.dragHandleProps}
+							draggable={true}
+							className='message-list__drag-handler'></div>
 					</div>
+					<MessageItem index={index} message={message} />
 				</li>
 			)}
 		</Draggable>
@@ -76,8 +74,8 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 		<div
 			className={
 				messageListDataStore.editedMessageId === message.id
-					? 'editedMessage'
-					: 'messageCard'
+					? 'message-list__message-card_edited'
+					: 'message-list__message-card'
 			}>
 			<div
 				onClick={() => {
@@ -90,7 +88,7 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 				<b style={{ marginRight: '10px' }}>delay:</b>
 				<TextField
 					variant='standard'
-					className='delayInput'
+					className='message-list__delay-input'
 					type='number'
 					InputProps={{
 						endAdornment: <InputAdornment position='end'>ms</InputAdornment>,
@@ -116,7 +114,7 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) => {
 	if (isParsedMessageItem(props.message)) {
 		return (
-			<div className='messageEntity'>
+			<div className='message-list__message-content'>
 				<p>
 					<b>session: </b>
 					{props.message.sessionId}
@@ -158,10 +156,10 @@ const MessageCardControls = observer(
 	}) => {
 		const messageListDataStore = useStore().messageListDataStore;
 		return (
-			<div className='cardControls'>
+			<div className='message-list__message-card-controls'>
 				<button
 					disabled={messageListDataStore.editMessageMode}
-					className='deleteButton'
+					className='message-list__delete-message-btn'
 					onClick={() => {
 						messageListDataStore.deleteMessage(props.id);
 					}}>
