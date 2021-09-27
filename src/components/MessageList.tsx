@@ -29,10 +29,10 @@ import { ParsedMessageItem, ActMessageItem } from '../models/Message';
 import DraggableMessageItem from './MessageItem';
 
 export type Indicator =
-	| 'indicator-unvisible'
-	| 'indicator-edited'
-	| 'indicator-successful'
-	| 'indicator-unsuccessful';
+	| 'indicator_unvisible'
+	| 'indicator_edited'
+	| 'indicator_successful'
+	| 'indicator_unsuccessful';
 
 const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }) => {
 	const store = useStore();

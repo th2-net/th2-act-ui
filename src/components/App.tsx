@@ -69,11 +69,11 @@ const App = () => {
 						</SplitViewPane>
 
 						<SplitViewPane>
-							<div className='appGrid'>
+							<div className='app__tabs-container'>
 								<Tabs value={currentTab} onChange={selectTab}>
-									<Tab label='Result' className='tab' />
-									<Tab label='History' className='tab' />
-									<Tab label='Dictionary' className='tab' />
+									<Tab label='Result' className='app__tab' />
+									<Tab label='History' className='app__tab' />
+									<Tab label='Dictionary' className='app__tab' />
 								</Tabs>
 								{currentTab === 0 ? (
 									<div>

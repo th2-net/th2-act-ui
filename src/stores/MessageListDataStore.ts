@@ -56,7 +56,7 @@ export default class MessageListDataStore {
 					messageType: this.store.selectedMessageType,
 					message: this.editorCode,
 					delay: this.editedMessageSendDelay,
-					indicator: 'indicator-edited',
+					indicator: 'indicator_edited',
 				};
 				return editedMessage;
 			}
@@ -74,7 +74,7 @@ export default class MessageListDataStore {
 					methodName: this.store.selectedMethod?.methodName,
 					message: this.editorCode,
 					delay: this.editedMessageSendDelay,
-					indicator: 'indicator-edited',
+					indicator: 'indicator_edited',
 				};
 				return editedMessage;
 			}
@@ -146,7 +146,7 @@ export default class MessageListDataStore {
 		if (!messageWithId.id) {
 			messageWithId.id = nanoid();
 		}
-		messageWithId.indicator = 'indicator-unvisible';
+		messageWithId.indicator = 'indicator_unvisible';
 		if (isParsedMessageItem(messageWithId)) {
 			this.parsedMessagesHistory.push(messageWithId);
 		} else if (isActMessageItem(messageWithId)) {
@@ -194,11 +194,11 @@ export default class MessageListDataStore {
 	@action clearIndicators = () => {
 		if (this.store.selectedSchemaType === 'parsed-message') {
 			for (let i = 0; i < this.parsedMessagesHistory.length; i++) {
-				this.parsedMessagesHistory[i].indicator = 'indicator-unvisible';
+				this.parsedMessagesHistory[i].indicator = 'indicator_unvisible';
 			}
 		} else if (this.store.selectedSchemaType === 'act') {
 			for (let i = 0; i < this.actMessagesHistory.length; i++) {
-				this.actMessagesHistory[i].indicator = 'indicator-unvisible';
+				this.actMessagesHistory[i].indicator = 'indicator_unvisible';
 			}
 		}
 	};

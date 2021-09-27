@@ -297,12 +297,12 @@ export default class Store {
 				});
 				this.messageListDataStore.changeIndicator(
 					index,
-					result.code === 200 ? 'indicator-successful' : 'indicator-unsuccessful',
+					result.code === 200 ? 'indicator_successful' : 'indicator_unsuccessful',
 				);
 			} catch (error) {
 				alert('Error while sending');
 				this.messageListDataStore.changeIndicator(
-					index, 'indicator-unsuccessful',
+					index, 'indicator_unsuccessful',
 				);
 			}
 		}
@@ -315,12 +315,12 @@ export default class Store {
 				});
 				this.messageListDataStore.changeIndicator(
 					index,
-					result.code === 200 ? 'indicator-successful' : 'indicator-unsuccessful',
+					result.code === 200 ? 'indicator_successful' : 'indicator_unsuccessful',
 				);
 			} catch (error) {
 				alert('Error while sending');
 				this.messageListDataStore.changeIndicator(
-					index, 'indicator-unsuccessful',
+					index, 'indicator_unsuccessful',
 				);
 			}
 		}
@@ -356,7 +356,7 @@ export default class Store {
 					messageType: this.selectedMessageType,
 					message: JSON.stringify(message, null, 4),
 					delay: 0,
-					indicator: 'indicator-unvisible',
+					indicator: 'indicator_unvisible',
 				});
 				break;
 			}
@@ -378,7 +378,7 @@ export default class Store {
 					methodName: this.selectedMethod.methodName,
 					message: JSON.stringify(message, null, 4),
 					delay: 0,
-					indicator: 'indicator-unvisible',
+					indicator: 'indicator_unvisible',
 				});
 				break;
 			}

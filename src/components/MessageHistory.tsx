@@ -18,7 +18,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '../hooks/useStore';
-import '../styles/message-list.scss';
+import '../styles/message-history.scss';
 import '../styles/splitter.scss';
 import { downloadFile } from '../helpers/downloadFile';
 import { ParsedMessageItem, ActMessageItem } from '../models/Message';
@@ -88,32 +88,35 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 	};
 
 	return (
-		<div className='historyTab'>
-			{messageListDataStore.editMessageMode ? (
+		<div
+			className={'message-history'.concat(
+				messageListDataStore.editMessageMode ? '_edited' : '',
+			)}>
+			{messageListDataStore.editMessageMode && (
 				<div
-					className={'normalNewMessage'}
+					className={'add-new-message'}
 					onClick={() => {
 						messageListDataStore.setEditMessageMode(false);
 					}}>
 					New Message
 				</div>
-			) : (
-				<div></div>
 			)}
 
-			<MessageList messages={props.messages} />
+			<div className="message-history__message-list-container">
+				<MessageList messages={props.messages} />
+			</div>
 
-			<div>
+			<div className='message-history__controls'>
 				<button
 					disabled={messageListDataStore.editMessageMode}
-					className='mainButton'
+					className='message-history__controls-button'
 					onClick={messageListDataStore.clearParsedMessages}>
 					Clear
 				</button>
 
 				<button
 					disabled={messageListDataStore.getCurrentMessagesArray.length === 0}
-					className='mainButton'
+					className='message-history__controls-button'
 					onClick={exportFn}>
 					Export
 				</button>
@@ -123,7 +126,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 						messageListDataStore.editMessageMode
 						|| messageListDataStore.getCurrentMessagesArray.length === 0
 					}
-					className='mainButton'
+					className='message-history__controls-button'
 					onClick={() => {
 						setReplayMode(!isReplay);
 					}}>

@@ -19,6 +19,7 @@ import React, { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Draggable, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import '../styles/message-list.scss';
+import '../styles/indicator.scss';
 import { InputAdornment, TextField } from '@material-ui/core';
 import {
 	ParsedMessageItem,

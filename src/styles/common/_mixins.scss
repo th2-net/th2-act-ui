@@ -148,3 +148,11 @@
 	flex-direction: row;
 	justify-content: flex-start;
 }
+
+@mixin message-card-sample {
+	@include display-flex-row;
+	border-radius: 4px;
+	padding: 3px;
+	overflow: hidden;
+	width: 100%;
+}
