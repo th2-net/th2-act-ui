@@ -21,9 +21,11 @@
 
 	&__item {
 		@include display-flex-row;
+		border: 1px solid #b0b0b0;
+		background: #1111;
 		margin-bottom: 10px;
 
-		&_dragging .messageCard {
+		&_dragging {
 			background-color: #cccccc;
 			border: 1px solid #b0b0b0;
 			box-shadow: 5px 5px 5px #494949;
@@ -33,16 +35,21 @@
 	&__drag-handler-container {
 		display: flex;
 		flex-direction: column;
-		justify-content: start;
+		justify-content: center;
 		background-color: transparent;
 		width: 25px;
+		margin-right: 5px;
 	}
 
 	&__drag-handler {
-		background-image: url('../../resources/icons/burger.svg');
+		background-image: url('../../resources/icons/grip.svg');
 		background-repeat: no-repeat;
 		background-size: contain;
 		height: 25px;
+		transform: rotate(90deg);
+		-moz-transform: rotate(90deg);
+		-ms-transform: rotate(90deg);
+		-o-transform: rotate(90deg);
 	}
 
 	&__drag-handler:hover {
@@ -51,8 +58,6 @@
 
 	&__message-card {
 		@include message-card-sample;
-		border: 1px solid #b0b0b0;
-		background: #1111;
 
 		&_edited {
 			@include message-card-sample;

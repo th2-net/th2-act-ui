@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 .message-history {
-	height: 100%;
+    height: 100%;
 	display: grid;
 	grid-template-rows: auto 40px;
 	grid-row-gap: 10px;
@@ -27,7 +27,7 @@
 	}
 
 	&__message-list-container {
-		overflow-y: scroll;
+		overflow-y: auto;
 	}
 
 	&__controls {

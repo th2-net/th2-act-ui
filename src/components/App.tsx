@@ -59,42 +59,40 @@ const App = () => {
 		<div className='app'>
 			<div className='app__body'>
 				<Control />
-				<div>
-					<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
-						<SplitViewPane>
-							<MessageEditor
-								messageSchema={store.selectedSchema}
-								ref={messageEditorRef}
-							/>
-						</SplitViewPane>
+				<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
+					<SplitViewPane>
+						<MessageEditor
+							messageSchema={store.selectedSchema}
+							ref={messageEditorRef}
+						/>
+					</SplitViewPane>
 
-						<SplitViewPane>
-							<div className='app__tabs-container'>
-								<Tabs value={currentTab} onChange={selectTab}>
-									<Tab label='Result' className='app__tab' />
-									<Tab label='History' className='app__tab' />
-									<Tab label='Dictionary' className='app__tab' />
-								</Tabs>
-								{currentTab === 0 ? (
-									<div>
-										<h3 className='app__title'>Result</h3>
-										<Result response={response} />
-									</div>
-								) : currentTab === 1 ? (
-									<MessageHistory
-										messages={messageListDataStore.getCurrentMessagesArray.slice()}
-									/>
-								) : (
-									<EmbeddedEditor
-										schema='schema-qa'
-										object={store.selectedDictionaryName || ''}
-									/>
-								)}
-							</div>
-						</SplitViewPane>
-					</SplitView>
-					{store.isSchemaLoading && <div className='overlay' />}
-				</div>
+					<SplitViewPane>
+						<div className='app__tabs-container'>
+							<Tabs value={currentTab} onChange={selectTab}>
+								<Tab label='Result' className='app__tab' />
+								<Tab label='History' className='app__tab' />
+								<Tab label='Dictionary' className='app__tab' />
+							</Tabs>
+							{currentTab === 0 ? (
+								<div>
+									<h3 className='app__title'>Result</h3>
+									<Result response={response} />
+								</div>
+							) : currentTab === 1 ? (
+								<MessageHistory
+									messages={messageListDataStore.getCurrentMessagesArray.slice()}
+								/>
+							) : (
+								<EmbeddedEditor
+									schema='schema-qa'
+									object={store.selectedDictionaryName || ''}
+								/>
+							)}
+						</div>
+					</SplitViewPane>
+				</SplitView>
+				{store.isSchemaLoading && <div className='overlay' />}
 				<div className='app__buttons'>
 					<Button
 						onClick={
