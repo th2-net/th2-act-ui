@@ -111,7 +111,7 @@ ul {
 		height: 100%;
 		width: 100%;
 		display: grid;
-		grid-template-rows: 50px 640px;
+		grid-template-rows: 50px auto;
 		grid-row-gap: 10px;
 	}
 

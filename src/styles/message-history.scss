@@ -15,13 +15,14 @@
  ***************************************************************************** */
 
 .message-history {
-    height: 100%;
 	display: grid;
+    overflow-y: auto;
 	grid-template-rows: auto 40px;
 	grid-row-gap: 10px;
 
 	&_edited {
 		display: grid;
+        overflow-y: auto;
 		grid-template-rows: auto auto 40px;
 		grid-row-gap: 10px;
 	}
