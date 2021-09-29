@@ -37,11 +37,13 @@ interface MessageItemProps {
 
 interface DraggableMessageItemProps extends MessageItemProps {
 	keyId: string;
+	editMessageMode: boolean;
 }
 
-const DraggableMessageItem = ({ index, message, keyId }: DraggableMessageItemProps) => {
-	const messageListDataStore = useStore().messageListDataStore;
-	return (
+const DraggableMessageItem = observer(
+	({
+		index, message, keyId, editMessageMode,
+	}: DraggableMessageItemProps) => (
 		<Draggable draggableId={keyId} index={index} key={keyId}>
 			{(prov: DraggableProvided, snapshot: DraggableStateSnapshot) => (
 				<li
@@ -49,14 +51,16 @@ const DraggableMessageItem = ({ index, message, keyId }: DraggableMessageItemPro
 					ref={prov.innerRef}
 					key={keyId}
 					draggable={false}
-					className={snapshot.isDragging ? 'message-list__item_dragging' : 'message-list__item'}>
-					<div className='message-list__drag-handler-container'>
+					className={
+						snapshot.isDragging ? 'message-list__item_dragging' : 'message-list__item'
+					}>
+					<div
+						className={
+							editMessageMode
+								? 'message-list__drag-handler-container_hidden'
+								: 'message-list__drag-handler-container'
+						}>
 						<div
-							style={{
-								visibility: messageListDataStore.editMessageMode
-									? 'hidden'
-									: 'visible',
-							}}
 							{...prov.dragHandleProps}
 							draggable={true}
 							className='message-list__drag-handler'></div>
@@ -65,8 +69,8 @@ const DraggableMessageItem = ({ index, message, keyId }: DraggableMessageItemPro
 				</li>
 			)}
 		</Draggable>
-	);
-};
+	),
+);
 
 const MessageItem = observer(({ index, message }: MessageItemProps) => {
 	const [delay, setDelayValue] = useState(message.delay.toString());
@@ -178,4 +182,4 @@ const MessageCardControls = observer(
 	},
 );
 
-export default observer(DraggableMessageItem);
+export default DraggableMessageItem;

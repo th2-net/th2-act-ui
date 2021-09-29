@@ -22,6 +22,7 @@
 	&__item {
 		@include display-flex-row;
 		border: 1px solid #b0b0b0;
+		border-radius: 4px;
 		background: #1111;
 		margin-bottom: 10px;
 
@@ -39,17 +40,17 @@
 		background-color: transparent;
 		width: 25px;
 		margin-right: 5px;
+
+		&_hidden {
+			visibility: hidden;
+		}
 	}
 
 	&__drag-handler {
-		background-image: url('../../resources/icons/grip.svg');
+		background-image: url('../../resources/icons/grip-vertical.svg');
 		background-repeat: no-repeat;
 		background-size: contain;
 		height: 25px;
-		transform: rotate(90deg);
-		-moz-transform: rotate(90deg);
-		-ms-transform: rotate(90deg);
-		-o-transform: rotate(90deg);
 	}
 
 	&__drag-handler:hover {

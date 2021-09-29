@@ -66,6 +66,7 @@ const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }
 									keyId={item.id || nanoid()}
 									index={index}
 									message={item}
+									editMessageMode={messageListDataStore.editMessageMode}
 								/>
 							))}
 							{provided.placeholder}
