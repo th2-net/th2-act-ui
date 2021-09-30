@@ -113,7 +113,7 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 
 	return (
 		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
-			<ResultMonacoEditor value = {content}></ResultMonacoEditor>
+			<ResultMonacoEditor value={content}></ResultMonacoEditor>
 		</div>
 	);
 };

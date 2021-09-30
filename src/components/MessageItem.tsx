@@ -52,7 +52,7 @@ const DraggableMessageItem = observer(
 					key={keyId}
 					draggable={false}
 					className={
-						snapshot.isDragging ? 'message-list__item_dragging' : 'message-list__item'
+						snapshot.isDragging ? 'message-list__item dragging' : 'message-list__item'
 					}>
 					<div
 						className={

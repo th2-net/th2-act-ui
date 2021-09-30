@@ -85,26 +85,21 @@ export default class MessageListDataStore {
 
 	@action saveEditedMessage = () => {
 		if (this.editedMessageId !== '') {
-			const message: ParsedMessageItem | ActMessageItem | undefined = this.buildEditedMessage();
-			if (message !== undefined) {
-				message.id = nanoid();
+			const editedMessage: ParsedMessageItem | ActMessageItem | undefined = this.buildEditedMessage();
+			if (editedMessage !== undefined) {
+				editedMessage.id = nanoid();
 				if (
 					this.store.selectedSchemaType === 'parsed-message'
-					&& isParsedMessageItem(message)
+					&& isParsedMessageItem(editedMessage)
 				) {
-					for (let i = 0; i < this.parsedMessagesHistory.length; i++) {
-						if (this.parsedMessagesHistory[i].id === this.editedMessageId) {
-							this.parsedMessagesHistory[i] = message;
-							break;
-						}
-					}
-				} else if (this.store.selectedSchemaType === 'act' && isActMessageItem(message)) {
-					for (let i = 0; i < this.actMessagesHistory.length; i++) {
-						if (this.actMessagesHistory[i].id === this.editedMessageId) {
-							this.actMessagesHistory[i] = message;
-							break;
-						}
-					}
+					this.parsedMessagesHistory = this.parsedMessagesHistory.map(message =>
+						(message.id === this.editedMessageId ? editedMessage : message));
+				} else if (
+					this.store.selectedSchemaType === 'act'
+					&& isActMessageItem(editedMessage)
+				) {
+					this.actMessagesHistory = this.actMessagesHistory.map(message =>
+						(message.id === this.editedMessageId ? editedMessage : message));
 				}
 			}
 			this.setEditMessageMode(false);
@@ -193,10 +188,15 @@ export default class MessageListDataStore {
 
 	@action clearIndicators = () => {
 		if (this.store.selectedSchemaType === 'parsed-message') {
-			for (let i = 0; i < this.parsedMessagesHistory.length; i++) {
-				this.parsedMessagesHistory[i].indicator = 'indicator_unvisible';
-			}
+			this.parsedMessagesHistory = this.parsedMessagesHistory.map(message => ({
+				...message,
+				indicator: 'indicator_unvisible',
+			}));
 		} else if (this.store.selectedSchemaType === 'act') {
+			this.actMessagesHistory.map(message => ({
+				...message,
+				indicator: 'indicator_unvisible',
+			}));
 			for (let i = 0; i < this.actMessagesHistory.length; i++) {
 				this.actMessagesHistory[i].indicator = 'indicator_unvisible';
 			}
@@ -241,17 +241,13 @@ export default class MessageListDataStore {
 	};
 
 	@action deleteMessage = (id: string) => {
-		const newArray: any = [];
-
-		this.getCurrentMessagesArray.forEach((item: ParsedMessageItem | ActMessageItem) => {
-			if (item.id !== id) {
-				newArray.push(item);
-			}
-		});
-		this.clearParsedMessages();
-		newArray.forEach((mess: ParsedMessageItem | ActMessageItem) => {
-			this.addParsedMessage(mess);
-		});
+		if (this.store.selectedSchemaType === 'parsed-message') {
+			this.parsedMessagesHistory = this.parsedMessagesHistory.filter(
+				message => message.id !== id,
+			);
+		} else if (this.store.selectedSchemaType === 'act') {
+			this.actMessagesHistory = this.actMessagesHistory.filter(message => message.id !== id);
+		}
 	};
 
 	prepareForSelectedSchemaType = (type: SchemaType) => {

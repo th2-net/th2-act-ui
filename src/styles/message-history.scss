@@ -16,19 +16,19 @@
 
 .message-history {
 	display: grid;
-    overflow-y: auto;
+	overflow: hidden;
 	grid-template-rows: auto 40px;
 	grid-row-gap: 10px;
 
 	&_edited {
 		display: grid;
-        overflow-y: auto;
-		grid-template-rows: auto auto 40px;
+		overflow: hidden;
+		grid-template-rows: 30px auto 40px;
 		grid-row-gap: 10px;
 	}
 
 	&__message-list-container {
-		overflow-y: auto;
+		overflow: auto;
 	}
 
 	&__controls {

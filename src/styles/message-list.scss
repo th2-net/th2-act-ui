@@ -25,12 +25,12 @@
 		border-radius: 4px;
 		background: #1111;
 		margin-bottom: 10px;
+	}
 
-		&_dragging {
-			background-color: #cccccc;
-			border: 1px solid #b0b0b0;
-			box-shadow: 5px 5px 5px #494949;
-		}
+	.dragging {
+		background-color: #cccccc;
+		border: 1px solid #b0b0b0;
+		box-shadow: 5px 5px 5px #494949;
 	}
 
 	&__drag-handler-container {

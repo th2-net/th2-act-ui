@@ -44,12 +44,9 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 
 	const jsonMessagesFromString = (rawFromFile: string) => {
 		try {
-			const json = JSON.parse(rawFromFile);
+			const messages = JSON.parse(rawFromFile) as Array<ParsedMessageItem | ActMessageItem>;
 			messageListDataStore.clearParsedMessages();
-
-			for (let i = 0; i < json.length; i++) {
-				messageListDataStore.addParsedMessage(json[i]);
-			}
+			messages.forEach(message => messageListDataStore.addParsedMessage(message));
 		} catch (error) {
 			// eslint-disable-next-line no-alert
 			alert('Failed to read the file. Please, try to select another file');
@@ -102,7 +99,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 				</div>
 			)}
 
-			<div className="message-history__message-list-container">
+			<div className='message-history__message-list-container'>
 				<MessageList messages={props.messages} />
 			</div>
 
