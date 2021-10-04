@@ -20,6 +20,7 @@ import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import {
 	action, computed, observable, reaction, runInAction,
 } from 'mobx';
+import { nanoid } from 'nanoid';
 import api from '../api';
 import { SchemaType } from '../components/Control';
 import { Dictionary } from '../models/Dictionary';
@@ -285,7 +286,7 @@ export default class Store {
 		this.isSessionsLoading = false;
 	};
 
-	@action replayMessage = async (message: ParsedMessageItem | ActMessageItem, index: number) => {
+	@action replayMessage = async (message: ParsedMessageItem | ActMessageItem) => {
 		let result: MessageSendingResponse | ActSendingResponse | null = null;
 		if (isParsedMessageItem(message)) {
 			try {
@@ -296,13 +297,13 @@ export default class Store {
 					message: JSON.parse(message.message as string),
 				});
 				this.messageListDataStore.changeIndicator(
-					index,
+					message.id,
 					result.code === 200 ? 'indicator_successful' : 'indicator_unsuccessful',
 				);
 			} catch (error) {
 				alert('Error while sending');
 				this.messageListDataStore.changeIndicator(
-					index, 'indicator_unsuccessful',
+					message.id, 'indicator_unsuccessful',
 				);
 			}
 		}
@@ -314,13 +315,13 @@ export default class Store {
 					message: JSON.parse(message.message as string),
 				});
 				this.messageListDataStore.changeIndicator(
-					index,
+					message.id,
 					result.code === 200 ? 'indicator_successful' : 'indicator_unsuccessful',
 				);
 			} catch (error) {
 				alert('Error while sending');
 				this.messageListDataStore.changeIndicator(
-					index, 'indicator_unsuccessful',
+					message.id, 'indicator_unsuccessful',
 				);
 			}
 		}
@@ -351,6 +352,7 @@ export default class Store {
 				});
 
 				this.messageListDataStore.addParsedMessage({
+					id: nanoid(),
 					sessionId: this.selectedSession,
 					dictionary: this.selectedDictionaryName,
 					messageType: this.selectedMessageType,
@@ -373,6 +375,7 @@ export default class Store {
 				});
 
 				this.messageListDataStore.addParsedMessage({
+					id: nanoid(),
 					actBox: this.selectedActBox,
 					fullServiceName: this.selectedService,
 					methodName: this.selectedMethod.methodName,

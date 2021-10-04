@@ -71,7 +71,7 @@ export interface ParsedMessageItem {
 	messageType: string;
 	message: object | string;
 	delay: number;
-	id?: string;
+	id: string;
 	indicator: Indicator;
 }
 
@@ -81,7 +81,7 @@ export interface ActMessageItem {
 	methodName: string;
 	message: object | string;
 	delay: number;
-	id?: string;
+	id: string;
 	indicator: Indicator;
 }
 

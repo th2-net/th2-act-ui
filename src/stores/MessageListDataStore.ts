@@ -18,7 +18,6 @@
 import {
 	action, computed, observable, reaction,
 } from 'mobx';
-import { nanoid } from 'nanoid';
 import { SchemaType } from '../components/Control';
 import {
 	ParsedMessageItem,
@@ -43,7 +42,7 @@ export default class MessageListDataStore {
 
 	@observable editedMessageSendDelay = 0;
 
-	buildEditedMessage = (): ParsedMessageItem | ActMessageItem | undefined => {
+	buildEditedMessage = (id: string): ParsedMessageItem | ActMessageItem | undefined => {
 		if (this.store.selectedSchemaType === 'parsed-message') {
 			if (
 				this.store.selectedSession
@@ -51,6 +50,7 @@ export default class MessageListDataStore {
 				&& this.store.selectedMessageType
 			) {
 				const editedMessage: ParsedMessageItem = {
+					id,
 					sessionId: this.store.selectedSession,
 					dictionary: this.store.selectedDictionaryName,
 					messageType: this.store.selectedMessageType,
@@ -69,6 +69,7 @@ export default class MessageListDataStore {
 				&& this.store.selectedMethod
 			) {
 				const editedMessage: ActMessageItem = {
+					id,
 					actBox: this.store.selectedActBox,
 					fullServiceName: this.store.selectedService,
 					methodName: this.store.selectedMethod?.methodName,
@@ -85,9 +86,8 @@ export default class MessageListDataStore {
 
 	@action saveEditedMessage = () => {
 		if (this.editedMessageId !== '') {
-			const editedMessage: ParsedMessageItem | ActMessageItem | undefined = this.buildEditedMessage();
+			const editedMessage = this.buildEditedMessage(this.editedMessageId);
 			if (editedMessage !== undefined) {
-				editedMessage.id = nanoid();
 				if (
 					this.store.selectedSchemaType === 'parsed-message'
 					&& isParsedMessageItem(editedMessage)
@@ -108,29 +108,27 @@ export default class MessageListDataStore {
 
 	@action selectMessage = (id: string) => {
 		if (this.store.selectedSchemaType === 'parsed-message') {
-			for (let i = 0; i < this.parsedMessagesHistory.length; i++) {
-				if (this.parsedMessagesHistory[i].id === id) {
-					this.setEditorProperties(
-						this.parsedMessagesHistory[i].sessionId,
-						this.parsedMessagesHistory[i].dictionary,
-						this.parsedMessagesHistory[i].messageType,
-						this.parsedMessagesHistory[i].message as string,
-					);
-					break;
-				}
-			}
+			const selectedMessage = this.parsedMessagesHistory.find(
+				message => message.id === id,
+			) as ParsedMessageItem;
+
+			this.setEditorProperties(
+				selectedMessage.sessionId,
+				selectedMessage.dictionary,
+				selectedMessage.messageType,
+				selectedMessage.message as string,
+			);
 		} else if (this.store.selectedSchemaType === 'act') {
-			for (let i = 0; i < this.actMessagesHistory.length; i++) {
-				if (this.actMessagesHistory[i].id === id) {
-					this.setEditorProperties(
-						this.actMessagesHistory[i].actBox,
-						this.actMessagesHistory[i].fullServiceName,
-						this.actMessagesHistory[i].methodName,
-						this.actMessagesHistory[i].message as string,
-					);
-					break;
-				}
-			}
+			const selectedMessage = this.actMessagesHistory.find(
+				message => message.id === id,
+			) as ActMessageItem;
+
+			this.setEditorProperties(
+				selectedMessage.actBox,
+				selectedMessage.fullServiceName,
+				selectedMessage.methodName,
+				selectedMessage.message as string,
+			);
 		}
 		this.setEditMessageMode(true);
 		this.setEditedMessageId(id);
@@ -138,9 +136,6 @@ export default class MessageListDataStore {
 
 	@action addParsedMessage = (message: ParsedMessageItem | ActMessageItem) => {
 		const messageWithId: ParsedMessageItem | ActMessageItem = message;
-		if (!messageWithId.id) {
-			messageWithId.id = nanoid();
-		}
 		messageWithId.indicator = 'indicator_unvisible';
 		if (isParsedMessageItem(messageWithId)) {
 			this.parsedMessagesHistory.push(messageWithId);
@@ -203,20 +198,20 @@ export default class MessageListDataStore {
 		}
 	};
 
-	@action changeIndicator = (index: number, indicator: Indicator) => {
-		const tmpArray = this.getCurrentMessagesArray.slice();
-		const messageTmp = tmpArray[index];
-		messageTmp.indicator = indicator;
-		tmpArray[index] = messageTmp;
+	@action changeIndicator = (id: string, indicator: Indicator) => {
 		if (this.store.selectedSchemaType === 'parsed-message') {
-			this.parsedMessagesHistory = tmpArray as ParsedMessageItem[];
+			this.parsedMessagesHistory = this.parsedMessagesHistory.map(message =>
+				(message.id === id ? { ...message, indicator } : message));
 		} else if (this.store.selectedSchemaType === 'act') {
-			this.actMessagesHistory = tmpArray as ActMessageItem[];
+			this.actMessagesHistory = this.actMessagesHistory.map(message =>
+				(message.id === id ? { ...message, indicator } : message));
 		}
 	};
 
 	@action setEditedMessageSendDelay = (delay: number) => {
-		this.editedMessageSendDelay = delay;
+		if (delay >= 0) {
+			this.editedMessageSendDelay = delay;
+		}
 	};
 
 	@observable setEditedMessageId = (id: string) => {

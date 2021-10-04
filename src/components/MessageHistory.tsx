@@ -65,7 +65,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 	const replaySendMessage = (array: ParsedMessageItem[] | ActMessageItem[], index: number) => {
 		if (isReplayRef.current && array.length > 0 && index < array.length) {
 			setTimeout(() => {
-				store.replayMessage(array[index], index).then(() => {
+				store.replayMessage(array[index]).then(() => {
 					if (index === array.length - 1) {
 						setReplayMode(false);
 					} else {

@@ -100,8 +100,9 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 					}}
 					size='small'
 					value={delay}
+					placeholder='0'
 					onChange={e => {
-						messageListDataStore.setEditedMessageSendDelay(Number(e.target.value));
+						messageListDataStore.setEditedMessageSendDelay(Number(e.target.value) || 0);
 						setDelayValue(e.target.value);
 					}}
 				/>
