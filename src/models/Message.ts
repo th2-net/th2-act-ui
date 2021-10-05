@@ -65,24 +65,23 @@ export interface ActSendingResponse {
 	responseMessage: string;
 }
 
-export interface ParsedMessageItem {
-	sessionId: string;
-	dictionary: string;
-	messageType: string;
+export interface MessageItem{
 	message: object | string;
 	delay: number;
 	id: string;
 	indicator: Indicator;
 }
 
-export interface ActMessageItem {
+export interface ParsedMessageItem extends MessageItem {
+	sessionId: string;
+	dictionary: string;
+	messageType: string;
+}
+
+export interface ActMessageItem extends MessageItem {
 	actBox: string;
 	fullServiceName: string;
 	methodName: string;
-	message: object | string;
-	delay: number;
-	id: string;
-	indicator: Indicator;
 }
 
 export function isParsedMessageItem(object: unknown): object is ParsedMessageItem {

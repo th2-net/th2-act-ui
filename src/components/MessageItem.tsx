@@ -103,6 +103,11 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 					placeholder='0'
 					onChange={e => {
 						messageListDataStore.setEditedMessageSendDelay(Number(e.target.value) || 0);
+						if (!Number(e.target.value)) {
+							console.log(`includes${(e.target.value as string).replace('-', '')}`);
+							setDelayValue(e.target.value.replace('-', ''));
+						}
+						console.log(`not includes ${e.target.value}`);
 						setDelayValue(e.target.value);
 					}}
 				/>
