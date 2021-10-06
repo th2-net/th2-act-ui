@@ -16,6 +16,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
+import ResizeObserver from 'resize-observer-polyfill';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import {
@@ -39,7 +40,9 @@ export interface MessageEditorMethods {
 	getFilledMessage: () => object | null;
 }
 
-const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
+const DEFAULT_EDITOR_HEIGHT = 500;
+
+const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const store = useStore();
 
 	const monacoRef = React.useRef<Monaco>();
@@ -51,6 +54,28 @@ const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMe
 		valueGetter.current = _valueGetter;
 	};
 
+	const [editorHeight, setEditorHeight] = React.useState(DEFAULT_EDITOR_HEIGHT);
+
+	const editorHeightObserver = React.useRef(
+		new ResizeObserver((entries: ResizeObserverEntry[]) => {
+			setEditorHeight(entries[0]?.contentRect.height || DEFAULT_EDITOR_HEIGHT);
+		}),
+	);
+
+	const rootRef = React.useRef<HTMLDivElement>(null);
+
+	React.useEffect(() => {
+		if (rootRef.current) {
+			editorHeightObserver.current.observe(rootRef.current);
+		}
+
+		return () => {
+			if (rootRef.current) {
+				editorHeightObserver.current.unobserve(rootRef.current);
+			}
+		};
+	}, []);
+
 	React.useEffect(() => {
 		monaco.init().then((_monaco: Monaco) => {
 			monacoRef.current = _monaco;
@@ -59,10 +84,12 @@ const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMe
 			} else {
 				monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 					validate: true,
-					schemas: [{
-						uri: 'do.not.load',
-						schema: {},
-					}],
+					schemas: [
+						{
+							uri: 'do.not.load',
+							schema: {},
+						},
+					],
 				});
 			}
 		});
@@ -72,9 +99,8 @@ const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMe
 		if (!monacoRef.current) return;
 		if (messageSchema) {
 			const schema = toJS(messageSchema);
-			uri.current = monacoRef.current.Uri.parse(
-				'://b/$schema.json',
-			);
+			uri.current = monacoRef.current.Uri.parse('://b/$schema.json');
+
 			initiateSchema(messageSchema);
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
@@ -90,10 +116,12 @@ const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMe
 			setCode('{}');
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
-				schemas: [{
-					uri: 'do.not.load',
-					schema: {},
-				}],
+				schemas: [
+					{
+						uri: 'do.not.load',
+						schema: {},
+					},
+				],
 			});
 		}
 	}, [messageSchema]);
@@ -125,14 +153,16 @@ const MessageEditor = (({ messageSchema }: Props, ref: React.Ref<MessageEditorMe
 	);
 
 	return (
-		<ControlledEditor
-			height="500px"
-			language="json"
-			value={code}
-			onChange={onValueChange}
-			editorDidMount={handleEditorDidMount}
-		/>
+		<div ref={rootRef} style={{ height: '100%' }}>
+			<ControlledEditor
+				height={editorHeight}
+				language='json'
+				value={code}
+				onChange={onValueChange}
+				editorDidMount={handleEditorDidMount}
+			/>
+		</div>
 	);
-});
+};
 
 export default observer(MessageEditor, { forwardRef: true });

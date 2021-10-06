@@ -56,3 +56,10 @@ export interface ParsedMessageSendingResponse {
 	dictionary: string;
 	messageType: string;
 }
+
+export interface ActSendingResponse {
+	eventId: string;
+	methodName: string;
+	fullServiceName: string;
+	responseMessage: string;
+}
