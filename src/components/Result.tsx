@@ -15,89 +15,110 @@
  ***************************************************************************** */
 
 import React from 'react';
-import { MessageSendingResponse, ParsedMessageSendingResponse } from '../models/Message';
+import {
+	ActSendingResponse,
+	MessageSendingResponse,
+	ParsedMessageSendingResponse,
+} from '../models/Message';
 import '../styles/result.scss';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-const Result = ({
-	response,
-}: { response: MessageSendingResponse | null }) => {
+const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 	if (!response) {
-		return (
-			<div className='result' />
-		);
+		return <div className='result' />;
 	}
 
 	const { code, message } = response;
 
-	const queryParameter: string | null = (() => {
+	const parseContent = (): { link: string | null; content: string } => {
 		try {
-			const data: ParsedMessageSendingResponse = JSON.parse(message);
-			const currentTime = new Date().getTime();
-			const filterValueFrom = currentTime - (60 * 1000);
-			const filterValueTo = currentTime + (60 * 1000);
+			const parsedContent = JSON.parse(message);
+			const renderData = {
+				link: getLink(parsedContent),
+				content: JSON.stringify(parsedContent, null, 2),
+			};
+			return renderData;
+		} catch (error) {
+			return {
+				link: null,
+				content: message,
+			};
+		}
+	};
 
-			const queryParameterObject = [
-				{
-					events: {
-						filter: {
-							eventTypes: ['act-ui'],
-							names: [],
-							timestampFrom: filterValueFrom,
-							timestampTo: filterValueTo,
+	const getLink = (obj: unknown): string | null => {
+		const rootLink = isDev
+			? window.location.href.slice(0, window.location.href.lastIndexOf('/'))
+			: window.location.href.substring(0, window.location.href.indexOf('/act-ui'));
+
+		let eventId: string | null = null;
+		let workspaceState: any = [];
+		try {
+			// TODO: this is temporary hot fix, needs to be fixed
+			if (typeof obj === 'object' && obj !== null && 'eventId' in obj) {
+			 	eventId = (obj as ActSendingResponse | ParsedMessageSendingResponse).eventId;
+				workspaceState = eventId && typeof eventId === 'string' ? [
+					{
+						events: {
+							filter: {
+								attachedMessageId: {
+									type: 'string',
+									negative: false,
+									values: '',
+								},
+								type: {
+									type: 'string[]',
+									values: [],
+									negative: false,
+								},
+								name: {
+									type: 'string[]',
+									values: [],
+									negative: false,
+								},
+								body: {
+									type: 'string[]',
+									values: [],
+									negative: false,
+								},
+								status: {
+									type: 'switcher',
+									values: 'any',
+								},
+							},
+							panelArea: 50,
+							selectedEventId: eventId,
+							flattenedListView: false,
 						},
-						panelArea: 50,
-						selectedNodesPath: [
-							data.eventId,
-						],
-						flattenedListView: true,
+						layout: [50, 50],
 					},
-					messages: {
-						timestampFrom: filterValueFrom,
-						timestampTo: filterValueTo,
-					},
-					timeRange: [
-						filterValueFrom,
-						filterValueTo,
-					],
-					interval: 1,
-					layout: [
-						50,
-						50,
-					],
-				},
-			];
+				] : [];
+			}
 
-			return Buffer.from(
-				JSON.stringify(queryParameterObject),
-			).toString('base64');
-		} catch (e) {
-			console.error(e);
+			const url = eventId
+				? `${rootLink}/?workspaces=${window.btoa(JSON.stringify(workspaceState))}`
+				: null;
+			return url;
+		} catch (error) {
 			return null;
 		}
-	})();
+	};
 
-	const rootLink = isDev
-		? 'localhost:9000'
-		: window.location.href
-			.substring(0, window.location.href.indexOf('/act-ui'));
+	const { link, content } = parseContent();
 
 	return (
-
 		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
-			<pre className="result-value">
-				{queryParameter !== null ? (
+			<pre className='result-value'>
+				{link && (
 					<>
-						<div>
-							Message is sent successfully
-						</div>
-						<a href={`${rootLink}/?workspaces=${queryParameter}`}
-						   rel="noreferrer"
-						   target="_blank">report link</a>
+						<div>Message is sent successfully</div>
+						<a href={link} rel='noreferrer' target='_blank'>
+							Go to the send request event (opens in a new tab)
+						</a>
 					</>
-				) : null}
-				{message}
+				)}
+				{content}
 			</pre>
 		</div>
 	);

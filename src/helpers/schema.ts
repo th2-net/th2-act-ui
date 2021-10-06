@@ -36,9 +36,10 @@ export function createInitialActMessage(schema: JSONSchema4 | JSONSchema7) {
 						([key, schm]) => definitionsMap.set(schm.id || key, schm),
 					);
 			}
+
 			if (currentSchema.$ref) {
 				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				currentSchema = definitionsMap.get(currentSchema.$ref)!;
+				currentSchema = definitionsMap.get(currentSchema.$ref.replace('#/definitions/', ''))!;
 			}
 
 			if (currentSchema.enum) {

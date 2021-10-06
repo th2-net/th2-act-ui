@@ -73,14 +73,9 @@ const api = {
 	},
 
 	async sendMessage(request: MessageRequestModel): Promise<MessageSendingResponse> {
+		const { session, dictionary, messageType } = request;
 		const res = await fetch(
-			`backend/message/?session=${
-				request.session
-			}&dictionary=${
-				request.dictionary
-			}&messageType=${
-				request.messageType
-			}`,
+			`backend/message?session=${session}&dictionary=${dictionary}&messageType=${messageType}`,
 			{
 				method: 'POST',
 				headers: {
@@ -101,7 +96,6 @@ const api = {
 			message,
 		};
 	},
-
 	async getActsList(): Promise<string[]> {
 		const actsResponse = await fetch('backend/acts', {
 			cache: 'no-cache',
@@ -138,10 +132,16 @@ const api = {
 		console.error(servicesResponse.statusText);
 		return null;
 	},
-	async getActSchema(serviceName: string, methodName: string): Promise<JSONSchemaResponse | null> {
-		const schemaResponse = await fetch(`backend/json_schema/${serviceName}/?method=${methodName}`, {
-			cache: 'no-cache',
-		});
+	async getActSchema(
+		serviceName: string,
+		methodName: string,
+	): Promise<JSONSchemaResponse | null> {
+		const schemaResponse = await fetch(
+			`backend/json_schema/${serviceName}?method=${methodName}`,
+			{
+				cache: 'no-cache',
+			},
+		);
 
 		if (schemaResponse.ok) {
 			return schemaResponse.json();
@@ -150,9 +150,9 @@ const api = {
 		console.error(schemaResponse.statusText);
 		return null;
 	},
-	async callMethod(request: MethodCallRequestModel): Promise<void> {
+	async callMethod(request: MethodCallRequestModel): Promise<MessageSendingResponse> {
 		const res = await fetch(
-			`backend/method/?fullServiceName=${request.fullServiceName}&methodName=${request.methodName}`,
+			`backend/method?fullServiceName=${request.fullServiceName}&methodName=${request.methodName}`,
 			{
 				method: 'POST',
 				headers: {
@@ -165,6 +165,13 @@ const api = {
 		if (!res.ok) {
 			console.error(res);
 		}
+
+		const message = await res.text();
+
+		return {
+			code: res.status,
+			message,
+		};
 	},
 };
 

@@ -22,7 +22,7 @@ import {
 import api from '../api';
 import { SchemaType } from '../components/Control';
 import { Dictionary } from '../models/Dictionary';
-import { MessageSendingResponse, ParsedMessage } from '../models/Message';
+import { ActSendingResponse, MessageSendingResponse, ParsedMessage } from '../models/Message';
 import Service, { Method } from '../models/Service';
 
 export default class Store {
@@ -187,7 +187,7 @@ export default class Store {
 				this.selectedSession = sessions[0];
 			}
 		} catch (error) {
-			console.error('Error occured while fetching dictionaries');
+			console.error('Error occured while fetching sessions');
 		}
 		this.isSessionsLoading = false;
 	};
@@ -195,7 +195,7 @@ export default class Store {
 	sendMessage = async (message: object): Promise<MessageSendingResponse | null> => {
 		this.isSending = true;
 
-		let result: MessageSendingResponse | null = null;
+		let result: MessageSendingResponse | ActSendingResponse | null = null;
 
 		switch (this.selectedSchemaType) {
 			case 'parsed-message': {
@@ -218,7 +218,7 @@ export default class Store {
 					return null;
 				}
 
-				await api.callMethod({
+				result = await api.callMethod({
 					fullServiceName: this.selectedService,
 					methodName: this.selectedMethod.methodName,
 					message,
@@ -242,7 +242,7 @@ export default class Store {
 				this.selectedActBox = actsList[0];
 			}
 		} catch (error) {
-			console.error('Error occured while fetching dictionaries');
+			console.error('Error occured while fetching acts');
 		}
 		this.isActsLoading = false;
 	};
@@ -257,7 +257,7 @@ export default class Store {
 				this.selectedService = services[0];
 			}
 		} catch (error) {
-			console.error('Error occured while fetching dictionaries');
+			console.error('Error occured while fetching services');
 		}
 		this.isServicesLoading = false;
 	};
@@ -274,7 +274,7 @@ export default class Store {
 				this.selectedMethod = serviceDetails.methods[0];
 			}
 		} catch (error) {
-			console.error('Error occured while fetching dictionaries');
+			console.error('Error occured while fetching service details');
 		}
 		this.isMethodsLoading = false;
 	};
@@ -305,9 +305,9 @@ export default class Store {
 			const actMessage = await api.getActSchema(serviceName, methodName);
 			if (!actMessage) return;
 
-			this.actSchema = JSON.parse(actMessage[this.selectedMethod.inputType]) as JSONSchema4;
+			this.actSchema = actMessage[this.selectedMethod.inputType] as unknown as JSONSchema4;
 		} catch (error) {
-			console.error('Error occured while fetching dictionaries');
+			console.error('Error occured while fetching act schema');
 		}
 		this.isSchemaLoading = false;
 	};
