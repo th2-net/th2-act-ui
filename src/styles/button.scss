@@ -42,8 +42,12 @@
 		content: "";
 	}
 
-	&.disabled:after {
-		background: rgba(#000, .3);
+	&.disabled {
+		cursor: default;
+
+		&:after {
+			background: rgba(#000, .3);
+		}
 	}
 }
 
