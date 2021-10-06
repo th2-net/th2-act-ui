@@ -32,10 +32,11 @@ import '../styles/message-list.scss';
 import { EmbeddedEditor } from './EmbeddedEditor';
 import SplitView from '../split-view/SplitView';
 import SplitViewPane from '../split-view/SplitViewPane';
+import useMessagesHistoryStore from '../hooks/useMessagesHistoryStore';
 
 const App = () => {
 	const store: Store = useStore();
-	const messageListDataStore = store.messageListDataStore;
+	const messageListDataStore = useMessagesHistoryStore();
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
@@ -81,7 +82,7 @@ const App = () => {
 								</div>
 							) : currentTab === 1 ? (
 								<MessageHistory
-									messages={messageListDataStore.getCurrentMessagesArray.slice()}
+									messages={messageListDataStore.messagesHistory}
 								/>
 							) : (
 								<EmbeddedEditor

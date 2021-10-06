@@ -28,7 +28,7 @@ import {
 	isActMessageItem,
 } from '../models/Message';
 import { Indicator } from './MessageList';
-import { useStore } from '../hooks/useStore';
+import useMessagesHistoryStore from '../hooks/useMessagesHistoryStore';
 
 interface MessageItemProps {
 	index: number;
@@ -63,7 +63,7 @@ const DraggableMessageItem = observer(
 						<div
 							{...prov.dragHandleProps}
 							draggable={true}
-							className='message-list__drag-handler'></div>
+							className='message-list__drag-handler' />
 					</div>
 					<MessageItem index={index} message={message} />
 				</li>
@@ -74,7 +74,7 @@ const DraggableMessageItem = observer(
 
 const MessageItem = observer(({ index, message }: MessageItemProps) => {
 	const [delay, setDelayValue] = useState(message.delay.toString());
-	const messageListDataStore = useStore().messageListDataStore;
+	const messageListDataStore = useMessagesHistoryStore();
 	return (
 		<div
 			className={
@@ -165,7 +165,7 @@ const MessageCardControls = observer(
 		message: ParsedMessageItem | ActMessageItem;
 		index: number;
 	}) => {
-		const messageListDataStore = useStore().messageListDataStore;
+		const messageListDataStore = useMessagesHistoryStore();
 		return (
 			<div className='message-list__message-card-controls'>
 				<button
@@ -179,9 +179,8 @@ const MessageCardControls = observer(
 				<div>
 					<button
 						className={
-							messageListDataStore.getCurrentMessagesArray.slice()[props.index]
-								.indicator
-						}></button>
+							props.message.indicator
+						} />
 				</div>
 			</div>
 		);

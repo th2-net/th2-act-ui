@@ -13,54 +13,88 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
-
-import { Indicator } from '../components/MessageList';
-import { setInLocalStorage } from '../helpers/localStorageManager';
+import { action, observable } from 'mobx';
 import { MessageItem } from '../models/Message';
+import { Indicator } from '../components/MessageList';
 
 export default abstract class MessageListStore<T extends MessageItem> {
-	private messagesHistory: T[] = [];
+	@observable messagesHistory: T[] = [];
 
-	abstract editorCode: string;
+	@observable editorCode = '{}';
 
-	editMessageMode = false;
+	@observable editMessageMode = false;
 
-	editedMessageId = '';
+	@observable editedMessageId = '';
 
-	editedMessageSendDelay = 0;
+	@observable editedMessageSendDelay = 0;
 
-	setEditorCode = (code: string) => {
+	abstract buildEditedMessage: (id: string) => T | undefined;
+
+	@action saveEditedMessage = () => {
+		if (this.editedMessageId !== '') {
+			const editedMessage = this.buildEditedMessage(this.editedMessageId);
+
+			if (editedMessage !== undefined) {
+				this.messagesHistory = this.messagesHistory.map(message =>
+					(message.id === this.editedMessageId ? editedMessage : message));
+			}
+
+			this.setEditMessageMode(false);
+		}
+	};
+
+	abstract selectMessage: (id: string) => void;
+
+	@action addMessage = (message: T) => {
+		const messageWithId = message;
+		messageWithId.indicator = 'indicator_unvisible';
+
+		this.messagesHistory.push(messageWithId);
+	};
+
+	@action clearMessages = () => {
+		this.messagesHistory = [];
+
+		if (this.editMessageMode) {
+			this.setEditMessageMode(false);
+		}
+	};
+
+	@action setEditorCode = (code: string) => {
 		this.editorCode = code;
 	};
 
-	setEditedMessageSendDelay = (delay: number) => {
+	@action clearIndicators = () => {
+		this.messagesHistory = this.messagesHistory.map(message => ({
+			...message,
+			indicator: 'indicator_unvisible',
+		}));
+	};
+
+	@action changeIndicator = (id: string, indicator: Indicator) => {
+		this.messagesHistory = this.messagesHistory.map(message =>
+			(message.id === id ? { ...message, indicator } : message));
+	};
+
+	@action setEditedMessageSendDelay = (delay: number) => {
 		if (delay >= 0) {
 			this.editedMessageSendDelay = delay;
 		}
 	};
 
-	setEditedMessageId = (id: string) => {
-		this.editedMessageId = id;
-		setInLocalStorage('editedParsedMessageId', id);
+	abstract setEditedMessageId: (id: string) => void;
+
+	abstract setEditMessageMode: (mode: boolean) => void;
+
+	@action deleteMessage = (id: string) => {
+		this.messagesHistory = this.messagesHistory.filter(
+			message => message.id !== id,
+		);
 	};
 
-	abstract changeIndicator(id: string, indicator: Indicator): void;
+	abstract loadMessageFromJSON: (jsonString: string) => void;
 
-	abstract clearIndicators(): void;
+	abstract prepare: () => void;
 
-	abstract selectMessage(id: string): void;
-
-	abstract buildEditedMessage(id: string): T | undefined;
-
-	abstract prepareForSelectedSchemaType(): void;
-
-	abstract setEditMessageMode(mode: boolean): void;
-
-	abstract saveEditedMessage(editedMessage: T): void;
-
-	abstract addMessage(message: T): void;
-
-	abstract clearMessageHistory(): void;
-
-	abstract deleteMessage(id: string): void;
+	abstract init: () => void;
 }

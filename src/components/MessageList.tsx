@@ -21,12 +21,12 @@ import {
 	Droppable, DroppableProvided, DropResult, DragDropContext,
 } from 'react-beautiful-dnd';
 import { nanoid } from 'nanoid';
-import { useStore } from '../hooks/useStore';
 import '../styles/message-list.scss';
 import '../styles/splitter.scss';
 import { reorderArray } from '../helpers/reorderArrayWithDragAndDrop';
 import { ParsedMessageItem, ActMessageItem } from '../models/Message';
 import DraggableMessageItem from './MessageItem';
+import useMessagesHistoryStore from '../hooks/useMessagesHistoryStore';
 
 export type Indicator =
 	| 'indicator_unvisible'
@@ -35,8 +35,7 @@ export type Indicator =
 	| 'indicator_unsuccessful';
 
 const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }) => {
-	const store = useStore();
-	const messageListDataStore = store.messageListDataStore;
+	const messageListDataStore = useMessagesHistoryStore();
 
 	const dragEndHandler = (result: DropResult) => {
 		messageListDataStore.clearIndicators();
@@ -47,7 +46,7 @@ const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }
 		if (destination.droppableId === source.droppableId && destination.index === source.index) {
 			return;
 		}
-		const array = messageListDataStore.getCurrentMessagesArray;
+		const array = messageListDataStore.messagesHistory;
 		reorderArray(destination.index, source.index, array[source.index], { array });
 	};
 
