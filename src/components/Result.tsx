@@ -21,6 +21,7 @@ import {
 	ParsedMessageSendingResponse,
 } from '../models/Message';
 import '../styles/result.scss';
+import ResultMonacoEditor from './ResultMonacoEditor';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -53,47 +54,50 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 			: window.location.href.substring(0, window.location.href.indexOf('/act-ui'));
 
 		let eventId: string | null = null;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		let workspaceState: any = [];
 		try {
 			// TODO: this is temporary hot fix, needs to be fixed
 			if (typeof obj === 'object' && obj !== null && 'eventId' in obj) {
-			 	eventId = (obj as ActSendingResponse | ParsedMessageSendingResponse).eventId;
-				workspaceState = eventId && typeof eventId === 'string' ? [
-					{
-						events: {
-							filter: {
-								attachedMessageId: {
-									type: 'string',
-									negative: false,
-									values: '',
+				eventId = (obj as ActSendingResponse | ParsedMessageSendingResponse).eventId;
+				workspaceState =					eventId && typeof eventId === 'string'
+					? [
+						{
+							events: {
+								filter: {
+									attachedMessageId: {
+										type: 'string',
+										negative: false,
+										values: '',
+									},
+									type: {
+										type: 'string[]',
+										values: [],
+										negative: false,
+									},
+									name: {
+										type: 'string[]',
+										values: [],
+										negative: false,
+									},
+									body: {
+										type: 'string[]',
+										values: [],
+										negative: false,
+									},
+									status: {
+										type: 'switcher',
+										values: 'any',
+									},
 								},
-								type: {
-									type: 'string[]',
-									values: [],
-									negative: false,
-								},
-								name: {
-									type: 'string[]',
-									values: [],
-									negative: false,
-								},
-								body: {
-									type: 'string[]',
-									values: [],
-									negative: false,
-								},
-								status: {
-									type: 'switcher',
-									values: 'any',
-								},
+								panelArea: 50,
+								selectedEventId: eventId,
+								flattenedListView: false,
 							},
-							panelArea: 50,
-							selectedEventId: eventId,
-							flattenedListView: false,
+							layout: [50, 50],
 						},
-						layout: [50, 50],
-					},
-				] : [];
+						  ]
+					: [];
 			}
 
 			const url = eventId
@@ -105,21 +109,11 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 		}
 	};
 
-	const { link, content } = parseContent();
+	const { content } = parseContent();
 
 	return (
 		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
-			<pre className='result-value'>
-				{link && (
-					<>
-						<div>Message is sent successfully</div>
-						<a href={link} rel='noreferrer' target='_blank'>
-							Go to the send request event (opens in a new tab)
-						</a>
-					</>
-				)}
-				{content}
-			</pre>
+			<ResultMonacoEditor value={content}></ResultMonacoEditor>
 		</div>
 	);
 };

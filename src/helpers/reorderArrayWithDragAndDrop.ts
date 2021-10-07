@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /** ****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,4 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
- $splitterBarWidth: 32px;
+
+export const reorderArray = (
+	destinationIndex: number,
+	sourceIndex: number,
+	draggableMessage: any,
+	sourceArray: {array: any[]},
+) => {
+	const arrayCopy = sourceArray.array.slice();
+	arrayCopy.splice(sourceIndex, 1);
+	arrayCopy.splice(destinationIndex, 0, draggableMessage);
+	for (let i = 0; i < arrayCopy.length; i++) {
+		// eslint-disable-next-line no-param-reassign
+		sourceArray.array[i] = arrayCopy[i];
+	}
+};

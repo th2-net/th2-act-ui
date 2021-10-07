@@ -13,4 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
- $splitterBarWidth: 32px;
+
+import React from 'react';
+import Editor, { monaco, Monaco } from '@monaco-editor/react';
+
+const ResultMonacoEditor = (props: { value: string }) => {
+	const monacoEditor = React.useRef<Monaco>();
+
+	React.useEffect(() => {
+		monaco.init().then((_monaco: Monaco) => {
+			monacoEditor.current = _monaco;
+			monacoEditor.current.languages.json.jsonDefaults.setDiagnosticsOptions({
+				validate: false,
+			});
+		});
+	}, []);
+
+	return (
+		<Editor
+			height='250px'
+			language='json'
+			value={props.value}
+			options={{
+				minimap: { enabled: false },
+				readOnly: true,
+				lineNumbers: 'off',
+				wordWrap: 'on',
+			}}></Editor>
+	);
+};
+
+export default ResultMonacoEditor;

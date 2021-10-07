@@ -1,5 +1,5 @@
 /** ****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,4 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
- $splitterBarWidth: 32px;
+
+import React from 'react';
+import '../styles/embedded-editor.scss';
+
+export const EmbeddedEditor = (props: { schema: string; object: string }) => {
+	const url = `/editor2/?schema=${props.schema}&${
+		props.object && `object=${props.object}`
+	}&editorMode=dictionaryEditor&embedded=true`;
+	return <iframe className='embedded-editor' src={url}></iframe>;
+};
