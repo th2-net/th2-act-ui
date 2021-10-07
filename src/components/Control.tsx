@@ -19,13 +19,12 @@ import React from 'react';
 import { useStore } from '../hooks/useStore';
 import Select from './Select';
 import SplashScreen from './SplashScreen';
-import useMessagesHistoryStore from '../hooks/useMessagesHistoryStore';
 
 export type SchemaType = 'parsed-message' | 'raw-message' | 'act';
 
 const Control = () => {
 	const store = useStore();
-	const { editMessageMode } = useMessagesHistoryStore();
+	const messageListDataStore = store.messageListDataStore;
 
 	const controlConfigs = [
 		{
@@ -46,7 +45,7 @@ const Control = () => {
 					options: store.dictionaries.slice().sort(),
 					selected: store.selectedDictionaryName || '',
 					disabled: store.isSessionsLoading || store.isDictionariesLoading
-					|| editMessageMode,
+					|| messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedDictionaryName : true,
 					onChange: (opt: string) => (store.selectedDictionaryName = opt),
 				},
@@ -58,7 +57,7 @@ const Control = () => {
 					disabled:
 						store.isSessionsLoading
 						|| store.isDictionariesLoading
-						|| store.isDictionaryLoading || editMessageMode,
+						|| store.isDictionaryLoading || messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedMessageType : true,
 					onChange: (opt: string) => (store.selectedMessageType = opt),
 				},
@@ -82,7 +81,7 @@ const Control = () => {
 					options: store.services.slice().sort(),
 					selected: store.selectedService || '',
 					disabled: store.isActsLoading || store.isServicesLoading
-					|| editMessageMode,
+					|| messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedService : true,
 					onChange: (opt: string) => (store.selectedService = opt),
 				},
@@ -95,7 +94,7 @@ const Control = () => {
 					selected: store.selectedMethod?.methodName || '',
 					disabled:
 						store.isActsLoading || store.isServicesLoading || store.isMethodsLoading
-						|| editMessageMode,
+						|| messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedMethod : true,
 					onChange: (methodName: string) => store.setSelectedMethod(methodName),
 				},
@@ -134,7 +133,7 @@ const Control = () => {
 						.selects.map(props => (
 							<React.Fragment key={props.id}>
 								<Select {...props} />
-								{(props.disabled && !editMessageMode)
+								{(props.disabled && !messageListDataStore.editMessageMode)
 								&& <SplashScreen key='splash' />}
 							</React.Fragment>
 						))

@@ -15,20 +15,27 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, reaction } from 'mobx';
-import { ActMessageItem, isActMessageItem } from '../models/Message';
+import { action, observable, reaction } from 'mobx';
+import { ActMessageItem } from '../models/Message';
 import Store from './Store';
-import { getFromLocalStorage, setInLocalStorage } from '../helpers/localStorageManager';
+import { setInLocalStorage, getFromLocalStorage } from '../helpers/localStorageManager';
+import { Indicator } from '../components/MessageList';
 import MessageListStore from './MessageListStore';
 
 export default class ActMessagesStore extends MessageListStore<ActMessageItem> {
+	@observable actMessagesHistory: ActMessageItem[] = [];
+
+	@observable editorCode = '{}';
+
+	@observable editMessageMode = false;
+
+	@observable editedMessageId = '';
+
+	@observable editedMessageSendDelay = 0;
+
 	buildEditedMessage = (id: string): ActMessageItem | undefined => {
-		if (
-			this.store.selectedActBox
-			&& this.store.selectedService
-			&& this.store.selectedMethod
-		) {
-			return {
+		if (this.store.selectedActBox && this.store.selectedService && this.store.selectedMethod) {
+			const editedMessage: ActMessageItem = {
 				id,
 				actBox: this.store.selectedActBox,
 				fullServiceName: this.store.selectedService,
@@ -37,12 +44,24 @@ export default class ActMessagesStore extends MessageListStore<ActMessageItem> {
 				delay: this.editedMessageSendDelay,
 				indicator: 'indicator_edited',
 			};
+			return editedMessage;
 		}
 		return undefined;
 	};
 
+	@action saveEditedMessage = () => {
+		if (this.editedMessageId !== '') {
+			const editedMessage = this.buildEditedMessage(this.editedMessageId);
+			if (editedMessage !== undefined) {
+				this.actMessagesHistory = this.actMessagesHistory.map(message =>
+					(message.id === this.editedMessageId ? editedMessage : message));
+			}
+			this.setEditMessageMode(false);
+		}
+	};
+
 	@action selectMessage = (id: string) => {
-		const selectedMessage = this.messagesHistory.find(
+		const selectedMessage = this.actMessagesHistory.find(
 			message => message.id === id,
 		) as ActMessageItem;
 
@@ -52,59 +71,73 @@ export default class ActMessagesStore extends MessageListStore<ActMessageItem> {
 			selectedMessage.methodName,
 			selectedMessage.message as string,
 		);
-
 		this.setEditMessageMode(true);
 		this.setEditedMessageId(id);
 	};
 
+	@action addMessage = (message: ActMessageItem) => {
+		this.actMessagesHistory.push({ ...message, indicator: 'indicator_unvisible' });
+	};
+
+	@action clearMessageHistory = () => {
+		this.actMessagesHistory = [];
+
+		if (this.editMessageMode === true) {
+			this.setEditMessageMode(false);
+		}
+	};
+
 	setEditorProperties = (
-		actBox: string | null,
-		service: string | null,
-		method: string | null,
+		sessionOrActBox: string | null,
+		dictionaryOrService: string | null,
+		messageTypeOrMethod: string | null,
 		editorCode: string,
 	) => {
-		this.store.selectedActBox = actBox;
-		this.store.selectedService = service;
-		this.store.setSelectedMethod(method);
+		this.store.selectedActBox = sessionOrActBox;
+		this.store.selectedService = dictionaryOrService;
+		this.store.setSelectedMethod(messageTypeOrMethod);
 
 		if (editorCode) {
 			this.setEditorCode(editorCode);
 		}
 	};
 
-	@action setEditedMessageId = (id: string) => {
+	@action clearIndicators = () => {
+		this.actMessagesHistory.map(message => ({
+			...message,
+			indicator: 'indicator_unvisible',
+		}));
+	};
+
+	@action changeIndicator = (id: string, indicator: Indicator) => {
+		this.actMessagesHistory = this.actMessagesHistory.map(message =>
+			(message.id === id ? { ...message, indicator } : message));
+	};
+
+	@action setEditedMessageSendDelay = (delay: number) => {
+		if (delay >= 0) {
+			this.editedMessageSendDelay = delay;
+		}
+	};
+
+	@observable setEditedMessageId = (id: string) => {
 		this.editedMessageId = id;
 		setInLocalStorage('editedActMessageId', id);
 	};
 
 	@action setEditMessageMode = (mode: boolean) => {
 		this.editMessageMode = mode;
-
-		if (!mode) {
+		if (mode === false) {
 			this.setEditedMessageId('');
 		}
-
 		setInLocalStorage('editActMessageMode', mode.toString());
 	};
 
-	@action loadMessageFromJSON = (jsonString: string) => {
-		try {
-			const messages = JSON.parse(jsonString) as Array<ActMessageItem>;
-			this.clearMessages();
-
-			messages.forEach(message => {
-				if (!isActMessageItem(message)) {
-					throw Error('Failed to read the file. Please, try to select another file');
-				}
-
-				this.addMessage(message);
-			});
-		} catch (error) {
-			console.error(error);
-		}
+	@action deleteMessage = (id: string) => {
+		this.actMessagesHistory = this.actMessagesHistory.filter(message => message.id !== id);
 	};
 
-	prepare = () => {
+	prepareForSelectedSchemaType = () => {
 		this.setEditMessageMode(getFromLocalStorage('editActMessageMode') === 'true');
 		this.editedMessageId = getFromLocalStorage('editedActMessageId') || '';
 	};
@@ -112,17 +145,10 @@ export default class ActMessagesStore extends MessageListStore<ActMessageItem> {
 	constructor(private store: Store) {
 		super();
 		reaction(
-			() => this.messagesHistory,
-			messagesHistory => {
-				setInLocalStorage('actMessagesHistory', JSON.stringify(messagesHistory));
+			() => this.actMessagesHistory.slice(),
+			actMessagesHistory => {
+				setInLocalStorage('actMessagesHistory', JSON.stringify(actMessagesHistory));
 			},
 		);
 	}
-
-	init = () => {
-		const actMessageList = getFromLocalStorage('actMessagesHistory') || '[]';
-		localStorage.removeItem('actMessagesHistory');
-
-		this.messagesHistory = JSON.parse(actMessageList);
-	};
 }

@@ -31,7 +31,6 @@ import { Uri } from 'monaco-editor';
 import { toJS } from 'mobx';
 import { createInitialActMessage } from '../helpers/schema';
 import { useStore } from '../hooks/useStore';
-import useMessagesHistoryStore from '../hooks/useMessagesHistoryStore';
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
@@ -45,7 +44,7 @@ const DEFAULT_EDITOR_HEIGHT = 700;
 
 const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const store = useStore();
-	const messageListDataStore = useMessagesHistoryStore();
+	const messageListDataStore = store.messageListDataStore;
 
 	const monacoRef = React.useRef<Monaco>();
 	const valueGetter = React.useRef<(() => string) | null>(null);

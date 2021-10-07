@@ -15,20 +15,31 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, reaction } from 'mobx';
-import { isParsedMessageItem, ParsedMessageItem } from '../models/Message';
+import { action, observable, reaction } from 'mobx';
+import { ParsedMessageItem } from '../models/Message';
 import Store from './Store';
-import { getFromLocalStorage, setInLocalStorage } from '../helpers/localStorageManager';
+import { setInLocalStorage, getFromLocalStorage } from '../helpers/localStorageManager';
+import { Indicator } from '../components/MessageList';
 import MessageListStore from './MessageListStore';
 
 export default class ParsedMessagesStore extends MessageListStore<ParsedMessageItem> {
+	@observable parsedMessagesHistory: ParsedMessageItem[] = [];
+
+	@observable editorCode = '{}';
+
+	@observable editMessageMode = false;
+
+	@observable editedMessageId = '';
+
+	@observable editedMessageSendDelay = 0;
+
 	buildEditedMessage = (id: string): ParsedMessageItem | undefined => {
 		if (
 			this.store.selectedSession
 			&& this.store.selectedDictionaryName
 			&& this.store.selectedMessageType
 		) {
-			return {
+			const editedMessage: ParsedMessageItem = {
 				id,
 				sessionId: this.store.selectedSession,
 				dictionary: this.store.selectedDictionaryName,
@@ -37,12 +48,24 @@ export default class ParsedMessagesStore extends MessageListStore<ParsedMessageI
 				delay: this.editedMessageSendDelay,
 				indicator: 'indicator_edited',
 			};
+			return editedMessage;
 		}
 		return undefined;
 	};
 
+	@action saveEditedMessage = () => {
+		if (this.editedMessageId !== '') {
+			const editedMessage = this.buildEditedMessage(this.editedMessageId);
+			if (editedMessage !== undefined) {
+				this.parsedMessagesHistory = this.parsedMessagesHistory.map(message =>
+					(message.id === this.editedMessageId ? editedMessage : message));
+			}
+			this.setEditMessageMode(false);
+		}
+	};
+
 	@action selectMessage = (id: string) => {
-		const selectedMessage = this.messagesHistory.find(
+		const selectedMessage = this.parsedMessagesHistory.find(
 			message => message.id === id,
 		) as ParsedMessageItem;
 
@@ -52,78 +75,75 @@ export default class ParsedMessagesStore extends MessageListStore<ParsedMessageI
 			selectedMessage.messageType,
 			selectedMessage.message as string,
 		);
-
 		this.setEditMessageMode(true);
 		this.setEditedMessageId(id);
 	};
 
+	@action addMessage = (message: ParsedMessageItem) => {
+		this.parsedMessagesHistory.push({ ...message, indicator: 'indicator_unvisible' });
+	};
+
+	@action clearMessageHistory = () => {
+		this.parsedMessagesHistory = [];
+
+		if (this.editMessageMode === true) {
+			this.setEditMessageMode(false);
+		}
+	};
+
 	setEditorProperties = (
-		session: string | null,
-		dictionary: string | null,
-		messageType: string | null,
+		sessionOrActBox: string | null,
+		dictionaryOrService: string | null,
+		messageTypeOrMethod: string | null,
 		editorCode: string,
 	) => {
-		this.store.selectedSession = session;
-		this.store.selectedDictionaryName = dictionary;
-		this.store.selectedMessageType = messageType;
+		this.store.selectedSession = sessionOrActBox;
+		this.store.selectedDictionaryName = dictionaryOrService;
+		this.store.selectedMessageType = messageTypeOrMethod;
 
 		if (editorCode) {
 			this.setEditorCode(editorCode);
 		}
 	};
 
-	@action setEditedMessageId = (id: string) => {
-		this.editedMessageId = id;
-		setInLocalStorage('editedParsedMessageId', id);
+	@action clearIndicators = () => {
+		this.parsedMessagesHistory = this.parsedMessagesHistory.map(message => ({
+			...message,
+			indicator: 'indicator_unvisible',
+		}));
+	};
+
+	@action changeIndicator = (id: string, indicator: Indicator) => {
+		this.parsedMessagesHistory = this.parsedMessagesHistory.map(message =>
+			(message.id === id ? { ...message, indicator } : message));
 	};
 
 	@action setEditMessageMode = (mode: boolean) => {
 		this.editMessageMode = mode;
-
-		if (!mode) {
+		if (mode === false) {
 			this.setEditedMessageId('');
 		}
-
 		setInLocalStorage('editParsedMessageMode', mode.toString());
 	};
 
-	prepare = () => {
+	@action deleteMessage = (id: string) => {
+		this.parsedMessagesHistory = this.parsedMessagesHistory.filter(
+			message => message.id !== id,
+		);
+	};
+
+	prepareForSelectedSchemaType = () => {
 		this.setEditMessageMode(getFromLocalStorage('editParsedMessageMode') === 'true');
 		this.editedMessageId = getFromLocalStorage('editedParsedMessageId') || '';
 	};
 
 	constructor(private store: Store) {
 		super();
-
 		reaction(
-			() => this.messagesHistory,
-			messagesHistory => {
-				setInLocalStorage('parsedMessagesHistory', JSON.stringify(messagesHistory));
+			() => this.parsedMessagesHistory.slice(),
+			parsedMessageHistory => {
+				setInLocalStorage('parsedMessagesHistory', JSON.stringify(parsedMessageHistory));
 			},
 		);
 	}
-
-	@action loadMessageFromJSON = (jsonString: string) => {
-		try {
-			const messages = JSON.parse(jsonString) as Array<ParsedMessageItem>;
-			this.clearMessages();
-
-			messages.forEach(message => {
-				if (!isParsedMessageItem(message)) {
-					throw Error('Failed to read the file. Please, try to select another file');
-				}
-
-				this.addMessage(message);
-			});
-		} catch (error) {
-			console.error(error);
-		}
-	};
-
-	init = () => {
-		const parsedMessageList = getFromLocalStorage('parsedMessagesHistory') || '[]';
-		localStorage.removeItem('parsedMessagesHistory');
-
-		this.messagesHistory = JSON.parse(parsedMessageList);
-	};
 }

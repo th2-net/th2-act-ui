@@ -23,11 +23,10 @@ import '../styles/splitter.scss';
 import { downloadFile } from '../helpers/downloadFile';
 import { ParsedMessageItem, ActMessageItem } from '../models/Message';
 import MessageList from './MessageList';
-import useMessagesHistoryStore from '../hooks/useMessagesHistoryStore';
 
 const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }) => {
 	const store = useStore();
-	const messageListDataStore = useMessagesHistoryStore();
+	const messageListDataStore = store.messageListDataStore;
 	const [isReplay, setReplayMode] = useState(false);
 	const isReplayRef = useRef(isReplay);
 
@@ -37,9 +36,20 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 			reader.readAsText(file.item(0) as Blob);
 			reader.onload = () => {
 				if (typeof reader.result === 'string') {
-					messageListDataStore.loadMessageFromJSON(reader.result);
+					jsonMessagesFromString(reader.result);
 				}
 			};
+		}
+	};
+
+	const jsonMessagesFromString = (rawFromFile: string) => {
+		try {
+			const messages = JSON.parse(rawFromFile) as Array<ParsedMessageItem | ActMessageItem>;
+			messageListDataStore.clearParsedMessages();
+			messages.forEach(message => messageListDataStore.addParsedMessage(message));
+		} catch (error) {
+			// eslint-disable-next-line no-alert
+			alert('Failed to read the file. Please, try to select another file');
 		}
 	};
 
@@ -48,7 +58,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 		if (isReplay) {
 			messageListDataStore.setEditMessageMode(false);
 			messageListDataStore.clearIndicators();
-			replaySendMessage(messageListDataStore.messagesHistory, 0);
+			replaySendMessage(messageListDataStore.getCurrentMessagesArray, 0);
 		}
 	}, [isReplay]);
 
@@ -68,7 +78,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 
 	const exportFn = () => {
 		downloadFile(
-			JSON.stringify(messageListDataStore.messagesHistory),
+			JSON.stringify(messageListDataStore.getCurrentMessagesArray),
 			store.selectedSchemaType === 'parsed-message' ? 'parsedMessages' : 'actMessages',
 			'application/json',
 		);
@@ -97,12 +107,12 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 				<button
 					disabled={messageListDataStore.editMessageMode}
 					className='message-history__controls-button'
-					onClick={messageListDataStore.clearMessages}>
+					onClick={messageListDataStore.clearParsedMessages}>
 					Clear
 				</button>
 
 				<button
-					disabled={messageListDataStore.messagesHistory.length === 0}
+					disabled={messageListDataStore.getCurrentMessagesArray.length === 0}
 					className='message-history__controls-button'
 					onClick={exportFn}>
 					Export
@@ -111,7 +121,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 				<button
 					disabled={
 						messageListDataStore.editMessageMode
-						|| messageListDataStore.messagesHistory.length === 0
+						|| messageListDataStore.getCurrentMessagesArray.length === 0
 					}
 					className='message-history__controls-button'
 					onClick={() => {
@@ -119,7 +129,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 					}}>
 					{isReplay ? (
 						<div style={{ display: 'flex' }}>
-							<div className='spinner' /> Stop
+							<div className='spinner'></div>Stop
 						</div>
 					) : (
 						'Replay'
