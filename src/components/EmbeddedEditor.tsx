@@ -18,7 +18,7 @@ import React from 'react';
 import '../styles/embedded-editor.scss';
 
 export const EmbeddedEditor = (props: { schema: string; object: string }) => {
-	const url = `http://10.44.17.234:3000?schema=${props.schema}&${
+	const url = `/editor2/?schema=${props.schema}&${
 		props.object && `object=${props.object}`
 	}&editorMode=dictionaryEditor&embedded=true`;
 	return <iframe className='embedded-editor' src={url}></iframe>;

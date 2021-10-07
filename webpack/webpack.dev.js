@@ -48,10 +48,15 @@ module.exports = webpackMerge(commonConfig, {
                 '/backend': {
                   target: 'http://th2-qa:31464',
                   pathRewrite: { '^/backend': '' },
-                  secure:false,
-                  changeOrigin:true,
+                  secure: false,
+                  changeOrigin: true,
                 },
-            },
+				'/editor2': {
+					target: 'http://th2-qa:30000',
+					secure: false,
+					changeOrigin: true,
+				},
+			 },
     },
     module: {
         rules: [
