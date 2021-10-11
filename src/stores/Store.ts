@@ -100,7 +100,7 @@ export default class Store {
 	@action startApp = () => {
 		const actMessageList = getFromLocalStorage('actMessagesHistory') || '';
 		localStorage.removeItem('actMessagesHistory');
-		this.messageListDataStore.actMessagesHistory = [];
+		this.messageListDataStore.messageHistory.act = [];
 		if (actMessageList !== '') {
 			JSON.parse(actMessageList).forEach((element: ActMessageItem) => {
 				this.messageListDataStore.addParsedMessage(element);
@@ -109,7 +109,7 @@ export default class Store {
 
 		const parsedMessageList = getFromLocalStorage('parsedMessagesHistory') || '';
 		localStorage.removeItem('parsedMessagesHistory');
-		this.messageListDataStore.parsedMessagesHistory = [];
+		this.messageListDataStore.messageHistory['parsed-message'] = [];
 		if (parsedMessageList !== '') {
 			JSON.parse(parsedMessageList).forEach((element: ParsedMessageItem) => {
 				this.messageListDataStore.addParsedMessage(element);

@@ -20,7 +20,7 @@ import { useStore } from '../hooks/useStore';
 import Select from './Select';
 import SplashScreen from './SplashScreen';
 
-export type SchemaType = 'parsed-message' | 'raw-message' | 'act';
+export type SchemaType = 'parsed-message' | 'act';
 
 const Control = () => {
 	const store = useStore();

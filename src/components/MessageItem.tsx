@@ -27,7 +27,6 @@ import {
 	isParsedMessageItem,
 	isActMessageItem,
 } from '../models/Message';
-import { Indicator } from './MessageList';
 import { useStore } from '../hooks/useStore';
 
 interface MessageItemProps {
@@ -103,18 +102,12 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 					placeholder='0'
 					onChange={e => {
 						messageListDataStore.setEditedMessageSendDelay(Number(e.target.value) || 0);
-						if (!Number(e.target.value)) {
-							console.log(`includes${(e.target.value as string).replace('-', '')}`);
-							setDelayValue(e.target.value.replace('-', ''));
-						}
-						console.log(`not includes ${e.target.value}`);
-						setDelayValue(e.target.value);
+						setDelayValue(messageListDataStore.editedMessageSendDelay.toString());
 					}}
 				/>
 			</div>
 			<MessageCardControls
-				id={message.id || ''}
-				indicator={message.indicator}
+				id={message.id}
 				message={message}
 				index={index}
 			/>
@@ -161,7 +154,6 @@ const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) =
 const MessageCardControls = observer(
 	(props: {
 		id: string;
-		indicator: Indicator;
 		message: ParsedMessageItem | ActMessageItem;
 		index: number;
 	}) => {
@@ -179,8 +171,9 @@ const MessageCardControls = observer(
 				<div>
 					<button
 						className={
-							messageListDataStore.getCurrentMessagesArray.slice()[props.index]
-								.indicator
+							props.message.indicator
+							// messageListDataStore.getCurrentMessagesArray.slice()[props.index]
+							// 	.indicator
 						}></button>
 				</div>
 			</div>

@@ -20,7 +20,6 @@ import { observer } from 'mobx-react-lite';
 import {
 	Droppable, DroppableProvided, DropResult, DragDropContext,
 } from 'react-beautiful-dnd';
-import { nanoid } from 'nanoid';
 import { useStore } from '../hooks/useStore';
 import '../styles/message-list.scss';
 import '../styles/splitter.scss';
@@ -47,7 +46,7 @@ const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }
 		if (destination.droppableId === source.droppableId && destination.index === source.index) {
 			return;
 		}
-		const array = messageListDataStore.getCurrentMessagesArray;
+		const array = messageListDataStore.messageHistory[store.selectedSchemaType];
 		reorderArray(destination.index, source.index, array[source.index], { array });
 	};
 
@@ -63,7 +62,7 @@ const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }
 							).map((item: ParsedMessageItem | ActMessageItem, index: number) => (
 								<DraggableMessageItem
 									key={item.id}
-									keyId={item.id || nanoid()}
+									keyId={item.id}
 									index={index}
 									message={item}
 									editMessageMode={messageListDataStore.editMessageMode}

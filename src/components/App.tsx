@@ -81,12 +81,14 @@ const App = () => {
 								</div>
 							) : currentTab === 1 ? (
 								<MessageHistory
-									messages={messageListDataStore.getCurrentMessagesArray.slice()}
+									messages={messageListDataStore.messageHistory[store.selectedSchemaType].slice()}
 								/>
 							) : (
 								<EmbeddedEditor
 									schema='schema-qa'
 									object={store.selectedDictionaryName || ''}
+									editorMode='dictionaryEditor'
+									embedded = 'true'
 								/>
 							)}
 						</div>

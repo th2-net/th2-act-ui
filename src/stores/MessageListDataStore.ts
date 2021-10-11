@@ -16,7 +16,7 @@
  ***************************************************************************** */
 
 import {
-	action, computed, observable, reaction,
+	action, observable, reaction,
 } from 'mobx';
 import { SchemaType } from '../components/Control';
 import {
@@ -24,15 +24,28 @@ import {
 	ActMessageItem,
 	isParsedMessageItem,
 	isActMessageItem,
+	MessageItem,
 } from '../models/Message';
 import Store from './Store';
 import { setInLocalStorage, getFromLocalStorage } from '../helpers/localStorageManager';
 import { Indicator } from '../components/MessageList';
 
-export default class MessageListDataStore {
-	@observable parsedMessagesHistory: ParsedMessageItem[] = [];
+type MessageHistory = {
+	'parsed-message': ParsedMessageItem[];
+	'act': ActMessageItem[];
+  };
 
-	@observable actMessagesHistory: ActMessageItem[] = [];
+export default class MessageListDataStore<T extends MessageItem> {
+	@observable private parsedMessagesHistory: ParsedMessageItem[] = [];
+
+	@observable private actMessagesHistory: ActMessageItem[] = [];
+
+	@observable messageHistory: MessageHistory = {
+		'parsed-message': this.parsedMessagesHistory,
+		act: this.actMessagesHistory,
+	};
+
+	currentType = this.store.selectedSchemaType;
 
 	@observable editorCode = '{}';
 
@@ -88,19 +101,10 @@ export default class MessageListDataStore {
 		if (this.editedMessageId !== '') {
 			const editedMessage = this.buildEditedMessage(this.editedMessageId);
 			if (editedMessage !== undefined) {
-				if (
-					this.store.selectedSchemaType === 'parsed-message'
-					&& isParsedMessageItem(editedMessage)
-				) {
-					this.parsedMessagesHistory = this.parsedMessagesHistory.map(message =>
-						(message.id === this.editedMessageId ? editedMessage : message));
-				} else if (
-					this.store.selectedSchemaType === 'act'
-					&& isActMessageItem(editedMessage)
-				) {
-					this.actMessagesHistory = this.actMessagesHistory.map(message =>
-						(message.id === this.editedMessageId ? editedMessage : message));
-				}
+				this.messageHistory[this.currentType].forEach(
+					(message: ParsedMessageItem | ActMessageItem) =>
+						(message.id === this.editedMessageId ? editedMessage : message),
+				);
 			}
 			this.setEditMessageMode(false);
 		}
@@ -108,7 +112,7 @@ export default class MessageListDataStore {
 
 	@action selectMessage = (id: string) => {
 		if (this.store.selectedSchemaType === 'parsed-message') {
-			const selectedMessage = this.parsedMessagesHistory.find(
+			const selectedMessage = this.messageHistory['parsed-message'].find(
 				message => message.id === id,
 			) as ParsedMessageItem;
 
@@ -119,7 +123,7 @@ export default class MessageListDataStore {
 				selectedMessage.message as string,
 			);
 		} else if (this.store.selectedSchemaType === 'act') {
-			const selectedMessage = this.actMessagesHistory.find(
+			const selectedMessage = this.messageHistory.act.find(
 				message => message.id === id,
 			) as ActMessageItem;
 
@@ -135,21 +139,15 @@ export default class MessageListDataStore {
 	};
 
 	@action addParsedMessage = (message: ParsedMessageItem | ActMessageItem) => {
-		const messageWithId: ParsedMessageItem | ActMessageItem = message;
-		messageWithId.indicator = 'indicator_unvisible';
-		if (isParsedMessageItem(messageWithId)) {
-			this.parsedMessagesHistory.push(messageWithId);
-		} else if (isActMessageItem(messageWithId)) {
-			this.actMessagesHistory.push(messageWithId);
+		if (isParsedMessageItem(message)) {
+			this.messageHistory['parsed-message'].push({ ...message, indicator: 'indicator_unvisible' });
+		} else if (isActMessageItem(message)) {
+			this.messageHistory.act.push({ ...message, indicator: 'indicator_unvisible' });
 		}
 	};
 
 	@action clearParsedMessages = () => {
-		if (this.store.selectedSchemaType === 'parsed-message') {
-			this.parsedMessagesHistory = [];
-		} else if (this.store.selectedSchemaType === 'act') {
-			this.actMessagesHistory = [];
-		}
+		this.messageHistory[this.store.selectedSchemaType] = [];
 
 		if (this.editMessageMode === true) {
 			this.setEditMessageMode(false);
@@ -182,34 +180,19 @@ export default class MessageListDataStore {
 	};
 
 	@action clearIndicators = () => {
-		if (this.store.selectedSchemaType === 'parsed-message') {
-			this.parsedMessagesHistory = this.parsedMessagesHistory.map(message => ({
-				...message,
-				indicator: 'indicator_unvisible',
-			}));
-		} else if (this.store.selectedSchemaType === 'act') {
-			this.actMessagesHistory.map(message => ({
-				...message,
-				indicator: 'indicator_unvisible',
-			}));
-			for (let i = 0; i < this.actMessagesHistory.length; i++) {
-				this.actMessagesHistory[i].indicator = 'indicator_unvisible';
-			}
-		}
+		this.messageHistory[this.currentType].forEach((message: ParsedMessageItem | ActMessageItem) => ({
+			...message,
+			indicator: 'indicator_unvisible',
+		}));
 	};
 
 	@action changeIndicator = (id: string, indicator: Indicator) => {
-		if (this.store.selectedSchemaType === 'parsed-message') {
-			this.parsedMessagesHistory = this.parsedMessagesHistory.map(message =>
-				(message.id === id ? { ...message, indicator } : message));
-		} else if (this.store.selectedSchemaType === 'act') {
-			this.actMessagesHistory = this.actMessagesHistory.map(message =>
-				(message.id === id ? { ...message, indicator } : message));
-		}
+		this.messageHistory[this.currentType].forEach((message: ParsedMessageItem | ActMessageItem) =>
+			(message.id === id ? { ...message, indicator } : message));
 	};
 
 	@action setEditedMessageSendDelay = (delay: number) => {
-		if (delay >= 0) {
+		if (delay >= 0 && Number.isInteger(delay)) {
 			this.editedMessageSendDelay = delay;
 		}
 	};
@@ -237,11 +220,13 @@ export default class MessageListDataStore {
 
 	@action deleteMessage = (id: string) => {
 		if (this.store.selectedSchemaType === 'parsed-message') {
-			this.parsedMessagesHistory = this.parsedMessagesHistory.filter(
+			this.messageHistory['parsed-message'] = this.messageHistory['parsed-message'].filter(
 				message => message.id !== id,
 			);
 		} else if (this.store.selectedSchemaType === 'act') {
-			this.actMessagesHistory = this.actMessagesHistory.filter(message => message.id !== id);
+			this.messageHistory.act = this.messageHistory.act.filter(
+				message => message.id !== id,
+			);
 		}
 	};
 
@@ -263,22 +248,16 @@ export default class MessageListDataStore {
 		}
 	};
 
-	@computed get getCurrentMessagesArray() {
-		return this.store.selectedSchemaType === 'parsed-message'
-			? this.parsedMessagesHistory
-			: this.actMessagesHistory;
-	}
-
 	constructor(private store: Store) {
 		reaction(
-			() => this.parsedMessagesHistory.slice(),
+			() => this.messageHistory['parsed-message'].slice(),
 			parsedMessageHistory => {
 				setInLocalStorage('parsedMessagesHistory', JSON.stringify(parsedMessageHistory));
 			},
 		);
 
 		reaction(
-			() => this.actMessagesHistory.slice(),
+			() => this.messageHistory.act.slice(),
 			actMessagesHistory => {
 				setInLocalStorage('actMessagesHistory', JSON.stringify(actMessagesHistory));
 			},

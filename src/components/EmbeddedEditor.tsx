@@ -17,9 +17,9 @@
 import React from 'react';
 import '../styles/embedded-editor.scss';
 
-export const EmbeddedEditor = (props: { schema: string; object: string }) => {
-	const url = `/editor2/?schema=${props.schema}&${
-		props.object && `object=${props.object}`
-	}&editorMode=dictionaryEditor&embedded=true`;
+export const EmbeddedEditor = (props: { schema: string; object: string; editorMode: string; embedded: string }) => {
+	const url = `http://th2-qa:30000/editor2/?${new URLSearchParams(props)}`;
+	// eslint-disable-next-line no-console
+	console.log(url);
 	return <iframe className='embedded-editor' src={url}></iframe>;
 };

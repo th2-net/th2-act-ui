@@ -58,7 +58,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 		if (isReplay) {
 			messageListDataStore.setEditMessageMode(false);
 			messageListDataStore.clearIndicators();
-			replaySendMessage(messageListDataStore.getCurrentMessagesArray, 0);
+			replaySendMessage(messageListDataStore.messageHistory[store.selectedSchemaType], 0);
 		}
 	}, [isReplay]);
 
@@ -78,7 +78,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 
 	const exportFn = () => {
 		downloadFile(
-			JSON.stringify(messageListDataStore.getCurrentMessagesArray),
+			JSON.stringify(messageListDataStore.messageHistory[store.selectedSchemaType]),
 			store.selectedSchemaType === 'parsed-message' ? 'parsedMessages' : 'actMessages',
 			'application/json',
 		);
@@ -112,7 +112,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 				</button>
 
 				<button
-					disabled={messageListDataStore.getCurrentMessagesArray.length === 0}
+					disabled={messageListDataStore.messageHistory[store.selectedSchemaType].length === 0}
 					className='message-history__controls-button'
 					onClick={exportFn}>
 					Export
@@ -121,7 +121,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 				<button
 					disabled={
 						messageListDataStore.editMessageMode
-						|| messageListDataStore.getCurrentMessagesArray.length === 0
+						|| messageListDataStore.messageHistory[store.selectedSchemaType].length === 0
 					}
 					className='message-history__controls-button'
 					onClick={() => {
