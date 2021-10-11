@@ -18,6 +18,7 @@ import { hot } from 'react-hot-loader/root';
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Tab, Tabs } from '@material-ui/core';
+import loader from '@monaco-editor/loader';
 import Result from './Result';
 import Button from './Button';
 import '../styles/root.scss';
@@ -41,6 +42,10 @@ const App = () => {
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
 	const messageEditorRef = React.useRef<MessageEditorMethods>(null);
+
+	React.useEffect(() => {
+		loader.config({ paths: { vs: 'vs' } });
+	}, []);
 
 	const sendMessage = async () => {
 		if (messageEditorRef.current) {
