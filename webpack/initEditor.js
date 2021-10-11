@@ -1,11 +1,8 @@
 const fs = require('fs-extra');
 
 const dir = './public/vs';
-if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-} else {
-    fs.emptyDirSync(dir);
-}
+
+fs.emptyDirSync(dir);
 
 Promise.all([
     fs.copy('./node_modules/monaco-editor/min/vs/base', './public/vs/base'),

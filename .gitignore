@@ -6,4 +6,4 @@ build
 # Ignore Gradle project-specific cache directory
 .gradle
 
-.public/vs
+/public/vs
