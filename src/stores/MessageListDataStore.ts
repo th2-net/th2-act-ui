@@ -15,9 +15,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import {
-	action, observable, reaction,
-} from 'mobx';
+import { action, makeObservable, observable, reaction } from 'mobx';
 import { SchemaType } from '../components/Control';
 import {
 	ParsedMessageItem,
@@ -32,35 +30,70 @@ import { Indicator } from '../components/MessageList';
 
 type MessageHistory = {
 	'parsed-message': ParsedMessageItem[];
-	'act': ActMessageItem[];
-  };
+	act: ActMessageItem[];
+};
 
 export default class MessageListDataStore<T extends MessageItem> {
-	@observable private parsedMessagesHistory: ParsedMessageItem[] = [];
+	private parsedMessagesHistory: ParsedMessageItem[] = [];
 
-	@observable private actMessagesHistory: ActMessageItem[] = [];
+	private actMessagesHistory: ActMessageItem[] = [];
 
-	@observable messageHistory: MessageHistory = {
+	messageHistory: MessageHistory = {
 		'parsed-message': this.parsedMessagesHistory,
 		act: this.actMessagesHistory,
 	};
 
 	currentType = this.store.selectedSchemaType;
 
-	@observable editorCode = '{}';
+	editorCode = '{}';
 
-	@observable editMessageMode = false;
+	editMessageMode = false;
 
-	@observable editedMessageId = '';
+	editedMessageId = '';
 
-	@observable editedMessageSendDelay = 0;
+	editedMessageSendDelay = 0;
+
+	constructor(private store: Store) {
+		makeObservable(this, {
+			messageHistory: observable,
+			editorCode: observable,
+			editMessageMode: observable,
+			editedMessageId: observable,
+			editedMessageSendDelay: observable,
+			saveEditedMessage: action,
+			selectMessage: action,
+			addParsedMessage: action,
+			clearParsedMessages: action,
+			setEditorCode: action,
+			clearIndicators: action,
+			changeIndicator: action,
+			setEditedMessageId: action,
+			setEditMessageMode: action,
+			deleteMessage: action,
+			prepareForSelectedSchemaType: action,
+		});
+
+		reaction(
+			() => this.messageHistory['parsed-message'].slice(),
+			parsedMessageHistory => {
+				setInLocalStorage('parsedMessagesHistory', JSON.stringify(parsedMessageHistory));
+			},
+		);
+
+		reaction(
+			() => this.messageHistory.act.slice(),
+			actMessagesHistory => {
+				setInLocalStorage('actMessagesHistory', JSON.stringify(actMessagesHistory));
+			},
+		);
+	}
 
 	buildEditedMessage = (id: string): ParsedMessageItem | ActMessageItem | undefined => {
 		if (this.store.selectedSchemaType === 'parsed-message') {
 			if (
-				this.store.selectedSession
-				&& this.store.selectedDictionaryName
-				&& this.store.selectedMessageType
+				this.store.selectedSession &&
+				this.store.selectedDictionaryName &&
+				this.store.selectedMessageType
 			) {
 				const editedMessage: ParsedMessageItem = {
 					id,
@@ -77,9 +110,9 @@ export default class MessageListDataStore<T extends MessageItem> {
 		}
 		if (this.store.selectedSchemaType === 'act') {
 			if (
-				this.store.selectedActBox
-				&& this.store.selectedService
-				&& this.store.selectedMethod
+				this.store.selectedActBox &&
+				this.store.selectedService &&
+				this.store.selectedMethod
 			) {
 				const editedMessage: ActMessageItem = {
 					id,
@@ -97,20 +130,20 @@ export default class MessageListDataStore<T extends MessageItem> {
 		return undefined;
 	};
 
-	@action saveEditedMessage = () => {
+	saveEditedMessage = () => {
 		if (this.editedMessageId !== '') {
 			const editedMessage = this.buildEditedMessage(this.editedMessageId);
 			if (editedMessage !== undefined) {
 				this.messageHistory[this.currentType].forEach(
 					(message: ParsedMessageItem | ActMessageItem) =>
-						(message.id === this.editedMessageId ? editedMessage : message),
+						message.id === this.editedMessageId ? editedMessage : message,
 				);
 			}
 			this.setEditMessageMode(false);
 		}
 	};
 
-	@action selectMessage = (id: string) => {
+	selectMessage = (id: string) => {
 		if (this.store.selectedSchemaType === 'parsed-message') {
 			const selectedMessage = this.messageHistory['parsed-message'].find(
 				message => message.id === id,
@@ -138,15 +171,18 @@ export default class MessageListDataStore<T extends MessageItem> {
 		this.setEditedMessageId(id);
 	};
 
-	@action addParsedMessage = (message: ParsedMessageItem | ActMessageItem) => {
+	addParsedMessage = (message: ParsedMessageItem | ActMessageItem) => {
 		if (isParsedMessageItem(message)) {
-			this.messageHistory['parsed-message'].push({ ...message, indicator: 'indicator_unvisible' });
+			this.messageHistory['parsed-message'].push({
+				...message,
+				indicator: 'indicator_unvisible',
+			});
 		} else if (isActMessageItem(message)) {
 			this.messageHistory.act.push({ ...message, indicator: 'indicator_unvisible' });
 		}
 	};
 
-	@action clearParsedMessages = () => {
+	clearParsedMessages = () => {
 		this.messageHistory[this.store.selectedSchemaType] = [];
 
 		if (this.editMessageMode === true) {
@@ -154,7 +190,7 @@ export default class MessageListDataStore<T extends MessageItem> {
 		}
 	};
 
-	@action setEditorCode = (code: string) => {
+	setEditorCode = (code: string) => {
 		this.editorCode = code;
 	};
 
@@ -179,25 +215,29 @@ export default class MessageListDataStore<T extends MessageItem> {
 		}
 	};
 
-	@action clearIndicators = () => {
-		this.messageHistory[this.currentType].forEach((message: ParsedMessageItem | ActMessageItem) => ({
-			...message,
-			indicator: 'indicator_unvisible',
-		}));
+	clearIndicators = () => {
+		this.messageHistory[this.currentType].forEach(
+			(message: ParsedMessageItem | ActMessageItem) => ({
+				...message,
+				indicator: 'indicator_unvisible',
+			}),
+		);
 	};
 
-	@action changeIndicator = (id: string, indicator: Indicator) => {
-		this.messageHistory[this.currentType].forEach((message: ParsedMessageItem | ActMessageItem) =>
-			(message.id === id ? { ...message, indicator } : message));
+	changeIndicator = (id: string, indicator: Indicator) => {
+		this.messageHistory[this.currentType].forEach(
+			(message: ParsedMessageItem | ActMessageItem) =>
+				message.id === id ? { ...message, indicator } : message,
+		);
 	};
 
-	@action setEditedMessageSendDelay = (delay: number) => {
+	setEditedMessageSendDelay = (delay: number) => {
 		if (delay >= 0 && Number.isInteger(delay)) {
 			this.editedMessageSendDelay = delay;
 		}
 	};
 
-	@observable setEditedMessageId = (id: string) => {
+	setEditedMessageId = (id: string) => {
 		this.editedMessageId = id;
 		if (this.store.selectedSchemaType === 'parsed-message') {
 			setInLocalStorage('editedParsedMessageId', id);
@@ -206,7 +246,7 @@ export default class MessageListDataStore<T extends MessageItem> {
 		}
 	};
 
-	@action setEditMessageMode = (mode: boolean) => {
+	setEditMessageMode = (mode: boolean) => {
 		this.editMessageMode = mode;
 		if (mode === false) {
 			this.setEditedMessageId('');
@@ -218,15 +258,13 @@ export default class MessageListDataStore<T extends MessageItem> {
 		}
 	};
 
-	@action deleteMessage = (id: string) => {
+	deleteMessage = (id: string) => {
 		if (this.store.selectedSchemaType === 'parsed-message') {
 			this.messageHistory['parsed-message'] = this.messageHistory['parsed-message'].filter(
 				message => message.id !== id,
 			);
 		} else if (this.store.selectedSchemaType === 'act') {
-			this.messageHistory.act = this.messageHistory.act.filter(
-				message => message.id !== id,
-			);
+			this.messageHistory.act = this.messageHistory.act.filter(message => message.id !== id);
 		}
 	};
 
@@ -247,20 +285,4 @@ export default class MessageListDataStore<T extends MessageItem> {
 				throw new Error('');
 		}
 	};
-
-	constructor(private store: Store) {
-		reaction(
-			() => this.messageHistory['parsed-message'].slice(),
-			parsedMessageHistory => {
-				setInLocalStorage('parsedMessagesHistory', JSON.stringify(parsedMessageHistory));
-			},
-		);
-
-		reaction(
-			() => this.messageHistory.act.slice(),
-			actMessagesHistory => {
-				setInLocalStorage('actMessagesHistory', JSON.stringify(actMessagesHistory));
-			},
-		);
-	}
 }

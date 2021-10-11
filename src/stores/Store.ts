@@ -17,9 +17,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
-import {
-	action, computed, observable, reaction, runInAction,
-} from 'mobx';
+import { action, computed, makeObservable, observable, reaction, runInAction } from 'mobx';
 import { nanoid } from 'nanoid';
 import api from '../api';
 import { SchemaType } from '../components/Control';
@@ -40,100 +38,98 @@ import MessageListDataStore from './MessageListDataStore';
 export default class Store {
 	messageListDataStore = new MessageListDataStore(this);
 
-	@observable dictionaries: Array<string> = [];
+	dictionaries: Array<string> = [];
 
-	@observable sessions: Array<string> = [];
+	sessions: Array<string> = [];
 
-	@observable dictionary: Dictionary = [];
+	dictionary: Dictionary = [];
 
-	@observable selectedDictionaryName: string | null = null;
+	selectedDictionaryName: string | null = null;
 
-	@observable selectedMessageType: string | null = null;
+	selectedMessageType: string | null = null;
 
-	@observable selectedSession: string | null = null;
+	selectedSession: string | null = null;
 
-	@observable parsedMessage: ParsedMessage | null = null;
+	parsedMessage: ParsedMessage | null = null;
 
-	@observable acts: Array<string> = [];
+	acts: Array<string> = [];
 
-	@observable selectedActBox: string | null = null;
+	selectedActBox: string | null = null;
 
-	@observable services: string[] = [];
+	services: string[] = [];
 
-	@observable selectedService: string | null = null;
+	selectedService: string | null = null;
 
-	@observable serviceDetails: Service | null = null;
+	serviceDetails: Service | null = null;
 
-	@observable selectedMethod: Method | null = null;
+	selectedMethod: Method | null = null;
 
-	@observable actSchema: JSONSchema4 | null = null;
+	actSchema: JSONSchema4 | null = null;
 
-	@observable selectedSchemaType: SchemaType = 'parsed-message';
+	selectedSchemaType: SchemaType = 'parsed-message';
 
-	@observable isSessionsLoading = false;
+	isSessionsLoading = false;
 
-	@observable isDictionariesLoading = false;
+	isDictionariesLoading = false;
 
-	@observable isDictionaryLoading = false;
+	isDictionaryLoading = false;
 
-	@observable isActsLoading = false;
+	isActsLoading = false;
 
-	@observable isServicesLoading = false;
+	isServicesLoading = false;
 
-	@observable isMethodsLoading = false;
+	isMethodsLoading = false;
 
-	@observable isSending = false;
+	isSending = false;
 
-	@observable isSchemaLoading = false;
+	isSchemaLoading = false;
 
-	@observable isSchemaApplied = false;
-
-	@action setSelectedMethod = (methodName: string | null) => {
-		if (this.selectedService) {
-			this.getServiceDetails(this.selectedService).then(() => {
-				this.selectedMethod = this.serviceDetails?.methods.find(method => method.methodName === methodName)
-					|| null;
-			});
-		}
-	};
-
-	@action startApp = () => {
-		const actMessageList = getFromLocalStorage('actMessagesHistory') || '';
-		localStorage.removeItem('actMessagesHistory');
-		this.messageListDataStore.messageHistory.act = [];
-		if (actMessageList !== '') {
-			JSON.parse(actMessageList).forEach((element: ActMessageItem) => {
-				this.messageListDataStore.addParsedMessage(element);
-			});
-		}
-
-		const parsedMessageList = getFromLocalStorage('parsedMessagesHistory') || '';
-		localStorage.removeItem('parsedMessagesHistory');
-		this.messageListDataStore.messageHistory['parsed-message'] = [];
-		if (parsedMessageList !== '') {
-			JSON.parse(parsedMessageList).forEach((element: ParsedMessageItem) => {
-				this.messageListDataStore.addParsedMessage(element);
-			});
-		}
-		this.selectedSession = getFromLocalStorage('selectedSessionId');
-		this.selectedDictionaryName = getFromLocalStorage('selectedDictionaryName');
-		this.selectedMessageType = getFromLocalStorage('selectedMessageType');
-		this.selectedActBox = getFromLocalStorage('selectedActBox');
-		this.selectedService = getFromLocalStorage('selectedService');
-		this.setSelectedMethod(getFromLocalStorage('selectedMethodName'));
-
-		this.setSelectedSchemaType(
-			(getFromLocalStorage('selectedSchemaType') as SchemaType) || this.selectedSchemaType,
-		);
-	};
-
-	prepareApp = async () => {
-		this.getDictionaries();
-		this.getSessions();
-		this.getActs();
-	};
+	isSchemaApplied = false;
 
 	constructor() {
+		makeObservable(this, {
+			dictionaries: observable,
+			sessions: observable,
+			dictionary: observable,
+			selectedDictionaryName: observable,
+			selectedMessageType: observable,
+			selectedSession: observable,
+			parsedMessage: observable,
+			acts: observable,
+			selectedActBox: observable,
+			services: observable,
+			selectedService: observable,
+			serviceDetails: observable,
+			selectedMethod: observable,
+			actSchema: observable,
+			selectedSchemaType: observable,
+			isSessionsLoading: observable,
+			isDictionariesLoading: observable,
+			isDictionaryLoading: observable,
+			isActsLoading: observable,
+			isServicesLoading: observable,
+			isMethodsLoading: observable,
+			isSending: observable,
+			isSchemaLoading: observable,
+			isSchemaApplied: observable,
+			selectedSchema: computed,
+			isSendingAllowed: computed,
+			setSelectedMethod: action,
+			startApp: action,
+			setIsSchemaApplied: action,
+			getDictionaries: action,
+			getDictionary: action,
+			getMessageSchema: action,
+			getSessions: action,
+			replayMessage: action,
+			sendMessage: action,
+			getActs: action,
+			getServices: action,
+			getServiceDetails: action,
+			setSelectedSchemaType: action,
+			getActSchema: action,
+		});
+
 		this.prepareApp().then(this.startApp);
 
 		reaction(
@@ -221,12 +217,56 @@ export default class Store {
 		);
 	}
 
-	@action
+	setSelectedMethod = (methodName: string | null) => {
+		if (this.selectedService) {
+			this.getServiceDetails(this.selectedService).then(() => {
+				this.selectedMethod =
+					this.serviceDetails?.methods.find(method => method.methodName === methodName) ||
+					null;
+			});
+		}
+	};
+
+	startApp = () => {
+		const actMessageList = getFromLocalStorage('actMessagesHistory') || '';
+		localStorage.removeItem('actMessagesHistory');
+		this.messageListDataStore.messageHistory.act = [];
+		if (actMessageList !== '') {
+			JSON.parse(actMessageList).forEach((element: ActMessageItem) => {
+				this.messageListDataStore.addParsedMessage(element);
+			});
+		}
+
+		const parsedMessageList = getFromLocalStorage('parsedMessagesHistory') || '';
+		localStorage.removeItem('parsedMessagesHistory');
+		this.messageListDataStore.messageHistory['parsed-message'] = [];
+		if (parsedMessageList !== '') {
+			JSON.parse(parsedMessageList).forEach((element: ParsedMessageItem) => {
+				this.messageListDataStore.addParsedMessage(element);
+			});
+		}
+		this.selectedSession = getFromLocalStorage('selectedSessionId');
+		this.selectedDictionaryName = getFromLocalStorage('selectedDictionaryName');
+		this.selectedMessageType = getFromLocalStorage('selectedMessageType');
+		this.selectedActBox = getFromLocalStorage('selectedActBox');
+		this.selectedService = getFromLocalStorage('selectedService');
+		this.setSelectedMethod(getFromLocalStorage('selectedMethodName'));
+
+		this.setSelectedSchemaType(
+			(getFromLocalStorage('selectedSchemaType') as SchemaType) || this.selectedSchemaType,
+		);
+	};
+
+	prepareApp = async () => {
+		this.getDictionaries();
+		this.getSessions();
+		this.getActs();
+	};
+
 	setIsSchemaApplied = (isApplied: boolean) => {
 		this.isSchemaApplied = isApplied;
 	};
 
-	@action
 	getDictionaries = async () => {
 		try {
 			const dictionaryList = await api.getDictionaryList();
@@ -239,7 +279,6 @@ export default class Store {
 		}
 	};
 
-	@action
 	getDictionary = async (dictinonaryName: string) => {
 		this.isDictionaryLoading = true;
 		try {
@@ -254,7 +293,6 @@ export default class Store {
 		this.isDictionaryLoading = false;
 	};
 
-	@action
 	getMessageSchema = async (messageType: string, dictinonaryName: string) => {
 		this.isSchemaLoading = true;
 		try {
@@ -271,7 +309,6 @@ export default class Store {
 		this.isSchemaLoading = false;
 	};
 
-	@action
 	getSessions = async () => {
 		this.isSessionsLoading = true;
 		try {
@@ -286,7 +323,7 @@ export default class Store {
 		this.isSessionsLoading = false;
 	};
 
-	@action replayMessage = async (message: ParsedMessageItem | ActMessageItem) => {
+	replayMessage = async (message: ParsedMessageItem | ActMessageItem) => {
 		let result: MessageSendingResponse | ActSendingResponse | null = null;
 		if (isParsedMessageItem(message)) {
 			try {
@@ -302,9 +339,7 @@ export default class Store {
 				);
 			} catch (error) {
 				alert('Error while sending');
-				this.messageListDataStore.changeIndicator(
-					message.id, 'indicator_unsuccessful',
-				);
+				this.messageListDataStore.changeIndicator(message.id, 'indicator_unsuccessful');
 			}
 		}
 		if (isActMessageItem(message)) {
@@ -320,14 +355,11 @@ export default class Store {
 				);
 			} catch (error) {
 				alert('Error while sending');
-				this.messageListDataStore.changeIndicator(
-					message.id, 'indicator_unsuccessful',
-				);
+				this.messageListDataStore.changeIndicator(message.id, 'indicator_unsuccessful');
 			}
 		}
 	};
 
-	@action
 	sendMessage = async (message: object): Promise<MessageSendingResponse | null> => {
 		this.isSending = true;
 
@@ -336,9 +368,9 @@ export default class Store {
 		switch (this.selectedSchemaType) {
 			case 'parsed-message': {
 				if (
-					!this.selectedDictionaryName
-					|| !this.selectedMessageType
-					|| !this.selectedSession
+					!this.selectedDictionaryName ||
+					!this.selectedMessageType ||
+					!this.selectedSession
 				) {
 					this.isSending = false;
 					return null;
@@ -392,7 +424,6 @@ export default class Store {
 		return result;
 	};
 
-	@action
 	getActs = async () => {
 		this.isActsLoading = true;
 		try {
@@ -407,7 +438,6 @@ export default class Store {
 		this.isActsLoading = false;
 	};
 
-	@action
 	getServices = async (actBox: string) => {
 		this.isServicesLoading = true;
 		try {
@@ -422,7 +452,6 @@ export default class Store {
 		this.isServicesLoading = false;
 	};
 
-	@action
 	getServiceDetails = async (serviceName: string) => {
 		this.isMethodsLoading = true;
 		try {
@@ -439,14 +468,14 @@ export default class Store {
 		this.isMethodsLoading = false;
 	};
 
-	@action setSelectedSchemaType = (type: SchemaType) => {
+	setSelectedSchemaType = (type: SchemaType) => {
 		setInLocalStorage('selectedSchemaType', type);
 		this.selectedSchemaType = type;
 		this.messageListDataStore.prepareForSelectedSchemaType(type);
 		this.setIsSchemaApplied(false);
 	};
 
-	@computed get selectedSchema() {
+	get selectedSchema() {
 		switch (this.selectedSchemaType) {
 			case 'parsed-message':
 				return this.parsedMessage
@@ -459,7 +488,6 @@ export default class Store {
 		}
 	}
 
-	@action
 	getActSchema = async (serviceName: string, methodName: string) => {
 		this.isSchemaLoading = true;
 		if (!this.selectedMethod) return;
@@ -478,23 +506,22 @@ export default class Store {
 		this.isSchemaLoading = false;
 	};
 
-	@computed
 	get isSendingAllowed(): boolean {
 		switch (this.selectedSchemaType) {
 			case 'parsed-message': {
 				return !!(
-					!this.isSending
-					&& this.selectedSession
-					&& this.selectedDictionaryName
-					&& this.selectedMessageType
+					!this.isSending &&
+					this.selectedSession &&
+					this.selectedDictionaryName &&
+					this.selectedMessageType
 				);
 			}
 			case 'act': {
 				return !!(
-					!this.isSending
-					&& this.selectedActBox
-					&& this.selectedService
-					&& this.selectedMethod
+					!this.isSending &&
+					this.selectedActBox &&
+					this.selectedService &&
+					this.selectedMethod
 				);
 			}
 			default:
