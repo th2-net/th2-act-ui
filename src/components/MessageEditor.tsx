@@ -45,7 +45,7 @@ export interface MessageEditorMethods {
 	getFilledMessage: () => object | null;
 }
 
-const DEFAULT_EDITOR_HEIGHT = 500;
+const DEFAULT_EDITOR_HEIGHT = 700;
 
 export type UntypedField = {
 	fieldName: string;
@@ -58,6 +58,7 @@ const MessageEditor = ({
 	usedLenses,
 }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const store = useStore();
+	const messageListDataStore = store.messageListDataStore;
 
 	const monacoRef = React.useRef<Monaco>();
 	const editorRef = React.useRef<monacoEditor.editor.IStandaloneCodeEditor>();
@@ -120,6 +121,9 @@ const MessageEditor = ({
 			setNewSchema(schema);
 		} else {
 			setCode('{}');
+			if (messageListDataStore.editMessageMode) {
+				messageListDataStore.setEditorCode('{}');
+			}
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
 				schemas: [
@@ -507,10 +511,10 @@ const MessageEditor = ({
 				<Editor
 					height={editorHeight}
 					language='json'
-					value={code}
 					onChange={onValueChange}
 					onMount={handleEditorDidMount}
 					onValidate={initialMarkers}
+					value={messageListDataStore.editMessageMode ? messageListDataStore.editorCode : code}
 				/>
 			</div>
 		</>

@@ -1,0 +1,18 @@
+<svg width="14.999999999999998" height="14.999999999999998" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <title>background</title>
+  <rect x="-1" y="-1" width="582" height="402" id="canvas_background" fill="none"/>
+ </g>
+
+ <g>
+  <title>Layer 1</title>
+  <g transform="rotate(-90 6.80531 7.25713)" stroke="null" id="svg_7">
+   <circle stroke="null" cx="1.50498" cy="9.56896" r="1.5" fill="#808080" id="svg_1"/>
+   <circle stroke="null" cx="6.50498" cy="9.56896" r="1.5" fill="#808080" id="svg_2"/>
+   <circle stroke="null" cx="11.50498" cy="9.56896" r="1.5" fill="#808080" id="svg_3"/>
+   <circle stroke="null" cx="1.50498" cy="5.54598" r="1.5" fill="#808080" id="svg_4"/>
+   <circle stroke="null" cx="6.50498" cy="5.54598" r="1.5" fill="#808080" id="svg_5"/>
+   <circle stroke="null" transform="matrix(-0.601815 -0.767365 0.798636 -0.578251 13.9996 17.7977)" cx="11.50498" cy="5.54598" r="1.5" fill="#808080" id="svg_6"/>
+  </g>
+ </g>
+</svg>

@@ -24,6 +24,7 @@ export type SchemaType = 'parsed-message' | 'raw-message' | 'act';
 
 const Control = () => {
 	const store = useStore();
+	const messageListDataStore = store.messageListDataStore;
 
 	const controlConfigs = [
 		{
@@ -32,29 +33,33 @@ const Control = () => {
 				{
 					label: 'Session',
 					id: 'session',
-					options: store.sessions.sort(),
+					options: store.sessions.slice().sort(),
 					selected: store.selectedSession || '',
 					disabled: store.isSessionsLoading,
 					valid: store.isSchemaApplied ? !!store.selectedSession : true,
-					onChange: (opt: string) => store.selectedSession = opt,
+					onChange: (opt: string) => (store.selectedSession = opt),
 				},
 				{
 					label: 'Dictionary',
 					id: 'dictionary',
-					options: store.dictionaries.sort(),
+					options: store.dictionaries.slice().sort(),
 					selected: store.selectedDictionaryName || '',
-					disabled: store.isSessionsLoading || store.isDictionariesLoading,
+					disabled: store.isSessionsLoading || store.isDictionariesLoading
+					|| messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedDictionaryName : true,
-					onChange: (opt: string) => store.selectedDictionaryName = opt,
+					onChange: (opt: string) => (store.selectedDictionaryName = opt),
 				},
 				{
 					label: 'Msg Type',
 					id: 'msg-type',
-					options: store.dictionary.sort(),
+					options: store.dictionary.slice().sort(),
 					selected: store.selectedMessageType || '',
-					disabled: store.isSessionsLoading || store.isDictionariesLoading || store.isDictionaryLoading,
+					disabled:
+						store.isSessionsLoading
+						|| store.isDictionariesLoading
+						|| store.isDictionaryLoading || messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedMessageType : true,
-					onChange: (opt: string) => store.selectedMessageType = opt,
+					onChange: (opt: string) => (store.selectedMessageType = opt),
 				},
 			],
 		},
@@ -64,33 +69,34 @@ const Control = () => {
 				{
 					label: 'Act',
 					id: 'act',
-					options: store.acts.sort(),
+					options: store.acts.slice().sort(),
 					selected: store.selectedActBox || '',
 					disabled: store.isActsLoading,
 					valid: store.isSchemaApplied ? !!store.selectedActBox : true,
-					onChange: (opt: string) => store.selectedActBox = opt,
+					onChange: (opt: string) => (store.selectedActBox = opt),
 				},
 				{
 					label: 'Service',
 					id: 'service',
-					options: store.services.sort(),
+					options: store.services.slice().sort(),
 					selected: store.selectedService || '',
-					disabled: store.isActsLoading || store.isServicesLoading,
+					disabled: store.isActsLoading || store.isServicesLoading
+					|| messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedService : true,
-					onChange: (opt: string) => store.selectedService = opt,
+					onChange: (opt: string) => (store.selectedService = opt),
 				},
 				{
 					label: 'Method',
 					id: 'method',
 					options: store.serviceDetails
-						? store.serviceDetails.methods.map(method => method.methodName).sort()
+						? store.serviceDetails.methods.map(method => method.methodName).slice().sort()
 						: [],
 					selected: store.selectedMethod?.methodName || '',
-					disabled: store.isActsLoading || store.isServicesLoading || store.isMethodsLoading,
+					disabled:
+						store.isActsLoading || store.isServicesLoading || store.isMethodsLoading
+						|| messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedMethod : true,
-					onChange: (methodName: string) =>
-						store.selectedMethod = store.serviceDetails?.methods
-							.find(method => method.methodName === methodName) || null,
+					onChange: (methodName: string) => store.setSelectedMethod(methodName),
 				},
 			],
 		},
@@ -98,38 +104,39 @@ const Control = () => {
 
 	return (
 		<>
-			<div key="mode" className="app__row">
-				<h3 className="app__title">Send as</h3>
-				{
-					controlConfigs.map(_config => (
-						<label key={_config.name} htmlFor={_config.name}>
-							<input
-								type="radio"
-								value={_config.name}
-								id={_config.name}
-								checked={_config.name === store.selectedSchemaType}
-								onChange={e => store.setSelectedSchemaType(e.target.value as SchemaType)}
-								name="message-type"
-							/>
-							{
-								_config.name
-									.split('-')
-									.map(part => part.charAt(0).toUpperCase() + part.slice(1))
-									.join(' ')
+			<div key='mode' className='app__row'>
+				<h3 className='app__title'>Send as</h3>
+				{controlConfigs.map(config => (
+					<label key={config.name} htmlFor={config.name}>
+						<input
+							type='radio'
+							value={config.name}
+							id={config.name}
+							checked={config.name === store.selectedSchemaType}
+							onChange={e =>
+								store.setSelectedSchemaType(e.target.value as SchemaType)
 							}
-						</label>
-					))
-				}
+							name='message-type'
+						/>
+						{config.name
+							.split('-')
+							.map(part => part.charAt(0).toUpperCase() + part.slice(1))
+							.join(' ')}
+					</label>
+				))}
 			</div>
-			<div key="parameters" className="app__row app__controls">
+			<div key='parameters' className='app__row app__controls'>
 				{
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					controlConfigs.find(_config => _config.name === store.selectedSchemaType)!.selects.map(props => (
-						<React.Fragment key={props.id}>
-							<Select {...props} />
-							{props.disabled	&& <SplashScreen key="splash"/>}
-						</React.Fragment>
-					))
+					controlConfigs
+						.find(config => config.name === store.selectedSchemaType)!
+						.selects.map(props => (
+							<React.Fragment key={props.id}>
+								<Select {...props} />
+								{(props.disabled && !messageListDataStore.editMessageMode)
+								&& <SplashScreen key='splash' />}
+							</React.Fragment>
+						))
 				}
 
 				{store.isSchemaLoading && <SplashScreen />}

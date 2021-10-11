@@ -1,5 +1,5 @@
 /** ****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,4 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
- $splitterBarWidth: 32px;
+@import './common/vars';
+
+.indicator {
+	height: 15px;
+	width: 15px;
+	border-radius: 50%;
+
+	&_successful {
+		@extend .indicator;
+		@include color-indicator(chartreuse, currentColor);
+	}
+
+	&_unsuccessful {
+		@extend .indicator;
+		@include color-indicator(crimson, currentColor);
+	}
+
+	&_edited {
+		@extend .indicator;
+		@include color-indicator(darkorange, currentColor);
+	}
+
+	&_unvisible {
+		visibility: hidden;
+	}
+}

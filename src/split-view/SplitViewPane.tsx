@@ -1,4 +1,4 @@
-/******************************************************************************
+/** ****************************************************************************
  * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,32 +12,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- ******************************************************************************/
+ ***************************************************************************** */
 
-@import './common/vars';
+import * as React from 'react';
+import '../styles/splitter.scss';
 
-.result {
-	display: flex;
-	flex-grow: 1;
-	background-color: #fff;
-	border-radius: 6px;
-
-	&-value {
-		margin: 5px;
-		display: flex;
-		flex-direction: column;
-		white-space: pre-wrap;
-	}
+interface Props {
+	children: React.ReactNode;
 }
 
-.ok {
-	background-color: #ccffcc;
-}
+const SplitViewPane = ({ children }: Props) => (
+	<div className='splitter-pane'>
+		<div className='splitter-pane__content'>{children}</div>
+	</div>
+);
 
-.error {
-	background-color: #ffcccc;
-}
-
-a {
-	color: darkblue;
-}
+export default SplitViewPane;

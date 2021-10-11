@@ -1,5 +1,5 @@
 /** ****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,4 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
- $splitterBarWidth: 32px;
+
+.message-history {
+	display: grid;
+	overflow: hidden;
+	grid-template-rows: auto 40px;
+	grid-row-gap: 10px;
+
+	&_edited {
+		display: grid;
+		overflow: hidden;
+		grid-template-rows: 30px auto 40px;
+		grid-row-gap: 10px;
+	}
+
+	&__message-list-container {
+		overflow: auto;
+	}
+
+	&__controls {
+		margin-top: auto;
+
+		&-button {
+			margin-right: 5px;
+			height: 30px;
+			width: 70px;
+		}
+	}
+}
+
+.add-new-message {
+	width: 100%;
+	height: 30px;
+	background: #1111;
+	padding: 3px;
+	border: 2px dashed darkslategrey;
+	border-radius: 4px;
+	text-align: center;
+	cursor: pointer;
+}

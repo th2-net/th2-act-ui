@@ -19,6 +19,7 @@ import { hot } from 'react-hot-loader/root';
 import { languages } from 'monaco-editor';
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
+import { Tab, Tabs } from '@material-ui/core';
 import Result from './Result';
 import Button from './Button';
 import '../styles/root.scss';
@@ -28,6 +29,11 @@ import Control from './Control';
 import SplashScreen from './SplashScreen';
 import Store from '../stores/Store';
 import { MessageSendingResponse } from '../models/Message';
+import MessageHistory from './MessageHistory';
+import '../styles/message-list.scss';
+import { EmbeddedEditor } from './EmbeddedEditor';
+import SplitView from '../split-view/SplitView';
+import SplitViewPane from '../split-view/SplitViewPane';
 
 export type UsedLens = {
 	lineNumber: number;
@@ -36,7 +42,9 @@ export type UsedLens = {
 
 const App = () => {
 	const store: Store = useStore();
-
+	const messageListDataStore = store.messageListDataStore;
+	const [currentTab, setCurrentTab] = React.useState(0);
+	const [panelArea, setPanelArea] = React.useState(50);
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
 	const [usedLenses, setUsedLenses] = React.useState<UsedLens[]>([]);
@@ -53,29 +61,72 @@ const App = () => {
 	};
 
 	const messageSchema = store.selectedSchema;
+	const selectTab = (e: React.ChangeEvent<{}>, tab: number) => {
+		setCurrentTab(tab);
+	};
 
 	return (
 		<div className='app'>
 			<div className='app__body'>
 				<Control />
-				<div className='app__editor'>
-					<MessageEditor
-						messageSchema={messageSchema}
-						ref={messageEditorRef}
-						usedLenses={usedLenses}
-						setUsedLenses={setUsedLenses}
-					/>
-					{store.isSchemaLoading && <div className='overlay' />}
-				</div>
+				<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
+					<SplitViewPane>
+						<MessageEditor
+							messageSchema={messageSchema}
+							ref={messageEditorRef}
+							usedLenses={usedLenses}
+							setUsedLenses={setUsedLenses}
+						/>
+						{store.isSchemaLoading && <div className='overlay' />}
+					</SplitViewPane>
+
+					<SplitViewPane>
+						<div className='app__tabs-container'>
+							<Tabs value={currentTab} onChange={selectTab}>
+								<Tab label='Result' className='app__tab' />
+								<Tab label='History' className='app__tab' />
+								<Tab label='Dictionary' className='app__tab' />
+							</Tabs>
+							{currentTab === 0 ? (
+								<div>
+									<h3 className='app__title'>Result</h3>
+									<Result response={response} />
+								</div>
+							) : currentTab === 1 ? (
+								<MessageHistory
+									messages={messageListDataStore.getCurrentMessagesArray.slice()}
+								/>
+							) : (
+								<EmbeddedEditor
+									schema='schema-qa'
+									object={store.selectedDictionaryName || ''}
+								/>
+							)}
+						</div>
+					</SplitViewPane>
+				</SplitView>
+				{store.isSchemaLoading && <div className='overlay' />}
 				<div className='app__buttons'>
-					<Button onClick={sendMessage} disabled={!store.isSendingAllowed}>
-						<span>Send Message</span>
-						{store.isSending ? <SplashScreen /> : <i className='arrow-right-icon' />}
+					<Button
+						onClick={
+							messageListDataStore.editMessageMode
+								? messageListDataStore.saveEditedMessage
+								: sendMessage
+						}
+						disabled={!store.isSendingAllowed}>
+						<span>
+							{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}
+						</span>
+						{store.isSending ? (
+							<SplashScreen />
+						) : (
+							<i
+								className={
+									messageListDataStore.editMessageMode ? '' : 'arrow-right-icon'
+								}
+							/>
+						)}
 					</Button>
-				</div>
-				<div className='app__result'>
-					<h3 className='app__title'>Result</h3>
-					<Result response={response} />
 				</div>
 			</div>
 		</div>

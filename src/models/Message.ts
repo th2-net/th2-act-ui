@@ -16,6 +16,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
+import { Indicator } from '../components/MessageList';
 
 export type Message = ParsedMessage | JSONSchema4;
 
@@ -62,4 +63,39 @@ export interface ActSendingResponse {
 	methodName: string;
 	fullServiceName: string;
 	responseMessage: string;
+}
+
+export interface MessageItem{
+	message: object | string;
+	delay: number;
+	id: string;
+	indicator: Indicator;
+}
+
+export interface ParsedMessageItem extends MessageItem {
+	sessionId: string;
+	dictionary: string;
+	messageType: string;
+}
+
+export interface ActMessageItem extends MessageItem {
+	actBox: string;
+	fullServiceName: string;
+	methodName: string;
+}
+
+export function isParsedMessageItem(object: unknown): object is ParsedMessageItem {
+	return (
+		typeof object === 'object'
+		&& object !== null
+		&& typeof (object as ParsedMessageItem).sessionId === 'string'
+	);
+}
+
+export function isActMessageItem(object: unknown): object is ActMessageItem {
+	return (
+		typeof object === 'object'
+		&& object !== null
+		&& typeof (object as ActMessageItem).actBox === 'string'
+	);
 }
