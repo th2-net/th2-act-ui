@@ -1,0 +1,61 @@
+@import "./common/vars";
+
+.modal-wrapper {
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	position: fixed;
+	z-index: 99;
+	background: rgba(0,0,0,.5);
+}
+
+.modal-container {
+    z-index: 99;
+    background-color: $modalBgColor;
+	width: 500px;
+	height: 500px;
+	flex-direction: column;
+	margin: auto;
+	border-radius: 12px;
+	padding: 10px;
+	display: flex;
+	&__controls {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		height: 80px;
+		input{
+			border: none;
+			border-radius: 12px;
+			height: 40px;
+			margin-top: auto;
+			margin-bottom: auto;
+		}
+		input[type='text']{
+			width: 300px;
+		}
+		input[type='button']{
+			background-color: $modalButtonBg;
+		}
+	}
+	&__results{
+		display: grid;
+		grid-auto-rows: max-content;
+		grid-row-gap: 10px;
+		grid-template-columns: 1fr;
+		height: 400px;
+		justify-content: start;
+		overflow: auto;
+		div {
+			background-color: $modalResultSearch;
+			border-radius: 6px;
+			padding: 5px;
+			word-break: break-all;
+		}
+		div:hover {
+			cursor: pointer;
+			background-color: $modalResultSearchHover;
+		}
+		margin-bottom: 20px;
+	}
+}

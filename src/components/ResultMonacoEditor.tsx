@@ -15,19 +15,19 @@
  ***************************************************************************** */
 
 import React from 'react';
-import Editor, { monaco, Monaco } from '@monaco-editor/react';
+import Editor, { Monaco } from '@monaco-editor/react';
+// eslint-disable-next-line import/no-unresolved
+import * as monacoEditor from 'monaco-editor';
 
 const ResultMonacoEditor = (props: { value: string }) => {
-	const monacoEditor = React.useRef<Monaco>();
+	const editorRef = React.useRef<Monaco>();
 
-	React.useEffect(() => {
-		monaco.init().then((_monaco: Monaco) => {
-			monacoEditor.current = _monaco;
-			monacoEditor.current.languages.json.jsonDefaults.setDiagnosticsOptions({
-				validate: false,
-			});
+	const onMountHandler = (_editor: monacoEditor.editor.IStandaloneCodeEditor, _monaco: Monaco) => {
+		editorRef.current = _monaco;
+		editorRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
+			validate: false,
 		});
-	}, []);
+	};
 
 	return (
 		<Editor
@@ -39,7 +39,8 @@ const ResultMonacoEditor = (props: { value: string }) => {
 				readOnly: true,
 				lineNumbers: 'off',
 				wordWrap: 'on',
-			}}></Editor>
+			}}
+			onMount={onMountHandler}></Editor>
 	);
 };
 

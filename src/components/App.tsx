@@ -15,6 +15,8 @@
  ***************************************************************************** */
 
 import { hot } from 'react-hot-loader/root';
+// eslint-disable-next-line import/no-unresolved
+import { languages } from 'monaco-editor';
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Tab, Tabs } from '@material-ui/core';
@@ -33,12 +35,19 @@ import { EmbeddedEditor } from './EmbeddedEditor';
 import SplitView from '../split-view/SplitView';
 import SplitViewPane from '../split-view/SplitViewPane';
 
+export type UsedLens = {
+	lineNumber: number;
+	schemaName: string;
+};
+
 const App = () => {
 	const store: Store = useStore();
 	const messageListDataStore = store.messageListDataStore;
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
+
+	const [usedLenses, setUsedLenses] = React.useState<UsedLens[]>([]);
 
 	const messageEditorRef = React.useRef<MessageEditorMethods>(null);
 
@@ -51,6 +60,7 @@ const App = () => {
 		}
 	};
 
+	const messageSchema = store.selectedSchema;
 	const selectTab = (e: React.ChangeEvent<{}>, tab: number) => {
 		setCurrentTab(tab);
 	};
@@ -62,9 +72,12 @@ const App = () => {
 				<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
 					<SplitViewPane>
 						<MessageEditor
-							messageSchema={store.selectedSchema}
+							messageSchema={messageSchema}
 							ref={messageEditorRef}
+							usedLenses={usedLenses}
+							setUsedLenses={setUsedLenses}
 						/>
+						{store.isSchemaLoading && <div className='overlay' />}
 					</SplitViewPane>
 
 					<SplitViewPane>

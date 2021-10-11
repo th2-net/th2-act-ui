@@ -23,6 +23,7 @@ import {
 import { nanoid } from 'nanoid';
 import api from '../api';
 import { SchemaType } from '../components/Control';
+import { UntypedField } from '../components/MessageEditor';
 import { Dictionary } from '../models/Dictionary';
 import {
 	ActSendingResponse,

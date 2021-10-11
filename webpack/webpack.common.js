@@ -57,6 +57,6 @@ module.exports = {
             title: 'Message-sender-ui',
             template: path.resolve(appSrc, 'index.html'),
             favicon: false,
-        })
+        }),
     ],   
 };
