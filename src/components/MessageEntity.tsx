@@ -16,14 +16,14 @@
 
 import React from 'react';
 import {
-	ActMessageItem,
+	ActMessageHistoryItem,
 	isActMessageItem,
 	isParsedMessageItem,
-	ParsedMessageItem,
+	ParsedMessageHistoryItem,
 } from '../models/Message';
 import '../styles/message-list.scss';
 
-const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) => {
+const MessageEntity = (props: { message: ParsedMessageHistoryItem | ActMessageHistoryItem }) => {
 	if (isParsedMessageItem(props.message)) {
 		return (
 			<div className='message-list__message-content'>

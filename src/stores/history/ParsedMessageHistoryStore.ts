@@ -1,11 +1,11 @@
 import { action, makeObservable, reaction } from 'mobx';
 import MessageHistoryStore from './MessageHistoryStore';
-import { ParsedMessageItem } from '../../models/Message';
+import { ParsedMessageHistoryItem } from '../../models/Message';
 import Store from '../Store';
 import { getFromLocalStorage, setInLocalStorage } from '../../helpers/localStorageManager';
 import api from '../../api';
 
-export default class ParsedMessageHistoryStore extends MessageHistoryStore<ParsedMessageItem> {
+export default class ParsedMessageHistoryStore extends MessageHistoryStore<ParsedMessageHistoryItem> {
 	constructor(store: Store) {
 		super(store);
 
@@ -36,7 +36,7 @@ export default class ParsedMessageHistoryStore extends MessageHistoryStore<Parse
 		);
 	}
 
-	buildEditedMessage = (id: string): ParsedMessageItem | undefined => {
+	buildEditedMessage = (id: string): ParsedMessageHistoryItem | undefined => {
 		if (
 			this.store.selectedSession &&
 			this.store.selectedDictionaryName &&
@@ -56,7 +56,9 @@ export default class ParsedMessageHistoryStore extends MessageHistoryStore<Parse
 	};
 
 	selectMessage = (id: string) => {
-		const selectedMessage = this.history.find(message => message.id === id) as ParsedMessageItem;
+		const selectedMessage = this.history.find(
+			message => message.id === id,
+		) as ParsedMessageHistoryItem;
 
 		this.setEditorProperties(
 			selectedMessage.sessionId,

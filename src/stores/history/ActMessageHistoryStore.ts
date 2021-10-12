@@ -1,11 +1,11 @@
 import { action, makeObservable, reaction } from 'mobx';
 import MessageHistoryStore from './MessageHistoryStore';
-import { ActMessageItem } from '../../models/Message';
+import { ActMessageHistoryItem } from '../../models/Message';
 import Store from '../Store';
 import { getFromLocalStorage, setInLocalStorage } from '../../helpers/localStorageManager';
 import api from '../../api';
 
-export default class ActMessageHistoryStore extends MessageHistoryStore<ActMessageItem> {
+export default class ActMessageHistoryStore extends MessageHistoryStore<ActMessageHistoryItem> {
 	constructor(store: Store) {
 		super(store);
 
@@ -36,7 +36,7 @@ export default class ActMessageHistoryStore extends MessageHistoryStore<ActMessa
 		);
 	}
 
-	buildEditedMessage = (id: string): ActMessageItem | undefined => {
+	buildEditedMessage = (id: string): ActMessageHistoryItem | undefined => {
 		if (this.store.selectedActBox && this.store.selectedService && this.store.selectedMethod) {
 			return {
 				id,
@@ -52,7 +52,9 @@ export default class ActMessageHistoryStore extends MessageHistoryStore<ActMessa
 	};
 
 	selectMessage = (id: string) => {
-		const selectedMessage = this.history.find(message => message.id === id) as ActMessageItem;
+		const selectedMessage = this.history.find(
+			message => message.id === id,
+		) as ActMessageHistoryItem;
 
 		this.setEditorProperties(
 			selectedMessage.actBox,
