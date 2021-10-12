@@ -64,6 +64,7 @@
 		"babel-loader": "^8.1.0",
 		"babel-plugin-const-enum": "^1.0.1",
 		"babel-preset-minify": "^0.5.1",
+		"copy-webpack-plugin": "^6.3.2",
 		"css-loader": "^3.5.2",
 		"cssnano": "^4.1.10",
 		"enzyme": "^3.10.0",
