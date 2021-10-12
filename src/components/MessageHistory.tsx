@@ -24,7 +24,7 @@ import { downloadFile } from '../helpers/downloadFile';
 import { ParsedMessageItem, ActMessageItem } from '../models/Message';
 import MessageList from './MessageList';
 
-const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }) => {
+const MessageHistory = () => {
 	const { currentHistoryStore: messageListDataStore, selectedSchemaType } = useStore();
 	const [isReplay, setReplayMode] = useState(false);
 	const isReplayRef = useRef(isReplay);
@@ -99,7 +99,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 			)}
 
 			<div className='message-history__message-list-container'>
-				<MessageList messages={props.messages} />
+				<MessageList />
 			</div>
 
 			<div className='message-history__controls'>

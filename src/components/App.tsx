@@ -77,7 +77,7 @@ const App = () => {
 									<Result response={response} />
 								</div>
 							) : currentTab === 1 ? (
-								<MessageHistory messages={messageListDataStore.history} />
+								<MessageHistory />
 							) : (
 								<EmbeddedEditor
 									schema='schema-qa'
