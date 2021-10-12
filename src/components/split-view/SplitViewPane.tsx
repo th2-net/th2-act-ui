@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import * as React from 'react';
-import '../styles/splitter.scss';
+import '../../styles/splitter.scss';
 
 interface Props {
 	children: React.ReactNode;
