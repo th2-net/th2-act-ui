@@ -19,11 +19,10 @@ import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import ResizeObserver from 'resize-observer-polyfill';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import {
-	monaco,
-	EditorDidMount,
-	ControlledEditor,
-	ControlledEditorOnChange,
+import Editor, {
+	loader,
+	OnMount,
+	OnChange,
 	Monaco,
 } from '@monaco-editor/react';
 // eslint-disable-next-line import/no-unresolved
@@ -51,8 +50,9 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 	const uri = React.useRef<Uri>();
 	const [code, setCode] = React.useState('{}');
 
-	const handleEditorDidMount: EditorDidMount = _valueGetter => {
-		valueGetter.current = _valueGetter;
+	const handleEditorDidMount: OnMount = (editor, monaco) => {
+		monacoRef.current = monaco;
+		valueGetter.current = editor.getValue;
 	};
 
 	const [editorHeight, setEditorHeight] = React.useState(DEFAULT_EDITOR_HEIGHT);
@@ -78,7 +78,7 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 	}, []);
 
 	React.useEffect(() => {
-		monaco.init().then((_monaco: Monaco) => {
+		loader.init().then((_monaco: Monaco) => {
 			monacoRef.current = _monaco;
 			if (messageSchema) {
 				initiateSchema(messageSchema);
@@ -130,7 +130,7 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 		}
 	}, [messageSchema]);
 
-	const onValueChange: ControlledEditorOnChange = (event, value) => {
+	const onValueChange: OnChange = (value, event) => {
 		if (messageListDataStore.editMessageMode) {
 			messageListDataStore.setEditorCode(value || '{}');
 		} else {
@@ -162,14 +162,14 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 
 	return (
 		<div ref={rootRef}>
-			<ControlledEditor
+			<Editor
 				height={editorHeight}
 				language='json'
 				value={
 					messageListDataStore.editMessageMode ? messageListDataStore.editorCode : code
 				}
 				onChange={onValueChange}
-				editorDidMount={handleEditorDidMount}
+				onMount={handleEditorDidMount}
 			/>
 		</div>
 	);
