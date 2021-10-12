@@ -35,7 +35,7 @@ import SplitViewPane from '../split-view/SplitViewPane';
 
 const App = () => {
 	const store: Store = useStore();
-	const messageListDataStore = store.messageListDataStore;
+	const messageListDataStore = store.currentHistoryStore;
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
@@ -61,10 +61,7 @@ const App = () => {
 				<Control />
 				<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
 					<SplitViewPane>
-						<MessageEditor
-							messageSchema={store.selectedSchema}
-							ref={messageEditorRef}
-						/>
+						<MessageEditor messageSchema={store.selectedSchema} ref={messageEditorRef} />
 					</SplitViewPane>
 
 					<SplitViewPane>
@@ -80,15 +77,13 @@ const App = () => {
 									<Result response={response} />
 								</div>
 							) : currentTab === 1 ? (
-								<MessageHistory
-									messages={messageListDataStore.messageHistory[store.selectedSchemaType].slice()}
-								/>
+								<MessageHistory messages={messageListDataStore.history} />
 							) : (
 								<EmbeddedEditor
 									schema='schema-qa'
 									object={store.selectedDictionaryName || ''}
 									editorMode='dictionaryEditor'
-									embedded = 'true'
+									embedded='true'
 								/>
 							)}
 						</div>
@@ -103,17 +98,11 @@ const App = () => {
 								: sendMessage
 						}
 						disabled={!store.isSendingAllowed}>
-						<span>
-							{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}
-						</span>
+						<span>{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}</span>
 						{store.isSending ? (
 							<SplashScreen />
 						) : (
-							<i
-								className={
-									messageListDataStore.editMessageMode ? '' : 'arrow-right-icon'
-								}
-							/>
+							<i className={messageListDataStore.editMessageMode ? '' : 'arrow-right-icon'} />
 						)}
 					</Button>
 				</div>

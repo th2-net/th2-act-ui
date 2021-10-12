@@ -65,7 +65,7 @@ export interface ActSendingResponse {
 	responseMessage: string;
 }
 
-export interface MessageItem{
+export interface MessageItem {
 	message: object | string;
 	delay: number;
 	id: string;
@@ -86,16 +86,16 @@ export interface ActMessageItem extends MessageItem {
 
 export function isParsedMessageItem(object: unknown): object is ParsedMessageItem {
 	return (
-		typeof object === 'object'
-		&& object !== null
-		&& typeof (object as ParsedMessageItem).sessionId === 'string'
+		typeof object === 'object' &&
+		object !== null &&
+		typeof (object as ParsedMessageItem).sessionId === 'string'
 	);
 }
 
 export function isActMessageItem(object: unknown): object is ActMessageItem {
 	return (
-		typeof object === 'object'
-		&& object !== null
-		&& typeof (object as ActMessageItem).actBox === 'string'
+		typeof object === 'object' &&
+		object !== null &&
+		typeof (object as ActMessageItem).actBox === 'string'
 	);
 }

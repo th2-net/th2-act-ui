@@ -28,10 +28,7 @@ const Button = ({ children, onClick, disabled }: Props) => {
 	const buttonClassName = createBemBlock('button', disabled ? 'disabled' : null);
 
 	return (
-		<div
-			className={buttonClassName}
-			onClick={onClick}
-			role="button">
+		<div className={buttonClassName} onClick={onClick} role='button'>
 			{children}
 		</div>
 	);

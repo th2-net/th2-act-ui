@@ -43,8 +43,7 @@ export interface MessageEditorMethods {
 const DEFAULT_EDITOR_HEIGHT = 700;
 
 const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
-	const store = useStore();
-	const messageListDataStore = store.messageListDataStore;
+	const { currentHistoryStore: messageListDataStore, setIsSchemaApplied } = useStore();
 
 	const monacoRef = React.useRef<Monaco>();
 	const valueGetter = React.useRef<(() => string) | null>(null);
@@ -141,7 +140,7 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 	const initiateSchema = (message: JSONSchema4 | JSONSchema7) => {
 		const initialSchema = createInitialActMessage(message) || '{}';
 		setCode(initialSchema);
-		store.setIsSchemaApplied(true);
+		setIsSchemaApplied(true);
 	};
 
 	React.useImperativeHandle(
@@ -165,9 +164,7 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 			<ControlledEditor
 				height={editorHeight}
 				language='json'
-				value={
-					messageListDataStore.editMessageMode ? messageListDataStore.editorCode : code
-				}
+				value={messageListDataStore.editMessageMode ? messageListDataStore.editorCode : code}
 				onChange={onValueChange}
 				editorDidMount={handleEditorDidMount}
 			/>

@@ -26,10 +26,7 @@ module.exports = {
 		'plugin:import/typescript',
 		'prettier',
 	],
-	plugins: [
-		'react-hooks',
-		'prettier',
-	],
+	plugins: ['react-hooks', 'prettier'],
 	env: {
 		browser: true,
 		jest: true,
@@ -52,30 +49,41 @@ module.exports = {
 		'import/prefer-default-export': 'off',
 		'import/no-cycle': 'off',
 		'no-tabs': 'off',
-		'indent': ['error', 'tab', { 'SwitchCase': 1 }],
 		'max-len': [2, 120, 4],
-		'semi': 'off',
+		semi: 'off',
 		'@typescript-eslint/semi': ['error'],
-		'@typescript-eslint/member-delimiter-style': ['error', {
-			multiline: {
-				delimiter: 'semi',
-				requireLast: true,
+		'@typescript-eslint/member-delimiter-style': [
+			'error',
+			{
+				multiline: {
+					delimiter: 'semi',
+					requireLast: true,
+				},
+				singleline: {
+					delimiter: 'semi',
+					requireLast: false,
+				},
 			},
-			singleline: {
-				delimiter: 'semi',
-				requireLast: false,
-			},
-		},
 		],
 		'@typescript-eslint/no-use-before-define': 'off',
 		'@typescript-eslint/explicit-function-return-type': 'off',
 		'implicit-arrow-linebreak': 'off',
 		'arrow-parens': ['error', 'as-needed'],
 		'no-plusplus': 'off',
-		'radix': 'off',
+		radix: 'off',
 		'no-unused-expressions': 'off',
 		'@typescript-eslint/no-unused-expressions': ['error'],
-		'import/no-unassigned-import': ['error', { 'allow': ['**/*.scss', 'core-js/**', 'regenerator-runtime/**', 'ace-builds/src-noconflict/**'] }],
+		'import/no-unassigned-import': [
+			'error',
+			{
+				allow: [
+					'**/*.scss',
+					'core-js/**',
+					'regenerator-runtime/**',
+					'ace-builds/src-noconflict/**',
+				],
+			},
+		],
 		'class-methods-use-this': 'off',
 		'no-new-wrappers': 'off',
 		'no-mixed-spaces-and-tabs': 'off',
@@ -94,10 +102,12 @@ module.exports = {
 			version: 'detect',
 		},
 	},
-	overrides: [{
-		files: ['*.tsx'],
-		rules: {
-			'@typescript-eslint/explicit-function-return-type': 0,
+	overrides: [
+		{
+			files: ['*.tsx'],
+			rules: {
+				'@typescript-eslint/explicit-function-return-type': 0,
+			},
 		},
-	}],
+	],
 };

@@ -22,6 +22,7 @@ import {
 } from '../models/Message';
 import '../styles/result.scss';
 import ResultMonacoEditor from './ResultMonacoEditor';
+import createWorkspaceState from '../helpers/createWorkspaceState';
 
 const isDev = process.env.NODE_ENV === 'development';
 
@@ -35,11 +36,10 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 	const parseContent = (): { link: string | null; content: string } => {
 		try {
 			const parsedContent = JSON.parse(message);
-			const renderData = {
+			return {
 				link: getLink(parsedContent),
 				content: JSON.stringify(parsedContent, null, 2),
 			};
-			return renderData;
 		} catch (error) {
 			return {
 				link: null,
@@ -60,50 +60,13 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 			// TODO: this is temporary hot fix, needs to be fixed
 			if (typeof obj === 'object' && obj !== null && 'eventId' in obj) {
 				eventId = (obj as ActSendingResponse | ParsedMessageSendingResponse).eventId;
-				workspaceState =					eventId && typeof eventId === 'string'
-					? [
-						{
-							events: {
-								filter: {
-									attachedMessageId: {
-										type: 'string',
-										negative: false,
-										values: '',
-									},
-									type: {
-										type: 'string[]',
-										values: [],
-										negative: false,
-									},
-									name: {
-										type: 'string[]',
-										values: [],
-										negative: false,
-									},
-									body: {
-										type: 'string[]',
-										values: [],
-										negative: false,
-									},
-									status: {
-										type: 'switcher',
-										values: 'any',
-									},
-								},
-								panelArea: 50,
-								selectedEventId: eventId,
-								flattenedListView: false,
-							},
-							layout: [50, 50],
-						},
-						  ]
-					: [];
+				workspaceState =
+					eventId && typeof eventId === 'string' ? createWorkspaceState(eventId) : [];
 			}
 
-			const url = eventId
+			return eventId
 				? `${rootLink}/?workspaces=${window.btoa(JSON.stringify(workspaceState))}`
 				: null;
-			return url;
 		} catch (error) {
 			return null;
 		}
@@ -113,7 +76,7 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 
 	return (
 		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
-			<ResultMonacoEditor value={content}></ResultMonacoEditor>
+			<ResultMonacoEditor value={content} />
 		</div>
 	);
 };

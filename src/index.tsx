@@ -27,7 +27,7 @@ import StoresProvider from './components/StoresProvider';
 ReactDOM.render(
 	<ErrorBoundary>
 		<StoresProvider>
-			<App/>
+			<App />
 		</StoresProvider>
 	</ErrorBoundary>,
 	document.getElementById('index'),

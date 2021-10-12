@@ -140,9 +140,11 @@ export default class SplitView extends React.Component<Props, State> {
 		let previewPanelArea: number;
 
 		if (this.state.isVertical) {
-			previewPanelArea = ((newPosition.y - this.splitterThickness / 2) / this.panelsAvailableHeight) * 100;
+			previewPanelArea =
+				((newPosition.y - this.splitterThickness / 2) / this.panelsAvailableHeight) * 100;
 		} else {
-			previewPanelArea = ((newPosition.x - this.splitterThickness / 2) / this.panelsAvailableWidth) * 100;
+			previewPanelArea =
+				((newPosition.x - this.splitterThickness / 2) / this.panelsAvailableWidth) * 100;
 		}
 
 		previewPanelArea = Math.max(Math.min(previewPanelArea, 100), 0);
@@ -185,11 +187,12 @@ export default class SplitView extends React.Component<Props, State> {
 		if (this.root.current) {
 			if (isVertical) {
 				const [topHeight, bottomHeight] = this.getPanelsHeightByArea(panelArea);
-				rootStyle = { gridTemplateRows: `${topHeight}px auto ${bottomHeight}px` };
+				rootStyle = {
+					gridTemplateRows: `${topHeight}px auto ${bottomHeight}px`,
+				};
 
-				const [topPreviewHeight, bottomPreviewHeight] = this.getPanelsHeightByArea(
-					previewPanelArea,
-				);
+				const [topPreviewHeight, bottomPreviewHeight] =
+					this.getPanelsHeightByArea(previewPanelArea);
 				previewStyle = {
 					gridTemplateRows: `${topPreviewHeight}px auto ${bottomPreviewHeight}px`,
 				};
@@ -199,7 +202,9 @@ export default class SplitView extends React.Component<Props, State> {
 				};
 			} else {
 				const [leftWidth, rightWidth] = this.getPanelsWidthByArea(panelArea);
-				rootStyle = { gridTemplateColumns: `${leftWidth}px auto ${rightWidth}px` };
+				rootStyle = {
+					gridTemplateColumns: `${leftWidth}px auto ${rightWidth}px`,
+				};
 
 				const [leftPreviewWidth, rightPreviewWidth] = this.getPanelsWidthByArea(previewPanelArea);
 				previewStyle = {

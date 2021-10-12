@@ -40,9 +40,7 @@ interface DraggableMessageItemProps extends MessageItemProps {
 }
 
 const DraggableMessageItem = observer(
-	({
-		index, message, keyId, editMessageMode,
-	}: DraggableMessageItemProps) => (
+	({ index, message, keyId, editMessageMode }: DraggableMessageItemProps) => (
 		<Draggable draggableId={keyId} index={index} key={keyId}>
 			{(prov: DraggableProvided, snapshot: DraggableStateSnapshot) => (
 				<li
@@ -50,9 +48,7 @@ const DraggableMessageItem = observer(
 					ref={prov.innerRef}
 					key={keyId}
 					draggable={false}
-					className={
-						snapshot.isDragging ? 'message-list__item dragging' : 'message-list__item'
-					}>
+					className={snapshot.isDragging ? 'message-list__item dragging' : 'message-list__item'}>
 					<div
 						className={
 							editMessageMode
@@ -62,7 +58,8 @@ const DraggableMessageItem = observer(
 						<div
 							{...prov.dragHandleProps}
 							draggable={true}
-							className='message-list__drag-handler'></div>
+							className='message-list__drag-handler'
+						/>
 					</div>
 					<MessageItem index={index} message={message} />
 				</li>
@@ -72,8 +69,9 @@ const DraggableMessageItem = observer(
 );
 
 const MessageItem = observer(({ index, message }: MessageItemProps) => {
+	const { currentHistoryStore: messageListDataStore } = useStore();
 	const [delay, setDelayValue] = useState(message.delay.toString());
-	const messageListDataStore = useStore().messageListDataStore;
+
 	return (
 		<div
 			className={
@@ -106,11 +104,7 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 					}}
 				/>
 			</div>
-			<MessageCardControls
-				id={message.id}
-				message={message}
-				index={index}
-			/>
+			<MessageCardControls id={message.id} message={message} index={index} />
 		</div>
 	);
 });
@@ -152,12 +146,9 @@ const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) =
 };
 
 const MessageCardControls = observer(
-	(props: {
-		id: string;
-		message: ParsedMessageItem | ActMessageItem;
-		index: number;
-	}) => {
-		const messageListDataStore = useStore().messageListDataStore;
+	(props: { id: string; message: ParsedMessageItem | ActMessageItem; index: number }) => {
+		const { currentHistoryStore: messageListDataStore } = useStore();
+
 		return (
 			<div className='message-list__message-card-controls'>
 				<button
@@ -169,12 +160,7 @@ const MessageCardControls = observer(
 					x
 				</button>
 				<div>
-					<button
-						className={
-							props.message.indicator
-							// messageListDataStore.getCurrentMessagesArray.slice()[props.index]
-							// 	.indicator
-						}></button>
+					<button className={props.message.indicator} />
 				</div>
 			</div>
 		);

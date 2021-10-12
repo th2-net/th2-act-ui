@@ -22,21 +22,19 @@ import { nanoid } from 'nanoid';
 import api from '../api';
 import { SchemaType } from '../components/Control';
 import { Dictionary } from '../models/Dictionary';
-import {
-	ActSendingResponse,
-	MessageSendingResponse,
-	ParsedMessage,
-	ParsedMessageItem,
-	ActMessageItem,
-	isParsedMessageItem,
-	isActMessageItem,
-} from '../models/Message';
+import { ActSendingResponse, MessageSendingResponse, ParsedMessage } from '../models/Message';
 import Service, { Method } from '../models/Service';
-import { setInLocalStorage, getFromLocalStorage } from '../helpers/localStorageManager';
-import MessageListDataStore from './MessageListDataStore';
+import { getFromLocalStorage, setInLocalStorage } from '../helpers/localStorageManager';
+import ActMessageHistoryStore from './history/ActMessageHistoryStore';
+import ParsedMessageHistoryStore from './history/ParsedMessageHistoryStore';
 
 export default class Store {
-	messageListDataStore = new MessageListDataStore(this);
+	parsedMessageHistoryStore = new ParsedMessageHistoryStore(this);
+
+	actMessageHistoryStore = new ActMessageHistoryStore(this);
+
+	currentHistoryStore: ParsedMessageHistoryStore | ActMessageHistoryStore =
+		this.parsedMessageHistoryStore;
 
 	dictionaries: Array<string> = [];
 
@@ -88,6 +86,7 @@ export default class Store {
 
 	constructor() {
 		makeObservable(this, {
+			currentHistoryStore: observable.ref,
 			dictionaries: observable,
 			sessions: observable,
 			dictionary: observable,
@@ -121,7 +120,6 @@ export default class Store {
 			getDictionary: action,
 			getMessageSchema: action,
 			getSessions: action,
-			replayMessage: action,
 			sendMessage: action,
 			getActs: action,
 			getServices: action,
@@ -143,9 +141,7 @@ export default class Store {
 						this.selectedService = null;
 					});
 				}
-				if (!this.messageListDataStore.editMessageMode) {
-					setInLocalStorage('selectedActBox', selectedActBox || '');
-				}
+				setInLocalStorage('selectedActBox', selectedActBox || '');
 			},
 		);
 
@@ -163,9 +159,7 @@ export default class Store {
 					this.serviceDetails = null;
 					this.selectedMethod = null;
 				}
-				if (!this.messageListDataStore.editMessageMode) {
-					setInLocalStorage('selectedService', selectedService || '');
-				}
+				setInLocalStorage('selectedService', selectedService || '');
 			},
 		);
 
@@ -175,18 +169,14 @@ export default class Store {
 				if (selectedMethod && this.selectedService && this.selectedActBox) {
 					this.getActSchema(this.selectedService, selectedMethod.methodName);
 				}
-				if (!this.messageListDataStore.editMessageMode) {
-					setInLocalStorage('selectedMethodName', selectedMethod?.methodName || '');
-				}
+				setInLocalStorage('selectedMethodName', selectedMethod?.methodName || '');
 			},
 		);
 
 		reaction(
 			() => this.selectedSession,
 			selectedSession => {
-				if (!this.messageListDataStore.editMessageMode) {
-					setInLocalStorage('selectedSessionId', selectedSession || '');
-				}
+				setInLocalStorage('selectedSessionId', selectedSession || '');
 			},
 		);
 
@@ -196,9 +186,7 @@ export default class Store {
 				if (dictinonaryName) {
 					this.getDictionary(dictinonaryName);
 				}
-				if (!this.messageListDataStore.editMessageMode) {
-					setInLocalStorage('selectedDictionaryName', dictinonaryName || '');
-				}
+				setInLocalStorage('selectedDictionaryName', dictinonaryName || '');
 			},
 		);
 
@@ -210,9 +198,7 @@ export default class Store {
 				} else {
 					this.parsedMessage = null;
 				}
-				if (!this.messageListDataStore.editMessageMode) {
-					setInLocalStorage('selectedMessageType', messageType || '');
-				}
+				setInLocalStorage('selectedMessageType', messageType || '');
 			},
 		);
 	}
@@ -221,30 +207,12 @@ export default class Store {
 		if (this.selectedService) {
 			this.getServiceDetails(this.selectedService).then(() => {
 				this.selectedMethod =
-					this.serviceDetails?.methods.find(method => method.methodName === methodName) ||
-					null;
+					this.serviceDetails?.methods.find(method => method.methodName === methodName) || null;
 			});
 		}
 	};
 
 	startApp = () => {
-		const actMessageList = getFromLocalStorage('actMessagesHistory') || '';
-		localStorage.removeItem('actMessagesHistory');
-		this.messageListDataStore.messageHistory.act = [];
-		if (actMessageList !== '') {
-			JSON.parse(actMessageList).forEach((element: ActMessageItem) => {
-				this.messageListDataStore.addParsedMessage(element);
-			});
-		}
-
-		const parsedMessageList = getFromLocalStorage('parsedMessagesHistory') || '';
-		localStorage.removeItem('parsedMessagesHistory');
-		this.messageListDataStore.messageHistory['parsed-message'] = [];
-		if (parsedMessageList !== '') {
-			JSON.parse(parsedMessageList).forEach((element: ParsedMessageItem) => {
-				this.messageListDataStore.addParsedMessage(element);
-			});
-		}
 		this.selectedSession = getFromLocalStorage('selectedSessionId');
 		this.selectedDictionaryName = getFromLocalStorage('selectedDictionaryName');
 		this.selectedMessageType = getFromLocalStorage('selectedMessageType');
@@ -279,13 +247,12 @@ export default class Store {
 		}
 	};
 
-	getDictionary = async (dictinonaryName: string) => {
+	getDictionary = async (dictionaryName: string) => {
 		this.isDictionaryLoading = true;
 		try {
-			const dictionary = await api.getDictionary(dictinonaryName);
-			this.dictionary = dictionary;
+			this.dictionary = await api.getDictionary(dictionaryName);
 			if (this.selectedMessageType != null) {
-				this.getMessageSchema(this.selectedMessageType, dictinonaryName);
+				this.getMessageSchema(this.selectedMessageType, dictionaryName);
 			}
 		} catch (error) {
 			console.error('Error occured while fetching dictionary');
@@ -293,14 +260,14 @@ export default class Store {
 		this.isDictionaryLoading = false;
 	};
 
-	getMessageSchema = async (messageType: string, dictinonaryName: string) => {
+	getMessageSchema = async (messageType: string, dictionaryName: string) => {
 		this.isSchemaLoading = true;
 		try {
-			const message = await api.getMessage(messageType, dictinonaryName);
+			const message = await api.getMessage(messageType, dictionaryName);
 			if (message === null) {
 				localStorage.removeItem('selectedMessageType');
 				this.selectedMessageType = null;
-				this.messageListDataStore.setEditorCode('{}');
+				this.parsedMessageHistoryStore.setEditorCode('{}');
 			}
 			this.parsedMessage = message;
 		} catch (error) {
@@ -323,43 +290,6 @@ export default class Store {
 		this.isSessionsLoading = false;
 	};
 
-	replayMessage = async (message: ParsedMessageItem | ActMessageItem) => {
-		let result: MessageSendingResponse | ActSendingResponse | null = null;
-		if (isParsedMessageItem(message)) {
-			try {
-				result = await api.sendMessage({
-					session: message.sessionId,
-					dictionary: message.dictionary,
-					messageType: message.messageType,
-					message: JSON.parse(message.message as string),
-				});
-				this.messageListDataStore.changeIndicator(
-					message.id,
-					result.code === 200 ? 'indicator_successful' : 'indicator_unsuccessful',
-				);
-			} catch (error) {
-				alert('Error while sending');
-				this.messageListDataStore.changeIndicator(message.id, 'indicator_unsuccessful');
-			}
-		}
-		if (isActMessageItem(message)) {
-			try {
-				result = await api.callMethod({
-					fullServiceName: message.fullServiceName,
-					methodName: message.methodName,
-					message: JSON.parse(message.message as string),
-				});
-				this.messageListDataStore.changeIndicator(
-					message.id,
-					result.code === 200 ? 'indicator_successful' : 'indicator_unsuccessful',
-				);
-			} catch (error) {
-				alert('Error while sending');
-				this.messageListDataStore.changeIndicator(message.id, 'indicator_unsuccessful');
-			}
-		}
-	};
-
 	sendMessage = async (message: object): Promise<MessageSendingResponse | null> => {
 		this.isSending = true;
 
@@ -367,11 +297,7 @@ export default class Store {
 
 		switch (this.selectedSchemaType) {
 			case 'parsed-message': {
-				if (
-					!this.selectedDictionaryName ||
-					!this.selectedMessageType ||
-					!this.selectedSession
-				) {
+				if (!this.selectedDictionaryName || !this.selectedMessageType || !this.selectedSession) {
 					this.isSending = false;
 					return null;
 				}
@@ -383,7 +309,7 @@ export default class Store {
 					message,
 				});
 
-				this.messageListDataStore.addParsedMessage({
+				this.parsedMessageHistoryStore.addMessage({
 					id: nanoid(),
 					sessionId: this.selectedSession,
 					dictionary: this.selectedDictionaryName,
@@ -406,7 +332,7 @@ export default class Store {
 					message,
 				});
 
-				this.messageListDataStore.addParsedMessage({
+				this.actMessageHistoryStore.addMessage({
 					id: nanoid(),
 					actBox: this.selectedActBox,
 					fullServiceName: this.selectedService,
@@ -471,8 +397,10 @@ export default class Store {
 	setSelectedSchemaType = (type: SchemaType) => {
 		setInLocalStorage('selectedSchemaType', type);
 		this.selectedSchemaType = type;
-		this.messageListDataStore.prepareForSelectedSchemaType(type);
 		this.setIsSchemaApplied(false);
+
+		this.currentHistoryStore =
+			type === 'parsed-message' ? this.parsedMessageHistoryStore : this.actMessageHistoryStore;
 	};
 
 	get selectedSchema() {

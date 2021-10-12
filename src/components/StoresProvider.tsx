@@ -19,9 +19,7 @@ import RootStoreContext, { createRootStore } from '../contexts/storeContext';
 
 function RootStoreProvider({ children }: React.PropsWithChildren<{}>) {
 	return (
-		<RootStoreContext.Provider value={createRootStore()}>
-			{children}
-		</RootStoreContext.Provider>
+		<RootStoreContext.Provider value={createRootStore()}>{children}</RootStoreContext.Provider>
 	);
 }
 

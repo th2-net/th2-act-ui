@@ -24,7 +24,7 @@ export type SchemaType = 'parsed-message' | 'act';
 
 const Control = () => {
 	const store = useStore();
-	const messageListDataStore = store.messageListDataStore;
+	const { currentHistoryStore: messageListDataStore } = store;
 
 	const controlConfigs = [
 		{
@@ -44,8 +44,10 @@ const Control = () => {
 					id: 'dictionary',
 					options: store.dictionaries.slice().sort(),
 					selected: store.selectedDictionaryName || '',
-					disabled: store.isSessionsLoading || store.isDictionariesLoading
-					|| messageListDataStore.editMessageMode,
+					disabled:
+						store.isSessionsLoading ||
+						store.isDictionariesLoading ||
+						messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedDictionaryName : true,
 					onChange: (opt: string) => (store.selectedDictionaryName = opt),
 				},
@@ -55,9 +57,10 @@ const Control = () => {
 					options: store.dictionary.slice().sort(),
 					selected: store.selectedMessageType || '',
 					disabled:
-						store.isSessionsLoading
-						|| store.isDictionariesLoading
-						|| store.isDictionaryLoading || messageListDataStore.editMessageMode,
+						store.isSessionsLoading ||
+						store.isDictionariesLoading ||
+						store.isDictionaryLoading ||
+						messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedMessageType : true,
 					onChange: (opt: string) => (store.selectedMessageType = opt),
 				},
@@ -80,8 +83,8 @@ const Control = () => {
 					id: 'service',
 					options: store.services.slice().sort(),
 					selected: store.selectedService || '',
-					disabled: store.isActsLoading || store.isServicesLoading
-					|| messageListDataStore.editMessageMode,
+					disabled:
+						store.isActsLoading || store.isServicesLoading || messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedService : true,
 					onChange: (opt: string) => (store.selectedService = opt),
 				},
@@ -89,12 +92,17 @@ const Control = () => {
 					label: 'Method',
 					id: 'method',
 					options: store.serviceDetails
-						? store.serviceDetails.methods.map(method => method.methodName).slice().sort()
+						? store.serviceDetails.methods
+								.map(method => method.methodName)
+								.slice()
+								.sort()
 						: [],
 					selected: store.selectedMethod?.methodName || '',
 					disabled:
-						store.isActsLoading || store.isServicesLoading || store.isMethodsLoading
-						|| messageListDataStore.editMessageMode,
+						store.isActsLoading ||
+						store.isServicesLoading ||
+						store.isMethodsLoading ||
+						messageListDataStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedMethod : true,
 					onChange: (methodName: string) => store.setSelectedMethod(methodName),
 				},
@@ -113,9 +121,7 @@ const Control = () => {
 							value={config.name}
 							id={config.name}
 							checked={config.name === store.selectedSchemaType}
-							onChange={e =>
-								store.setSelectedSchemaType(e.target.value as SchemaType)
-							}
+							onChange={e => store.setSelectedSchemaType(e.target.value as SchemaType)}
 							name='message-type'
 						/>
 						{config.name
@@ -133,8 +139,9 @@ const Control = () => {
 						.selects.map(props => (
 							<React.Fragment key={props.id}>
 								<Select {...props} />
-								{(props.disabled && !messageListDataStore.editMessageMode)
-								&& <SplashScreen key='splash' />}
+								{props.disabled && !messageListDataStore.editMessageMode && (
+									<SplashScreen key='splash' />
+								)}
 							</React.Fragment>
 						))
 				}

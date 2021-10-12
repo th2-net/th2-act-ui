@@ -25,8 +25,7 @@ import { ParsedMessageItem, ActMessageItem } from '../models/Message';
 import MessageList from './MessageList';
 
 const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }) => {
-	const store = useStore();
-	const messageListDataStore = store.messageListDataStore;
+	const { currentHistoryStore: messageListDataStore, selectedSchemaType } = useStore();
 	const [isReplay, setReplayMode] = useState(false);
 	const isReplayRef = useRef(isReplay);
 
@@ -45,8 +44,10 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 	const jsonMessagesFromString = (rawFromFile: string) => {
 		try {
 			const messages = JSON.parse(rawFromFile) as Array<ParsedMessageItem | ActMessageItem>;
-			messageListDataStore.clearParsedMessages();
-			messages.forEach(message => messageListDataStore.addParsedMessage(message));
+			messageListDataStore.clearHistory();
+			messages.forEach(message =>
+				messageListDataStore.addMessage(message as ParsedMessageItem & ActMessageItem),
+			);
 		} catch (error) {
 			// eslint-disable-next-line no-alert
 			alert('Failed to read the file. Please, try to select another file');
@@ -58,14 +59,14 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 		if (isReplay) {
 			messageListDataStore.setEditMessageMode(false);
 			messageListDataStore.clearIndicators();
-			replaySendMessage(messageListDataStore.messageHistory[store.selectedSchemaType], 0);
+			replaySendMessage(messageListDataStore.history, 0);
 		}
 	}, [isReplay]);
 
 	const replaySendMessage = (array: ParsedMessageItem[] | ActMessageItem[], index: number) => {
 		if (isReplayRef.current && array.length > 0 && index < array.length) {
 			setTimeout(() => {
-				store.replayMessage(array[index]).then(() => {
+				messageListDataStore.replayMessage(array[index].id).then(() => {
 					if (index === array.length - 1) {
 						setReplayMode(false);
 					} else {
@@ -78,17 +79,15 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 
 	const exportFn = () => {
 		downloadFile(
-			JSON.stringify(messageListDataStore.messageHistory[store.selectedSchemaType]),
-			store.selectedSchemaType === 'parsed-message' ? 'parsedMessages' : 'actMessages',
+			JSON.stringify(messageListDataStore.history),
+			selectedSchemaType === 'parsed-message' ? 'parsedMessages' : 'actMessages',
 			'application/json',
 		);
 	};
 
 	return (
 		<div
-			className={'message-history'.concat(
-				messageListDataStore.editMessageMode ? '_edited' : '',
-			)}>
+			className={'message-history'.concat(messageListDataStore.editMessageMode ? '_edited' : '')}>
 			{messageListDataStore.editMessageMode && (
 				<div
 					className={'add-new-message'}
@@ -107,12 +106,12 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 				<button
 					disabled={messageListDataStore.editMessageMode}
 					className='message-history__controls-button'
-					onClick={messageListDataStore.clearParsedMessages}>
+					onClick={messageListDataStore.clearHistory}>
 					Clear
 				</button>
 
 				<button
-					disabled={messageListDataStore.messageHistory[store.selectedSchemaType].length === 0}
+					disabled={messageListDataStore.history.length === 0}
 					className='message-history__controls-button'
 					onClick={exportFn}>
 					Export
@@ -120,8 +119,7 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 
 				<button
 					disabled={
-						messageListDataStore.editMessageMode
-						|| messageListDataStore.messageHistory[store.selectedSchemaType].length === 0
+						messageListDataStore.editMessageMode || messageListDataStore.history.length === 0
 					}
 					className='message-history__controls-button'
 					onClick={() => {
@@ -129,7 +127,8 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 					}}>
 					{isReplay ? (
 						<div style={{ display: 'flex' }}>
-							<div className='spinner'></div>Stop
+							<div className='spinner' />
+							Stop
 						</div>
 					) : (
 						'Replay'

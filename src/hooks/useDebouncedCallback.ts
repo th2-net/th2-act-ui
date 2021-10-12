@@ -31,9 +31,7 @@ export function useDebouncedCallback<A extends unknown[]>(
 
 	useEffect(() => cleanup, []);
 
-	return function debouncedCallback(
-	  ...args: A
-	) {
+	return function debouncedCallback(...args: A) {
 		argsRef.current = args;
 		cleanup();
 		timeout.current = setTimeout(() => {

@@ -17,15 +17,12 @@
 
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import {
-	Droppable, DroppableProvided, DropResult, DragDropContext,
-} from 'react-beautiful-dnd';
+import { Droppable, DroppableProvided, DropResult, DragDropContext } from 'react-beautiful-dnd';
 import { useStore } from '../hooks/useStore';
 import '../styles/message-list.scss';
 import '../styles/splitter.scss';
 import { reorderArray } from '../helpers/reorderArrayWithDragAndDrop';
-import { ParsedMessageItem, ActMessageItem } from '../models/Message';
-import DraggableMessageItem from './MessageItem';
+import DraggableMessageList from './DraggableMessageList';
 
 export type Indicator =
 	| 'indicator_unvisible'
@@ -33,9 +30,8 @@ export type Indicator =
 	| 'indicator_successful'
 	| 'indicator_unsuccessful';
 
-const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }) => {
-	const store = useStore();
-	const messageListDataStore = store.messageListDataStore;
+const MessageList = () => {
+	const { currentHistoryStore: messageListDataStore } = useStore();
 
 	const dragEndHandler = (result: DropResult) => {
 		messageListDataStore.clearIndicators();
@@ -46,8 +42,10 @@ const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }
 		if (destination.droppableId === source.droppableId && destination.index === source.index) {
 			return;
 		}
-		const array = messageListDataStore.messageHistory[store.selectedSchemaType];
-		reorderArray(destination.index, source.index, array[source.index], { array });
+		const array = messageListDataStore.history;
+		reorderArray(destination.index, source.index, array[source.index], {
+			array,
+		});
 	};
 
 	return (
@@ -56,18 +54,7 @@ const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }
 				<Droppable droppableId='droppableId'>
 					{(provided: DroppableProvided) => (
 						<ul {...provided.droppableProps} ref={provided.innerRef}>
-							{(
-								(props.messages as ParsedMessageItem[])
-								|| (props.messages as ActMessageItem[])
-							).map((item: ParsedMessageItem | ActMessageItem, index: number) => (
-								<DraggableMessageItem
-									key={item.id}
-									keyId={item.id}
-									index={index}
-									message={item}
-									editMessageMode={messageListDataStore.editMessageMode}
-								/>
-							))}
+							<DraggableMessageList />
 							{provided.placeholder}
 						</ul>
 					)}

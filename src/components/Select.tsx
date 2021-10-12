@@ -19,12 +19,12 @@ import { createBemBlock } from '../helpers/styleCreators';
 import '../styles/select.scss';
 
 interface Props {
-    className?: string;
-    options: string[];
-    selected: string;
+	className?: string;
+	options: string[];
+	selected: string;
 	disabled: boolean;
 	valid: boolean;
-    prefix?: string;
+	prefix?: string;
 	onChange: (option: string) => void;
 	label?: string;
 	id?: string;
@@ -42,20 +42,22 @@ export default function Select({
 }: Props) {
 	const selectClassName = createBemBlock(`options-select ${className}`, !valid ? 'invalid' : null);
 	return (
-		<div className="options-select__root">
-			{label && <label className="options-select__label" htmlFor={id}>{label}</label>}
+		<div className='options-select__root'>
+			{label && (
+				<label className='options-select__label' htmlFor={id}>
+					{label}
+				</label>
+			)}
 			<select
 				className={selectClassName}
 				id={id}
 				value={selected}
 				disabled={disabled}
 				onChange={e => onChange(e.target.value)}>
-				<option label="" />
-				{
-					options.map((opt, index) => (
-						<option key={index}>{opt}</option>
-					))
-				}
+				<option label='' />
+				{options.map((opt, index) => (
+					<option key={index}>{opt}</option>
+				))}
 			</select>
 		</div>
 	);
