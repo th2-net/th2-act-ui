@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /** ****************************************************************************
  * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
@@ -14,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React from 'react';
 import { observer } from 'mobx-react-lite';

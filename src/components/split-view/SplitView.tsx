@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /** ****************************************************************************
  * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
  *
@@ -14,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
+
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 import * as React from 'react';
 import ResizeObserver from 'resize-observer-polyfill';

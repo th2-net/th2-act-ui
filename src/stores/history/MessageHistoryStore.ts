@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /** ****************************************************************************
  * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
