@@ -18,7 +18,7 @@ import { hot } from 'react-hot-loader/root';
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Tab, Tabs } from '@material-ui/core';
-import { loader } from '@monaco-editor/react';
+import loader from '@monaco-editor/loader';
 import Result from './Result';
 import Button from './Button';
 import '../styles/root.scss';
@@ -34,6 +34,8 @@ import { EmbeddedEditor } from './EmbeddedEditor';
 import SplitView from '../split-view/SplitView';
 import SplitViewPane from '../split-view/SplitViewPane';
 
+loader.config({ paths: { vs: 'resources/vs' } });
+
 const App = () => {
 	const store: Store = useStore();
 	const messageListDataStore = store.messageListDataStore;
@@ -42,10 +44,6 @@ const App = () => {
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 
 	const messageEditorRef = React.useRef<MessageEditorMethods>(null);
-
-	React.useEffect(() => {
-		loader.config({ paths: { vs: '../../resources/vs' } });
-	}, []);
 
 	const sendMessage = async () => {
 		if (messageEditorRef.current) {
