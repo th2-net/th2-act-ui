@@ -24,7 +24,5 @@ export const EmbeddedEditor = (props: {
 	embedded: string;
 }) => {
 	const url = `http://th2-qa:30000/editor2/?${new URLSearchParams(props)}`;
-	// eslint-disable-next-line no-console
-	console.log(url);
 	return <iframe className='embedded-editor' src={url} />;
 };

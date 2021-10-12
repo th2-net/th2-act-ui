@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /** ****************************************************************************
  * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
@@ -15,58 +14,13 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React, { useState } from 'react';
-import { observer } from 'mobx-react-lite';
-import { Draggable, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
-import '../styles/message-list.scss';
-import '../styles/indicator.scss';
 import { InputAdornment, TextField } from '@material-ui/core';
-import {
-	ParsedMessageItem,
-	ActMessageItem,
-	isParsedMessageItem,
-	isActMessageItem,
-} from '../models/Message';
+import { observer } from 'mobx-react-lite';
+import React, { useState } from 'react';
 import { useStore } from '../hooks/useStore';
-
-interface MessageItemProps {
-	index: number;
-	message: ParsedMessageItem | ActMessageItem;
-}
-
-interface DraggableMessageItemProps extends MessageItemProps {
-	keyId: string;
-	editMessageMode: boolean;
-}
-
-const DraggableMessageItem = observer(
-	({ index, message, keyId, editMessageMode }: DraggableMessageItemProps) => (
-		<Draggable draggableId={keyId} index={index} key={keyId}>
-			{(prov: DraggableProvided, snapshot: DraggableStateSnapshot) => (
-				<li
-					{...prov.draggableProps}
-					ref={prov.innerRef}
-					key={keyId}
-					draggable={false}
-					className={snapshot.isDragging ? 'message-list__item dragging' : 'message-list__item'}>
-					<div
-						className={
-							editMessageMode
-								? 'message-list__drag-handler-container_hidden'
-								: 'message-list__drag-handler-container'
-						}>
-						<div
-							{...prov.dragHandleProps}
-							draggable={true}
-							className='message-list__drag-handler'
-						/>
-					</div>
-					<MessageItem index={index} message={message} />
-				</li>
-			)}
-		</Draggable>
-	),
-);
+import { MessageItemProps } from './DraggableMessageItem';
+import MessageCardControls from './MessageControls';
+import MessageEntity from './MessageEntity';
 
 const MessageItem = observer(({ index, message }: MessageItemProps) => {
 	const { currentHistoryStore } = useStore();
@@ -109,62 +63,4 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 	);
 });
 
-const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) => {
-	if (isParsedMessageItem(props.message)) {
-		return (
-			<div className='message-list__message-content'>
-				<p>
-					<b>session: </b>
-					{props.message.sessionId}
-					<b> dictionary: </b>
-					{props.message.dictionary}
-					<b> messageType: </b>
-					{props.message.messageType}
-				</p>
-			</div>
-		);
-	}
-	if (isActMessageItem(props.message)) {
-		return (
-			<div>
-				<p>
-					<b>actBox: </b>
-					{props.message.actBox}
-				</p>
-				<p>
-					<b>fullServiceName: </b>
-					{props.message.fullServiceName}
-				</p>
-				<p>
-					<b>methodName: </b>
-					{props.message.methodName}
-				</p>
-			</div>
-		);
-	}
-	return null;
-};
-
-const MessageCardControls = observer(
-	(props: { id: string; message: ParsedMessageItem | ActMessageItem; index: number }) => {
-		const { currentHistoryStore } = useStore();
-
-		return (
-			<div className='message-list__message-card-controls'>
-				<button
-					disabled={currentHistoryStore.editMessageMode}
-					className='message-list__delete-message-btn'
-					onClick={() => {
-						currentHistoryStore.deleteMessage(props.id);
-					}}>
-					x
-				</button>
-				<div>
-					<button className={props.message.indicator} />
-				</div>
-			</div>
-		);
-	},
-);
-
-export default DraggableMessageItem;
+export default MessageItem;

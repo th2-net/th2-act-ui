@@ -93,6 +93,7 @@ export default class ActMessageHistoryStore extends MessageHistoryStore<ActMessa
 
 				message.indicator = result.code === 200 ? 'indicator_successful' : 'indicator_unsuccessful';
 			} catch (error) {
+				// eslint-disable-next-line no-alert
 				alert('Error while sending');
 				message.indicator = 'indicator_unsuccessful';
 			}

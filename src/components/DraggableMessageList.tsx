@@ -1,7 +1,7 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { ActMessageItem, MessageItem, ParsedMessageItem } from '../models/Message';
-import DraggableMessageItem from './MessageItem';
+import DraggableMessageItem from './DraggableMessageItem';
 import { useStore } from '../hooks/useStore';
 
 const DraggableMessageList = () => {
