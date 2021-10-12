@@ -14,59 +14,58 @@
  * limitations under the License.
  ***************************************************************************** */
 
- const path = require('path');
- const HtmlWebPackPlugin = require('html-webpack-plugin');
- const webpack = require('webpack');
- const CopyPlugin = require('copy-webpack-plugin');
- 
- const { appSrc, appPath } = require('./paths');
- 
- const api_env = process.env.API_ENV || 'http';
- 
- module.exports = {
-     resolve: {
-         extensions: ['.ts', '.tsx', '.scss', '.js'],
-     },
-     module: {
-         rules: [
-             {
-                 test: /\.css$/i,
-                 use: ['style-loader', 'css-loader'],
-             },
-             {
-                 test: /\.(ts|tsx)$/,
-                 loader: "babel-loader",
-                 exclude: /node_modules/
-             },
-             {
-                 test: /\.(woff(2)?|ttf|eot|svg|jpg)(\?v=\d+\.\d+\.\d+)?$/,
-                 use: [{
-                     loader: 'file-loader',
-                     options: {
-                         name: '[name].[ext]',
-                         outputPath: 'resources/',
-                     },
-                 }]
-             }
-         ]
-     },
-     plugins: [
-         new webpack.EnvironmentPlugin({
-             API_ENV: api_env
-         }),
-         new HtmlWebPackPlugin({
-             title: 'Message-sender-ui',
-             template: path.resolve(appSrc, 'index.html'),
-             favicon: false,
-         }),
-         new CopyPlugin({
-             patterns: [
-                 {
-                     from: './resources/vs', 
-                     to: './resources/vs',
-                 },
-             ],
-         }),
-     ],   
- };
- 
+const path = require('path');
+const HtmlWebPackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
+const CopyPlugin = require('copy-webpack-plugin');
+
+const { appSrc, appPath } = require('./paths');
+
+const api_env = process.env.API_ENV || 'http';
+
+module.exports = {
+    resolve: {
+        extensions: ['.ts', '.tsx', '.scss', '.js'],
+    },
+    module: {
+        rules: [
+            {
+                test: /\.css$/i,
+                use: ['style-loader', 'css-loader'],
+            },
+            {
+                test: /\.(ts|tsx)$/,
+                loader: "babel-loader",
+                exclude: /node_modules/
+            },
+            {
+                test: /\.(woff(2)?|ttf|eot|svg|jpg)(\?v=\d+\.\d+\.\d+)?$/,
+                use: [{
+                    loader: 'file-loader',
+                    options: {
+                        name: '[name].[ext]',
+                        outputPath: 'resources/',
+                    },
+                }]
+            }
+        ]
+    },
+    plugins: [
+        new webpack.EnvironmentPlugin({
+            API_ENV: api_env
+        }),
+        new HtmlWebPackPlugin({
+            title: 'Message-sender-ui',
+            template: path.resolve(appSrc, 'index.html'),
+            favicon: false,
+        }),
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: './resources/vs',
+                    to: './resources/vs',
+                },
+            ],
+        }),
+    ],
+};
