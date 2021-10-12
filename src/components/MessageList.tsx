@@ -31,10 +31,10 @@ export type Indicator =
 	| 'indicator_unsuccessful';
 
 const MessageList = () => {
-	const { currentHistoryStore: messageListDataStore } = useStore();
+	const { currentHistoryStore } = useStore();
 
 	const dragEndHandler = (result: DropResult) => {
-		messageListDataStore.clearIndicators();
+		currentHistoryStore.clearIndicators();
 		const { destination, source } = result;
 		if (!destination) {
 			return;
@@ -42,7 +42,7 @@ const MessageList = () => {
 		if (destination.droppableId === source.droppableId && destination.index === source.index) {
 			return;
 		}
-		const array = messageListDataStore.history;
+		const array = currentHistoryStore.history;
 		reorderArray(destination.index, source.index, array[source.index], {
 			array,
 		});

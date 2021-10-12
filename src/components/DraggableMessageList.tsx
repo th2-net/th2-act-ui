@@ -5,17 +5,17 @@ import DraggableMessageItem from './MessageItem';
 import { useStore } from '../hooks/useStore';
 
 const DraggableMessageList = () => {
-	const { currentHistoryStore: messageListDataStore } = useStore();
+	const { currentHistoryStore } = useStore();
 
 	return (
 		<>
-			{(messageListDataStore.history as MessageItem[]).map((item, index: number) => (
+			{(currentHistoryStore.history as MessageItem[]).map((item, index: number) => (
 				<DraggableMessageItem
 					key={item.id}
 					keyId={item.id}
 					index={index}
 					message={item as ParsedMessageItem | ActMessageItem}
-					editMessageMode={messageListDataStore.editMessageMode}
+					editMessageMode={currentHistoryStore.editMessageMode}
 				/>
 			))}
 		</>

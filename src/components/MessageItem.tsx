@@ -69,13 +69,13 @@ const DraggableMessageItem = observer(
 );
 
 const MessageItem = observer(({ index, message }: MessageItemProps) => {
-	const { currentHistoryStore: messageListDataStore } = useStore();
+	const { currentHistoryStore } = useStore();
 	const [delay, setDelayValue] = useState(message.delay.toString());
 
 	return (
 		<div
 			className={
-				messageListDataStore.editedMessageId === message.id
+				currentHistoryStore.editedMessageId === message.id
 					? 'message-list__message-card_edited'
 					: 'message-list__message-card'
 			}>
@@ -83,7 +83,7 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 				onClick={() => {
 					const selection = window.getSelection();
 					if (selection && selection?.toString().length === 0) {
-						messageListDataStore.selectMessage(message.id || '');
+						currentHistoryStore.selectMessage(message.id || '');
 					}
 				}}>
 				<MessageEntity message={message} />
@@ -99,8 +99,8 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 					value={delay}
 					placeholder='0'
 					onChange={e => {
-						messageListDataStore.setEditedMessageSendDelay(Number(e.target.value) || 0);
-						setDelayValue(messageListDataStore.editedMessageSendDelay.toString());
+						currentHistoryStore.setEditedMessageSendDelay(Number(e.target.value) || 0);
+						setDelayValue(currentHistoryStore.editedMessageSendDelay.toString());
 					}}
 				/>
 			</div>
@@ -147,15 +147,15 @@ const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) =
 
 const MessageCardControls = observer(
 	(props: { id: string; message: ParsedMessageItem | ActMessageItem; index: number }) => {
-		const { currentHistoryStore: messageListDataStore } = useStore();
+		const { currentHistoryStore } = useStore();
 
 		return (
 			<div className='message-list__message-card-controls'>
 				<button
-					disabled={messageListDataStore.editMessageMode}
+					disabled={currentHistoryStore.editMessageMode}
 					className='message-list__delete-message-btn'
 					onClick={() => {
-						messageListDataStore.deleteMessage(props.id);
+						currentHistoryStore.deleteMessage(props.id);
 					}}>
 					x
 				</button>

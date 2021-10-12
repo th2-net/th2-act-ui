@@ -24,7 +24,7 @@ export type SchemaType = 'parsed-message' | 'act';
 
 const Control = () => {
 	const store = useStore();
-	const { currentHistoryStore: messageListDataStore } = store;
+	const { currentHistoryStore } = store;
 
 	const controlConfigs = [
 		{
@@ -47,7 +47,7 @@ const Control = () => {
 					disabled:
 						store.isSessionsLoading ||
 						store.isDictionariesLoading ||
-						messageListDataStore.editMessageMode,
+						currentHistoryStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedDictionaryName : true,
 					onChange: (opt: string) => (store.selectedDictionaryName = opt),
 				},
@@ -60,7 +60,7 @@ const Control = () => {
 						store.isSessionsLoading ||
 						store.isDictionariesLoading ||
 						store.isDictionaryLoading ||
-						messageListDataStore.editMessageMode,
+						currentHistoryStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedMessageType : true,
 					onChange: (opt: string) => (store.selectedMessageType = opt),
 				},
@@ -84,7 +84,7 @@ const Control = () => {
 					options: store.services.slice().sort(),
 					selected: store.selectedService || '',
 					disabled:
-						store.isActsLoading || store.isServicesLoading || messageListDataStore.editMessageMode,
+						store.isActsLoading || store.isServicesLoading || currentHistoryStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedService : true,
 					onChange: (opt: string) => (store.selectedService = opt),
 				},
@@ -102,7 +102,7 @@ const Control = () => {
 						store.isActsLoading ||
 						store.isServicesLoading ||
 						store.isMethodsLoading ||
-						messageListDataStore.editMessageMode,
+						currentHistoryStore.editMessageMode,
 					valid: store.isSchemaApplied ? !!store.selectedMethod : true,
 					onChange: (methodName: string) => store.setSelectedMethod(methodName),
 				},
@@ -139,7 +139,7 @@ const Control = () => {
 						.selects.map(props => (
 							<React.Fragment key={props.id}>
 								<Select {...props} />
-								{props.disabled && !messageListDataStore.editMessageMode && (
+								{props.disabled && !currentHistoryStore.editMessageMode && (
 									<SplashScreen key='splash' />
 								)}
 							</React.Fragment>

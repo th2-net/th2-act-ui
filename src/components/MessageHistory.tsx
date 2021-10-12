@@ -25,7 +25,7 @@ import { ParsedMessageItem, ActMessageItem } from '../models/Message';
 import MessageList from './MessageList';
 
 const MessageHistory = () => {
-	const { currentHistoryStore: messageListDataStore, selectedSchemaType } = useStore();
+	const { currentHistoryStore, selectedSchemaType } = useStore();
 	const [isReplay, setReplayMode] = useState(false);
 	const isReplayRef = useRef(isReplay);
 
@@ -44,9 +44,9 @@ const MessageHistory = () => {
 	const jsonMessagesFromString = (rawFromFile: string) => {
 		try {
 			const messages = JSON.parse(rawFromFile) as Array<ParsedMessageItem | ActMessageItem>;
-			messageListDataStore.clearHistory();
+			currentHistoryStore.clearHistory();
 			messages.forEach(message =>
-				messageListDataStore.addMessage(message as ParsedMessageItem & ActMessageItem),
+				currentHistoryStore.addMessage(message as ParsedMessageItem & ActMessageItem),
 			);
 		} catch (error) {
 			// eslint-disable-next-line no-alert
@@ -57,16 +57,16 @@ const MessageHistory = () => {
 	useEffect(() => {
 		isReplayRef.current = isReplay;
 		if (isReplay) {
-			messageListDataStore.setEditMessageMode(false);
-			messageListDataStore.clearIndicators();
-			replaySendMessage(messageListDataStore.history, 0);
+			currentHistoryStore.setEditMessageMode(false);
+			currentHistoryStore.clearIndicators();
+			replaySendMessage(currentHistoryStore.history, 0);
 		}
 	}, [isReplay]);
 
 	const replaySendMessage = (array: ParsedMessageItem[] | ActMessageItem[], index: number) => {
 		if (isReplayRef.current && array.length > 0 && index < array.length) {
 			setTimeout(() => {
-				messageListDataStore.replayMessage(array[index].id).then(() => {
+				currentHistoryStore.replayMessage(array[index].id).then(() => {
 					if (index === array.length - 1) {
 						setReplayMode(false);
 					} else {
@@ -79,20 +79,19 @@ const MessageHistory = () => {
 
 	const exportFn = () => {
 		downloadFile(
-			JSON.stringify(messageListDataStore.history),
+			JSON.stringify(currentHistoryStore.history),
 			selectedSchemaType === 'parsed-message' ? 'parsedMessages' : 'actMessages',
 			'application/json',
 		);
 	};
 
 	return (
-		<div
-			className={'message-history'.concat(messageListDataStore.editMessageMode ? '_edited' : '')}>
-			{messageListDataStore.editMessageMode && (
+		<div className={'message-history'.concat(currentHistoryStore.editMessageMode ? '_edited' : '')}>
+			{currentHistoryStore.editMessageMode && (
 				<div
 					className={'add-new-message'}
 					onClick={() => {
-						messageListDataStore.setEditMessageMode(false);
+						currentHistoryStore.setEditMessageMode(false);
 					}}>
 					New Message
 				</div>
@@ -104,23 +103,21 @@ const MessageHistory = () => {
 
 			<div className='message-history__controls'>
 				<button
-					disabled={messageListDataStore.editMessageMode}
+					disabled={currentHistoryStore.editMessageMode}
 					className='message-history__controls-button'
-					onClick={messageListDataStore.clearHistory}>
+					onClick={currentHistoryStore.clearHistory}>
 					Clear
 				</button>
 
 				<button
-					disabled={messageListDataStore.history.length === 0}
+					disabled={currentHistoryStore.history.length === 0}
 					className='message-history__controls-button'
 					onClick={exportFn}>
 					Export
 				</button>
 
 				<button
-					disabled={
-						messageListDataStore.editMessageMode || messageListDataStore.history.length === 0
-					}
+					disabled={currentHistoryStore.editMessageMode || currentHistoryStore.history.length === 0}
 					className='message-history__controls-button'
 					onClick={() => {
 						setReplayMode(!isReplay);
@@ -136,7 +133,7 @@ const MessageHistory = () => {
 				</button>
 
 				<input
-					disabled={messageListDataStore.editMessageMode}
+					disabled={currentHistoryStore.editMessageMode}
 					value=''
 					id='file'
 					type='file'

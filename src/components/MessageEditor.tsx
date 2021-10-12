@@ -43,7 +43,7 @@ export interface MessageEditorMethods {
 const DEFAULT_EDITOR_HEIGHT = 700;
 
 const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
-	const { currentHistoryStore: messageListDataStore, setIsSchemaApplied } = useStore();
+	const { currentHistoryStore, setIsSchemaApplied } = useStore();
 
 	const monacoRef = React.useRef<Monaco>();
 	const valueGetter = React.useRef<(() => string) | null>(null);
@@ -114,8 +114,8 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 			});
 		} else {
 			setCode('{}');
-			if (messageListDataStore.editMessageMode) {
-				messageListDataStore.setEditorCode('{}');
+			if (currentHistoryStore.editMessageMode) {
+				currentHistoryStore.setEditorCode('{}');
 			}
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
@@ -130,8 +130,8 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 	}, [messageSchema]);
 
 	const onValueChange: ControlledEditorOnChange = (event, value) => {
-		if (messageListDataStore.editMessageMode) {
-			messageListDataStore.setEditorCode(value || '{}');
+		if (currentHistoryStore.editMessageMode) {
+			currentHistoryStore.setEditorCode(value || '{}');
 		} else {
 			setCode(value || '{}');
 		}
@@ -164,7 +164,7 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 			<ControlledEditor
 				height={editorHeight}
 				language='json'
-				value={messageListDataStore.editMessageMode ? messageListDataStore.editorCode : code}
+				value={currentHistoryStore.editMessageMode ? currentHistoryStore.editorCode : code}
 				onChange={onValueChange}
 				editorDidMount={handleEditorDidMount}
 			/>
