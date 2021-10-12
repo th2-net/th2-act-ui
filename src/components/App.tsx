@@ -44,7 +44,7 @@ const App = () => {
 	const messageEditorRef = React.useRef<MessageEditorMethods>(null);
 
 	React.useEffect(() => {
-		loader.config({ paths: { vs: 'vs' } });
+		loader.config({ paths: { vs: '../../resources/vs' } });
 	}, []);
 
 	const sendMessage = async () => {
