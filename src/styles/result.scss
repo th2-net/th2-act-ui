@@ -28,6 +28,17 @@
 		flex-direction: column;
 		white-space: pre-wrap;
 	}
+
+	&-link {
+		font-size: small;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		width: 15%;
+		background-color: #dedede;
+		border: 1px transparent;
+		border-radius: 6px;
+		padding: 3px;
+	}
 }
 
 .ok {
@@ -41,3 +52,4 @@
 a {
 	color: darkblue;
 }
+
