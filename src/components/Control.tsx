@@ -17,7 +17,7 @@
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import Select from '@material-ui/core/Select';
-import { InputLabel, MenuItem } from '@material-ui/core';
+import { InputLabel, MenuItem, Radio } from '@material-ui/core';
 import { useStore } from '../hooks/useStore';
 import SplashScreen from './SplashScreen';
 
@@ -117,8 +117,7 @@ const Control = () => {
 				<h3 className='app__title'>Send as</h3>
 				{controlConfigs.map(config => (
 					<label key={config.name} htmlFor={config.name}>
-						<input
-							type='radio'
+						<Radio
 							value={config.name}
 							id={config.name}
 							checked={config.name === store.selectedSchemaType}
