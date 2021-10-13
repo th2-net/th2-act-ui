@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /** ****************************************************************************
  * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
@@ -16,11 +15,11 @@
  ***************************************************************************** */
 
 import { action, makeObservable, observable } from 'mobx';
-import { MessageItem } from '../../models/Message';
+import { MessageHistoryItem } from '../../models/Message';
 import Store from '../Store';
 import { Indicator } from '../../components/MessageList';
 
-export default abstract class MessageHistoryStore<T extends MessageItem> {
+export default abstract class MessageHistoryStore<T extends MessageHistoryItem> {
 	history: T[] = [];
 
 	editorCode = '{}';

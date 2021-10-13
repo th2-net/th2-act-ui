@@ -1,11 +1,27 @@
+/** ****************************************************************************
+ * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ ***************************************************************************** */
+
 import { action, makeObservable, reaction } from 'mobx';
 import MessageHistoryStore from './MessageHistoryStore';
-import { ActMessageItem } from '../../models/Message';
+import { ActMessageHistoryItem } from '../../models/Message';
 import Store from '../Store';
 import { getFromLocalStorage, setInLocalStorage } from '../../helpers/localStorageManager';
 import api from '../../api';
 
-export default class ActMessageHistoryStore extends MessageHistoryStore<ActMessageItem> {
+export default class ActMessageHistoryStore extends MessageHistoryStore<ActMessageHistoryItem> {
 	constructor(store: Store) {
 		super(store);
 
@@ -36,7 +52,7 @@ export default class ActMessageHistoryStore extends MessageHistoryStore<ActMessa
 		);
 	}
 
-	buildEditedMessage = (id: string): ActMessageItem | undefined => {
+	buildEditedMessage = (id: string): ActMessageHistoryItem | undefined => {
 		if (this.store.selectedActBox && this.store.selectedService && this.store.selectedMethod) {
 			return {
 				id,
@@ -52,7 +68,9 @@ export default class ActMessageHistoryStore extends MessageHistoryStore<ActMessa
 	};
 
 	selectMessage = (id: string) => {
-		const selectedMessage = this.history.find(message => message.id === id) as ActMessageItem;
+		const selectedMessage = this.history.find(
+			message => message.id === id,
+		) as ActMessageHistoryItem;
 
 		this.setEditorProperties(
 			selectedMessage.actBox,

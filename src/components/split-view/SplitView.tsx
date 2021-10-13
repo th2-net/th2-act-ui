@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /** ****************************************************************************
  * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
  *
@@ -15,10 +14,12 @@
  * limitations under the License.
  ***************************************************************************** */
 
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 import * as React from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { createStyleSelector } from '../helpers/styleCreators';
-import '../styles/splitter.scss';
+import { createStyleSelector } from '../../helpers/styleCreators';
+import '../../styles/splitter.scss';
 
 export interface Props {
 	/**

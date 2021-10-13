@@ -30,8 +30,9 @@ import { MessageSendingResponse } from '../models/Message';
 import MessageHistory from './MessageHistory';
 import '../styles/message-list.scss';
 import { EmbeddedEditor } from './EmbeddedEditor';
-import SplitView from '../split-view/SplitView';
-import SplitViewPane from '../split-view/SplitViewPane';
+import SplitView from './split-view/SplitView';
+import SplitViewPane from './split-view/SplitViewPane';
+import TabPanel from './TabPanel';
 
 const App = () => {
 	const store: Store = useStore();
@@ -71,21 +72,23 @@ const App = () => {
 								<Tab label='History' className='app__tab' />
 								<Tab label='Dictionary' className='app__tab' />
 							</Tabs>
-							{currentTab === 0 ? (
+							<TabPanel tabIndex={0} currentTab={currentTab}>
 								<div>
 									<h3 className='app__title'>Result</h3>
 									<Result response={response} />
 								</div>
-							) : currentTab === 1 ? (
+							</TabPanel>
+							<TabPanel tabIndex={1} currentTab={currentTab}>
 								<MessageHistory />
-							) : (
+							</TabPanel>
+							<TabPanel tabIndex={2} currentTab={currentTab}>
 								<EmbeddedEditor
 									schema='schema-qa'
 									object={store.selectedDictionaryName || ''}
 									editorMode='dictionaryEditor'
 									embedded='true'
 								/>
-							)}
+							</TabPanel>
 						</div>
 					</SplitViewPane>
 				</SplitView>

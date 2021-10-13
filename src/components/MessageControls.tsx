@@ -17,12 +17,16 @@
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import { useStore } from '../hooks/useStore';
-import { ActMessageItem, ParsedMessageItem } from '../models/Message';
+import { ActMessageHistoryItem, ParsedMessageHistoryItem } from '../models/Message';
 import '../styles/message-list.scss';
 import '../styles/indicator.scss';
 
 const MessageCardControls = observer(
-	(props: { id: string; message: ParsedMessageItem | ActMessageItem; index: number }) => {
+	(props: {
+		id: string;
+		message: ParsedMessageHistoryItem | ActMessageHistoryItem;
+		index: number;
+	}) => {
 		const { currentHistoryStore } = useStore();
 
 		return (

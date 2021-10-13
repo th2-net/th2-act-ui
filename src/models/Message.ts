@@ -15,6 +15,7 @@
  ***************************************************************************** */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
+
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import { Indicator } from '../components/MessageList';
 
@@ -65,37 +66,37 @@ export interface ActSendingResponse {
 	responseMessage: string;
 }
 
-export interface MessageItem {
+export interface MessageHistoryItem {
 	message: object | string;
 	delay: number;
 	id: string;
 	indicator: Indicator;
 }
 
-export interface ParsedMessageItem extends MessageItem {
+export interface ParsedMessageHistoryItem extends MessageHistoryItem {
 	sessionId: string;
 	dictionary: string;
 	messageType: string;
 }
 
-export interface ActMessageItem extends MessageItem {
+export interface ActMessageHistoryItem extends MessageHistoryItem {
 	actBox: string;
 	fullServiceName: string;
 	methodName: string;
 }
 
-export function isParsedMessageItem(object: unknown): object is ParsedMessageItem {
+export function isParsedMessageItem(object: unknown): object is ParsedMessageHistoryItem {
 	return (
 		typeof object === 'object' &&
 		object !== null &&
-		typeof (object as ParsedMessageItem).sessionId === 'string'
+		typeof (object as ParsedMessageHistoryItem).sessionId === 'string'
 	);
 }
 
-export function isActMessageItem(object: unknown): object is ActMessageItem {
+export function isActMessageItem(object: unknown): object is ActMessageHistoryItem {
 	return (
 		typeof object === 'object' &&
 		object !== null &&
-		typeof (object as ActMessageItem).actBox === 'string'
+		typeof (object as ActMessageHistoryItem).actBox === 'string'
 	);
 }

@@ -15,6 +15,7 @@
  ***************************************************************************** */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
+
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import ResizeObserver from 'resize-observer-polyfill';
 import React from 'react';

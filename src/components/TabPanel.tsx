@@ -14,17 +14,15 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import * as React from 'react';
-import '../styles/splitter.scss';
+import React from 'react';
 
-interface Props {
+type Props = {
+	tabIndex: number;
+	currentTab: number;
 	children: React.ReactNode;
-}
+};
 
-const SplitViewPane = ({ children }: Props) => (
-	<div className='splitter-pane'>
-		<div className='splitter-pane__content'>{children}</div>
-	</div>
-);
+const TabPanel = ({ tabIndex, currentTab, children }: Props) =>
+	tabIndex === currentTab ? <>{children}</> : null;
 
-export default SplitViewPane;
+export default TabPanel;

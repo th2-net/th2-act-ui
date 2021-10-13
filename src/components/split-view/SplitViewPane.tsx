@@ -14,41 +14,17 @@
  * limitations under the License.
  ***************************************************************************** */
 
-const createWorkspaceState = (eventId: string) => [
-	{
-		events: {
-			filter: {
-				attachedMessageId: {
-					type: 'string',
-					negative: false,
-					values: '',
-				},
-				type: {
-					type: 'string[]',
-					values: [],
-					negative: false,
-				},
-				name: {
-					type: 'string[]',
-					values: [],
-					negative: false,
-				},
-				body: {
-					type: 'string[]',
-					values: [],
-					negative: false,
-				},
-				status: {
-					type: 'switcher',
-					values: 'any',
-				},
-			},
-			panelArea: 50,
-			selectedEventId: eventId,
-			flattenedListView: false,
-		},
-		layout: [50, 50],
-	},
-];
+import * as React from 'react';
+import '../../styles/splitter.scss';
 
-export default createWorkspaceState;
+interface Props {
+	children: React.ReactNode;
+}
+
+const SplitViewPane = ({ children }: Props) => (
+	<div className='splitter-pane'>
+		<div className='splitter-pane__content'>{children}</div>
+	</div>
+);
+
+export default SplitViewPane;

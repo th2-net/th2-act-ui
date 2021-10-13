@@ -1,4 +1,3 @@
-/* eslint-disable no-alert */
 /** ****************************************************************************
  * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
@@ -15,7 +14,9 @@
  * limitations under the License.
  ***************************************************************************** */
 
+/* eslint-disable no-alert */
 // eslint-disable-next-line import/no-extraneous-dependencies
+
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import { action, computed, makeObservable, observable, reaction, runInAction } from 'mobx';
 import { nanoid } from 'nanoid';

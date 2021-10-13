@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /** ****************************************************************************
  * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
@@ -15,13 +14,15 @@
  * limitations under the License.
  ***************************************************************************** */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React, { useState, useEffect, useRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '../hooks/useStore';
 import '../styles/message-history.scss';
 import '../styles/splitter.scss';
 import { downloadFile } from '../helpers/downloadFile';
-import { ParsedMessageItem, ActMessageItem } from '../models/Message';
+import { ParsedMessageHistoryItem, ActMessageHistoryItem } from '../models/Message';
 import MessageList from './MessageList';
 
 const MessageHistory = () => {
@@ -43,10 +44,12 @@ const MessageHistory = () => {
 
 	const jsonMessagesFromString = (rawFromFile: string) => {
 		try {
-			const messages = JSON.parse(rawFromFile) as Array<ParsedMessageItem | ActMessageItem>;
+			const messages = JSON.parse(rawFromFile) as Array<
+				ParsedMessageHistoryItem | ActMessageHistoryItem
+			>;
 			currentHistoryStore.clearHistory();
 			messages.forEach(message =>
-				currentHistoryStore.addMessage(message as ParsedMessageItem & ActMessageItem),
+				currentHistoryStore.addMessage(message as ParsedMessageHistoryItem & ActMessageHistoryItem),
 			);
 		} catch (error) {
 			// eslint-disable-next-line no-alert
@@ -63,7 +66,10 @@ const MessageHistory = () => {
 		}
 	}, [isReplay]);
 
-	const replaySendMessage = (array: ParsedMessageItem[] | ActMessageItem[], index: number) => {
+	const replaySendMessage = (
+		array: ParsedMessageHistoryItem[] | ActMessageHistoryItem[],
+		index: number,
+	) => {
 		if (isReplayRef.current && array.length > 0 && index < array.length) {
 			setTimeout(() => {
 				currentHistoryStore.replayMessage(array[index].id).then(() => {

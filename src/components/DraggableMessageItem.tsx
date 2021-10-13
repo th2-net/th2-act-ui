@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /** ****************************************************************************
  * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
@@ -15,17 +14,19 @@
  * limitations under the License.
  ***************************************************************************** */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Draggable, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import '../styles/message-list.scss';
 import '../styles/indicator.scss';
-import { ParsedMessageItem, ActMessageItem } from '../models/Message';
+import { ParsedMessageHistoryItem, ActMessageHistoryItem } from '../models/Message';
 import MessageItem from './MessageItem';
 
 export interface MessageItemProps {
 	index: number;
-	message: ParsedMessageItem | ActMessageItem;
+	message: ParsedMessageHistoryItem | ActMessageHistoryItem;
 }
 
 interface DraggableMessageItemProps extends MessageItemProps {
