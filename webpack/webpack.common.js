@@ -62,7 +62,7 @@ module.exports = {
         new CopyPlugin({
             patterns: [
                 {
-                    from: './resources/vs',
+                    from: './node_modules/monaco-editor/min/vs/',
                     to: './resources/vs',
                 },
             ],
