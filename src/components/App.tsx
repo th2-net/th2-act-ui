@@ -17,9 +17,9 @@
 import { hot } from 'react-hot-loader/root';
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
-import { Tab, Tabs } from '@material-ui/core';
+import { Tab, Tabs, Button } from '@material-ui/core';
+import Send from '../../node_modules/@material-ui/icons/Send';
 import Result from './Result';
-import Button from './Button';
 import '../styles/root.scss';
 import MessageEditor, { MessageEditorMethods } from './MessageEditor';
 import { useStore } from '../hooks/useStore';
@@ -92,18 +92,15 @@ const App = () => {
 				{store.isSchemaLoading && <div className='overlay' />}
 				<div className='app__buttons'>
 					<Button
+						variant='outlined'
+						endIcon={store.isSending ? <SplashScreen /> : <Send />}
 						onClick={
 							messageListDataStore.editMessageMode
 								? messageListDataStore.saveEditedMessage
 								: sendMessage
 						}
 						disabled={!store.isSendingAllowed}>
-						<span>{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}</span>
-						{store.isSending ? (
-							<SplashScreen />
-						) : (
-							<i className={messageListDataStore.editMessageMode ? '' : 'arrow-right-icon'} />
-						)}
+						{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}
 					</Button>
 				</div>
 			</div>
