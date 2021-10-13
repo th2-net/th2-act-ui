@@ -16,8 +16,9 @@
 
 import { observer } from 'mobx-react-lite';
 import React from 'react';
+import Select from '@material-ui/core/Select';
+import { InputLabel, MenuItem } from '@material-ui/core';
 import { useStore } from '../hooks/useStore';
-import Select from './Select';
 import SplashScreen from './SplashScreen';
 
 export type SchemaType = 'parsed-message' | 'act';
@@ -138,7 +139,22 @@ const Control = () => {
 						.find(config => config.name === store.selectedSchemaType)!
 						.selects.map(props => (
 							<React.Fragment key={props.id}>
-								<Select {...props} />
+								<InputLabel id={props.id}>{props.label}</InputLabel>
+								<Select
+									autoComplete='true'
+									style={{ minWidth: 120, marginRight: 10, marginLeft: 10 }}
+									onChange={event => props.onChange(event.target.value as string)}
+									error={!props.valid}
+									disabled={props.disabled}
+									label={props.label}
+									labelId={props.id}
+									value={props.selected}>
+									{props.options.map((opt, index) => (
+										<MenuItem key={index} value={opt}>
+											{opt}
+										</MenuItem>
+									))}
+								</Select>
 								{props.disabled && !currentHistoryStore.editMessageMode && (
 									<SplashScreen key='splash' />
 								)}
