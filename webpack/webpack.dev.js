@@ -18,6 +18,7 @@ const webpackMerge = require('webpack-merge');
 const commonConfig = require('./webpack.common');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const { appSrc } = require('./paths');
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = webpackMerge(commonConfig, {
 	output: {
@@ -84,6 +85,34 @@ module.exports = webpackMerge(commonConfig, {
 				files: './src/**/*{ts,tsx,js,jsx}',
 				enabled: true,
 			}
-		})
+		}),
+        new CopyPlugin({
+            patterns: [
+                {
+                    from: './node_modules/monaco-editor/min/vs/base',
+                    to: './resources/vs/base',
+                },
+                {
+                    from: './node_modules/monaco-editor/min/vs/editor',
+                    to: './resources/vs/editor',
+                    filter: (src) => {
+                        const files = ['editor.main.css', 'editor.main.js', 'editor.main.nls.js'];
+                        return !/\.(js|css)?$/.test(src) || files.some(file => src.includes(file));
+                    }
+                },
+                {
+                    from: './node_modules/monaco-editor/min/vs/language/json',
+                    to: './resources/vs/language/json',
+                },
+                {
+                    from: './node_modules/monaco-editor/min/vs/basic-languages/xml',
+                    to: './resources/vs/basic-languages/xml',
+                },
+                {
+                    from: './node_modules/monaco-editor/min/vs/loader.js',
+                    to: './resources/vs/loader.js',
+                },
+            ],
+        }),
 	]
 });
