@@ -24,6 +24,7 @@ import {
 	ActMessageItem,
 	isParsedMessageItem,
 	isActMessageItem,
+	ReplayMessage,
 } from '../models/Message';
 import Store from './Store';
 import { setInLocalStorage, getFromLocalStorage } from '../helpers/localStorageManager';
@@ -33,6 +34,8 @@ export default class MessageListDataStore {
 	@observable parsedMessagesHistory: ParsedMessageItem[] = [];
 
 	@observable actMessagesHistory: ActMessageItem[] = [];
+
+	@observable replayList: ReplayMessage[] = [];
 
 	@observable editorCode = '{}';
 
@@ -82,6 +85,11 @@ export default class MessageListDataStore {
 			return undefined;
 		}
 		return undefined;
+	};
+
+	@action
+	addToReplayList = (message: ReplayMessage) => {
+		this.replayList.push(message);
 	};
 
 	@action saveEditedMessage = () => {
@@ -235,14 +243,8 @@ export default class MessageListDataStore {
 		}
 	};
 
-	@action deleteMessage = (id: string) => {
-		if (this.store.selectedSchemaType === 'parsed-message') {
-			this.parsedMessagesHistory = this.parsedMessagesHistory.filter(
-				message => message.id !== id,
-			);
-		} else if (this.store.selectedSchemaType === 'act') {
-			this.actMessagesHistory = this.actMessagesHistory.filter(message => message.id !== id);
-		}
+	@action deleteMessageFromReplayList = (id: string) => {
+		this.replayList = this.replayList.filter(message => message.id !== id);
 	};
 
 	prepareForSelectedSchemaType = (type: SchemaType) => {

@@ -20,12 +20,11 @@ import { observer } from 'mobx-react-lite';
 import {
 	Droppable, DroppableProvided, DropResult, DragDropContext,
 } from 'react-beautiful-dnd';
-import { nanoid } from 'nanoid';
 import { useStore } from '../hooks/useStore';
 import '../styles/message-list.scss';
 import '../styles/splitter.scss';
 import { reorderArray } from '../helpers/reorderArrayWithDragAndDrop';
-import { ParsedMessageItem, ActMessageItem } from '../models/Message';
+import { ReplayMessage } from '../models/Message';
 import DraggableMessageItem from './MessageItem';
 
 export type Indicator =
@@ -34,7 +33,7 @@ export type Indicator =
 	| 'indicator_successful'
 	| 'indicator_unsuccessful';
 
-const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }) => {
+const MessageList = (props: { messages: ReplayMessage[] }) => {
 	const store = useStore();
 	const messageListDataStore = store.messageListDataStore;
 
@@ -57,13 +56,10 @@ const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }
 				<Droppable droppableId='droppableId'>
 					{(provided: DroppableProvided) => (
 						<ul {...provided.droppableProps} ref={provided.innerRef}>
-							{(
-								(props.messages as ParsedMessageItem[])
-								|| (props.messages as ActMessageItem[])
-							).map((item: ParsedMessageItem | ActMessageItem, index: number) => (
+							{props.messages.map((item, index) => (
 								<DraggableMessageItem
 									key={item.id}
-									keyId={item.id || nanoid()}
+									keyId={item.id}
 									index={index}
 									message={item}
 									editMessageMode={messageListDataStore.editMessageMode}

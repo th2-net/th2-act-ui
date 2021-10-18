@@ -15,11 +15,13 @@
  ***************************************************************************** */
 
 import React from 'react';
-import '../styles/embedded-editor.scss';
+import '../../styles/embedded-editor.scss';
 
-export const EmbeddedEditor = (props: { schema: string; object: string }) => {
+const EmbeddedEditorTab = (props: { schema: string; object: string }) => {
 	const url = `/editor2/?schema=${props.schema}&${
 		props.object && `object=${props.object}`
 	}&editorMode=dictionaryEditor&embedded=true`;
 	return <iframe className='embedded-editor' src={url}></iframe>;
 };
+
+export default EmbeddedEditorTab;

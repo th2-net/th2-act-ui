@@ -19,13 +19,13 @@ import {
 	ActSendingResponse,
 	MessageSendingResponse,
 	ParsedMessageSendingResponse,
-} from '../models/Message';
-import '../styles/result.scss';
-import ResultMonacoEditor from './ResultMonacoEditor';
+} from '../../models/Message';
+import '../../styles/result.scss';
+import ResultMonacoEditor from '../ResultMonacoEditor';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-const Result = ({ response }: { response: MessageSendingResponse | null }) => {
+const ResultTab = ({ response }: { response: MessageSendingResponse | null }) => {
 	if (!response) {
 		return <div className='result' />;
 	}
@@ -123,4 +123,4 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 	</div>;
 };
 
-export default Result;
+export default ResultTab;

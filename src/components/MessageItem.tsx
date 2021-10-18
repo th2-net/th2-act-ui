@@ -22,17 +22,14 @@ import '../styles/message-list.scss';
 import '../styles/indicator.scss';
 import { InputAdornment, TextField } from '@material-ui/core';
 import {
-	ParsedMessageItem,
-	ActMessageItem,
-	isParsedMessageItem,
-	isActMessageItem,
+	ReplayMessage,
 } from '../models/Message';
 import { Indicator } from './MessageList';
 import { useStore } from '../hooks/useStore';
 
 interface MessageItemProps {
 	index: number;
-	message: ParsedMessageItem | ActMessageItem;
+	message: ReplayMessage;
 }
 
 interface DraggableMessageItemProps extends MessageItemProps {
@@ -75,6 +72,7 @@ const DraggableMessageItem = observer(
 const MessageItem = observer(({ index, message }: MessageItemProps) => {
 	const [delay, setDelayValue] = useState(message.delay.toString());
 	const messageListDataStore = useStore().messageListDataStore;
+
 	return (
 		<div
 			className={
@@ -104,10 +102,8 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 					onChange={e => {
 						messageListDataStore.setEditedMessageSendDelay(Number(e.target.value) || 0);
 						if (!Number(e.target.value)) {
-							console.log(`includes${(e.target.value as string).replace('-', '')}`);
 							setDelayValue(e.target.value.replace('-', ''));
 						}
-						console.log(`not includes ${e.target.value}`);
 						setDelayValue(e.target.value);
 					}}
 				/>
@@ -115,54 +111,29 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 			<MessageCardControls
 				id={message.id || ''}
 				indicator={message.indicator}
-				message={message}
 				index={index}
 			/>
 		</div>
 	);
 });
 
-const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) => {
-	if (isParsedMessageItem(props.message)) {
-		return (
-			<div className='message-list__message-content'>
-				<p>
-					<b>session: </b>
-					{props.message.sessionId}
-					<b> dictionary: </b>
-					{props.message.dictionary}
-					<b> messageType: </b>
-					{props.message.messageType}
-				</p>
-			</div>
-		);
-	}
-	if (isActMessageItem(props.message)) {
-		return (
-			<div>
-				<p>
-					<b>actBox: </b>
-					{props.message.actBox}
-				</p>
-				<p>
-					<b>fullServiceName: </b>
-					{props.message.fullServiceName}
-				</p>
-				<p>
-					<b>methodName: </b>
-					{props.message.methodName}
-				</p>
-			</div>
-		);
-	}
-	return null;
-};
+const MessageEntity = (props: { message: ReplayMessage }) => (
+	<div className='message-list__message-content'>
+		<p>
+			<b>session: </b>
+			{props.message.sessionId}
+			<b> dictionary: </b>
+			{props.message.dictionary}
+			<b> messageType: </b>
+			{props.message.messageType}
+		</p>
+	</div>
+);
 
 const MessageCardControls = observer(
 	(props: {
 		id: string;
 		indicator: Indicator;
-		message: ParsedMessageItem | ActMessageItem;
 		index: number;
 	}) => {
 		const messageListDataStore = useStore().messageListDataStore;
@@ -172,17 +143,10 @@ const MessageCardControls = observer(
 					disabled={messageListDataStore.editMessageMode}
 					className='message-list__delete-message-btn'
 					onClick={() => {
-						messageListDataStore.deleteMessage(props.id);
+						messageListDataStore.deleteMessageFromReplayList(props.id);
 					}}>
 					x
 				</button>
-				<div>
-					<button
-						className={
-							messageListDataStore.getCurrentMessagesArray.slice()[props.index]
-								.indicator
-						}></button>
-				</div>
 			</div>
 		);
 	},

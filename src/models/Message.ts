@@ -65,12 +65,18 @@ export interface ActSendingResponse {
 	responseMessage: string;
 }
 
-export interface MessageItem{
+export interface MessageItem {
 	message: object | string;
 	delay: number;
 	id: string;
 	indicator: Indicator;
 }
+
+export type ReplayMessage = Omit<MessageItem, 'message'> & {
+	sessionId: string;
+	dictionary: string;
+	messageType: string;
+};
 
 export interface ParsedMessageItem extends MessageItem {
 	sessionId: string;
@@ -99,3 +105,51 @@ export function isActMessageItem(object: unknown): object is ActMessageItem {
 		&& typeof (object as ActMessageItem).actBox === 'string'
 	);
 }
+
+export type EventMessage = {
+	type: 'message';
+	messageType: string;
+	messageId: string;
+	timestamp: {
+		nano: number;
+		epochSecond: number;
+	};
+	direction: string;
+	sessionId: string;
+	body: MessageBody | null;
+	bodyBase64: string | null;
+};
+
+type MessageBody = {
+	metadata: {
+		id: {
+			connectionId: {
+				sessionAlias: string;
+			};
+			sequence: string;
+		};
+		timestamp: string;
+		messageType: string;
+	};
+	fields: MessageBodyFields;
+};
+
+type MessageBodyFields = { [key: string]: MessageBodyField };
+
+type MessageBodyField = ListValueField | MessageValueField | SimpleValueField;
+
+type ListValueField = {
+	listValue: {
+		values?: Array<MessageValueField>;
+	};
+};
+
+type MessageValueField = {
+	messageValue: {
+		fields?: { [key: string]: MessageBodyField };
+	};
+};
+
+type SimpleValueField = {
+	simpleValue: string;
+};
