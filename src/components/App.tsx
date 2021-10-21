@@ -42,8 +42,9 @@ const App = () => {
 	const [schema, setSchema] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
-		const urlSchema = window.location.pathname.split('/')[1];
+		// TODO: improve detecting schema
 
+		const urlSchema = window.location.pathname.split('/')[1];
 		if (urlSchema) {
 			setSchema(urlSchema);
 		}
