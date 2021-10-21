@@ -39,6 +39,16 @@ const App = () => {
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
+	const [schema, setSchema] = React.useState<string | null>(null);
+
+	React.useEffect(() => {
+		// TODO: improve detecting schema
+
+		const urlSchema = window.location.pathname.split('/')[1];
+		if (urlSchema) {
+			setSchema(urlSchema);
+		}
+	}, [setSchema]);
 
 	const messageEditorRef = React.useRef<MessageEditorMethods>(null);
 
@@ -84,10 +94,15 @@ const App = () => {
 									messages={messageListDataStore.getCurrentMessagesArray.slice()}
 								/>
 							) : (
-								<EmbeddedEditor
-									schema='schema-qa'
-									object={store.selectedDictionaryName || ''}
-								/>
+								<>
+									{
+										schema
+											? <EmbeddedEditor
+												schema={schema}
+												object={store.selectedDictionaryName || ''}
+											/> : <div>Please provide a schema to url</div>
+									}
+								</>
 							)}
 						</div>
 					</SplitViewPane>
