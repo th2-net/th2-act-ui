@@ -112,6 +112,13 @@ const MessageHistory = (props: { messages: ParsedMessageItem[] | ActMessageItem[
 				</button>
 
 				<button
+					disabled={messageListDataStore.editMessageMode}
+					className='message-history__controls-button'
+					onClick={messageListDataStore.clearUntitledMessages}>
+					Clear Untitled
+				</button>
+
+				<button
 					disabled={messageListDataStore.getCurrentMessagesArray.length === 0}
 					className='message-history__controls-button'
 					onClick={exportFn}>

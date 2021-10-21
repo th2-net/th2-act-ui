@@ -20,7 +20,9 @@ import { observer } from 'mobx-react-lite';
 import { Draggable, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import '../styles/message-list.scss';
 import '../styles/indicator.scss';
-import { InputAdornment, TextField } from '@material-ui/core';
+import {
+	Box, InputAdornment, TextField, Typography,
+} from '@material-ui/core';
 import {
 	ParsedMessageItem,
 	ActMessageItem,
@@ -89,6 +91,18 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 						messageListDataStore.selectMessage(message.id || '');
 					}
 				}}>
+				<Box display="flex" alignItems="center">
+					<Box mr={1}>
+						<Typography>Name: </Typography>
+					</Box>
+					<TextField
+						size="small"
+						onClick={e => e.stopPropagation()}
+						value={message.name}
+						placeholder="Untitled"
+						onChange={e => messageListDataStore.renameMessage(message.id, e.target.value)}
+					/>
+				</Box>
 				<MessageEntity message={message} />
 				<b style={{ marginRight: '10px' }}>delay:</b>
 				<TextField
