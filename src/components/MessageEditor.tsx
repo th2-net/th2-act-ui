@@ -131,18 +131,30 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 		}
 	}, [messageSchema]);
 
-	const onValueChange: ControlledEditorOnChange = (event, value) => {
-		if (messageListDataStore.editMessageMode) {
-			messageListDataStore.setEditorCode(value || '{}');
-		} else {
-			setCode(value || '{}');
-		}
-
+	const validate = React.useCallback((value: string) => {
 		try {
-			JSON.parse(value ?? '');
+			JSON.parse(value);
 			setIsValid(true);
 		} catch (_) {
 			setIsValid(false);
+		}
+	}, [setIsValid]);
+
+	React.useEffect(() => {
+		if (messageListDataStore.editMessageMode) {
+			validate(messageListDataStore.editorCode);
+		} else {
+			validate(code);
+		}
+	}, [code, validate, messageListDataStore.editMessageMode, messageListDataStore.editorCode]);
+
+	const onValueChange: ControlledEditorOnChange = (event, value) => {
+		const newValue = value || '{}';
+
+		if (messageListDataStore.editMessageMode) {
+			messageListDataStore.setEditorCode(newValue);
+		} else {
+			setCode(newValue);
 		}
 	};
 

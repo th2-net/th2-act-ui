@@ -65,7 +65,8 @@ export interface ActSendingResponse {
 	responseMessage: string;
 }
 
-export interface MessageItem{
+export interface MessageItem {
+	name?: string;
 	message: object | string;
 	delay: number;
 	id: string;
