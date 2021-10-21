@@ -60,6 +60,7 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 			// TODO: this is temporary hot fix, needs to be fixed
 			if (typeof obj === 'object' && obj !== null && 'eventId' in obj) {
 				eventId = (obj as ActSendingResponse | ParsedMessageSendingResponse).eventId;
+				const session = (obj as ParsedMessageSendingResponse).session;
 				workspaceState =					eventId && typeof eventId === 'string'
 					? [
 						{
@@ -95,6 +96,9 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 								flattenedListView: false,
 							},
 							layout: [50, 50],
+							messages: {
+								streams: session ? [session] : [],
+							},
 						},
 						  ]
 					: [];
@@ -109,13 +113,14 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 		}
 	};
 
-	const { content } = parseContent();
+	const { link, content } = parseContent();
 
-	return (
+	return <div>
+		{link && <div className='result-link' title={link}><a href={link}>{link}</a></div>}
 		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
 			<ResultMonacoEditor value={content}></ResultMonacoEditor>
 		</div>
-	);
+	</div>;
 };
 
 export default Result;
