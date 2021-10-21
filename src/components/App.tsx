@@ -40,6 +40,7 @@ const App = () => {
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [response, setResponse] = React.useState<MessageSendingResponse | null>(null);
 	const [schema, setSchema] = React.useState<string | null>(null);
+	const [isCodeValid, setIsCodeValid] = React.useState(false);
 
 	React.useEffect(() => {
 		// TODO: improve detecting schema
@@ -72,6 +73,7 @@ const App = () => {
 				<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
 					<SplitViewPane>
 						<MessageEditor
+							setIsValid={setIsCodeValid}
 							messageSchema={store.selectedSchema}
 							ref={messageEditorRef}
 						/>
@@ -115,7 +117,7 @@ const App = () => {
 								? messageListDataStore.saveEditedMessage
 								: sendMessage
 						}
-						disabled={!store.isSendingAllowed}>
+						disabled={!store.isSendingAllowed || !isCodeValid}>
 						<span>
 							{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}
 						</span>

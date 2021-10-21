@@ -34,6 +34,7 @@ import { useStore } from '../hooks/useStore';
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
+	setIsValid: (isValid: boolean) => void;
 }
 
 export interface MessageEditorMethods {
@@ -42,7 +43,7 @@ export interface MessageEditorMethods {
 
 const DEFAULT_EDITOR_HEIGHT = 700;
 
-const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
+const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const store = useStore();
 	const messageListDataStore = store.messageListDataStore;
 
@@ -135,6 +136,13 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 			messageListDataStore.setEditorCode(value || '{}');
 		} else {
 			setCode(value || '{}');
+		}
+
+		try {
+			JSON.parse(value ?? '');
+			setIsValid(true);
+		} catch (_) {
+			setIsValid(false);
 		}
 	};
 
