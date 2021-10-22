@@ -34,6 +34,7 @@ import { useStore } from '../hooks/useStore';
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
+	setIsValid: (isValid: boolean) => void;
 }
 
 export interface MessageEditorMethods {
@@ -42,7 +43,7 @@ export interface MessageEditorMethods {
 
 const DEFAULT_EDITOR_HEIGHT = 700;
 
-const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
+const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const store = useStore();
 	const messageListDataStore = store.messageListDataStore;
 
@@ -130,11 +131,30 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 		}
 	}, [messageSchema]);
 
-	const onValueChange: ControlledEditorOnChange = (event, value) => {
+	const validate = React.useCallback((value: string) => {
+		try {
+			JSON.parse(value);
+			setIsValid(true);
+		} catch (_) {
+			setIsValid(false);
+		}
+	}, [setIsValid]);
+
+	React.useEffect(() => {
 		if (messageListDataStore.editMessageMode) {
-			messageListDataStore.setEditorCode(value || '{}');
+			validate(messageListDataStore.editorCode);
 		} else {
-			setCode(value || '{}');
+			validate(code);
+		}
+	}, [code, validate, messageListDataStore.editMessageMode, messageListDataStore.editorCode]);
+
+	const onValueChange: ControlledEditorOnChange = (event, value) => {
+		const newValue = value || '{}';
+
+		if (messageListDataStore.editMessageMode) {
+			messageListDataStore.setEditorCode(newValue);
+		} else {
+			setCode(newValue);
 		}
 	};
 

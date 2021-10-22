@@ -73,6 +73,7 @@ export interface MessageItem {
 }
 
 export type ReplayMessage = Omit<MessageItem, 'message'> & {
+	name?: string;
 	sessionId: string;
 	dictionary: string;
 	messageType: string;

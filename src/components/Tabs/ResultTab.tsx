@@ -116,9 +116,13 @@ const ResultTab = ({ response }: { response: MessageSendingResponse | null }) =>
 	const { link, content } = parseContent();
 
 	return <div>
-		{link && <div className='result-link' title={link}><a href={link}>{link}</a></div>}
+		{link && (
+			<div className='result-link' title={link}>
+				<a href={link} target="_blank" rel="noreferrer">{link}</a>
+			</div>
+		)}
 		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
-			<ResultMonacoEditor value={content}></ResultMonacoEditor>
+			<ResultMonacoEditor value={content} />
 		</div>
 	</div>;
 };
