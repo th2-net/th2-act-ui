@@ -98,7 +98,7 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 						onClick={e => e.stopPropagation()}
 						value={message.name}
 						placeholder="Untitled"
-						onChange={e => messageListDataStore.renameMessage(message.id, e.target.value)}
+						onChange={e => messageListDataStore.renameReplayMessage(message.id, e.target.value)}
 					/>
 				</Box>
 				<MessageEntity message={message} />

@@ -271,22 +271,13 @@ export default class MessageListDataStore {
 			: this.actMessagesHistory;
 	}
 
-	@action renameMessage = (messageId: string, newName: string) => {
-		if (this.store.selectedSchemaType === 'parsed-message') {
-			this.parsedMessagesHistory = this.parsedMessagesHistory.map(message =>
-				(message.id === messageId ? { ...message, name: newName } : message));
-		} else if (this.store.selectedSchemaType === 'act') {
-			this.actMessagesHistory = this.actMessagesHistory.map(message =>
-				(message.id === messageId ? { ...message, name: newName } : message));
-		}
+	@action renameReplayMessage = (messageId: string, newName: string) => {
+		this.replayList = this.replayList.map(message =>
+			(message.id === messageId ? { ...message, name: newName } : message));
 	};
 
 	@action clearUntitledMessages = () => {
-		if (this.store.selectedSchemaType === 'parsed-message') {
-			this.parsedMessagesHistory = this.parsedMessagesHistory.filter(({ name }) => !!name);
-		} else if (this.store.selectedSchemaType === 'act') {
-			this.actMessagesHistory = this.actMessagesHistory.filter(({ name }) => !!name);
-		}
+		this.replayList = this.replayList.filter(message => !!message.name);
 	};
 
 	constructor(private store: Store) {

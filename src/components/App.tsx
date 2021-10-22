@@ -101,10 +101,12 @@ const App = () => {
 								) : currentTab === 2 ? (
 									<ReplayTab messages={messageListDataStore.replayList} />
 								) : (
-									<EmbeddedEditorTab
-										schema='schema-qa'
-										object={store.selectedDictionaryName || ''}
-									/>
+									<>
+										{schema ? (<EmbeddedEditorTab
+											schema='schema-qa'
+											object={store.selectedDictionaryName || ''}
+										/>) : <div>Please provide a schema to url</div>}
+									</>
 								)}
 							</div>
 						</SplitViewPane>
@@ -117,7 +119,7 @@ const App = () => {
 									? messageListDataStore.saveEditedMessage
 									: sendMessage
 							}
-							disabled={!store.isSendingAllowed}>
+							disabled={!store.isSendingAllowed || !isCodeValid}>
 							<span>
 								{messageListDataStore.editMessageMode ? 'Save' : 'Send Message'}
 							</span>
