@@ -1,6 +1,6 @@
 import React from 'react';
 import { Draggable, DraggableProvided, DraggableStateSnapshot, DroppableProvided } from 'react-beautiful-dnd';
-import { IconButton, TableBody, TableCell, TableRow, TextField } from '@mui/material';
+import { IconButton, InputAdornment, TableBody, TableCell, TableRow, TextField } from '@mui/material';
 import { DeleteOutline, Edit, ReorderRounded } from '@mui/icons-material';
 import { blue, green, red, yellow } from '@mui/material/colors';
 import { observer } from 'mobx-react-lite';
@@ -73,7 +73,10 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 									size='small'
 									type='number'
 									variant='standard'
-									sx={{ minWidth: 60 }}
+									sx={{ minWidth: 90 }}
+									InputProps={{
+										endAdornment: <InputAdornment position='end'>ms</InputAdornment>,
+									}}
 								/>
 							</TableCell>
 							<TableCell sx={{ color: colors[replayItem.status] }}>
