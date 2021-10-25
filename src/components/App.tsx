@@ -136,7 +136,6 @@ const App = () => {
 						</SplitViewPane>
 					</SplitView>
 					<div className='app__buttons'>
-						{/* TODO: validate message code */}
 						<Button
 							variant='contained'
 							endIcon={
