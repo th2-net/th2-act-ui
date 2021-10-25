@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import React from 'react';
-import MessageWorker from '../workers/MessageWorker';
+import MessageWorker from '../stores/MessageWorker';
 
 export const MessageWorkerContext = React.createContext<MessageWorker | null>(null);
 

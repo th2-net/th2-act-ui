@@ -34,7 +34,7 @@ import useMessagesStore from '../hooks/useMessagesStore';
 import useEditorStore from '../hooks/useEditorStore';
 import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
 import ReplayView from './replay/ReplayView';
-import MessageWorker from '../workers/MessageWorker';
+import MessageWorker from '../stores/MessageWorker';
 import MessageWorkerProvider from '../contexts/messageWorkerContext';
 import HistoryView from './history/HistoryView';
 

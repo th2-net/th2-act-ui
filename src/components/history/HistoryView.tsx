@@ -23,7 +23,7 @@ import { nanoid } from 'nanoid';
 import { EventMessage } from '../../models/Message';
 import { useRootStore } from '../../hooks/useRootStore';
 import useMessageWorker from '../../hooks/useMessageWorker';
-import { IncomingMessageActions } from '../../workers/MessageWorker';
+import { IncomingMessageActions } from '../../stores/MessageWorker';
 
 const rangeInMinutes = 30;
 

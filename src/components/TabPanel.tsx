@@ -7,11 +7,12 @@ type Props = {
 	children: React.ReactNode;
 };
 
-const TabPanel = ({ currentTab, tabIndex, children }: Props) =>
-	currentTab === tabIndex ? (
-		<Box sx={{ height: '100%', bgcolor: 'white', borderRadius: 1, borderTopLeftRadius: 0, overflow: 'hidden' }}>
-			{children}
-		</Box>
-	) : null;
+const TabPanel = ({ currentTab, tabIndex, children }: Props) => (
+	<Box
+		sx={{ height: '100%', bgcolor: 'white', borderRadius: 1, borderTopLeftRadius: 0, overflow: 'hidden' }}
+		hidden={currentTab !== tabIndex}>
+		{children}
+	</Box>
+);
 
 export default TabPanel;
