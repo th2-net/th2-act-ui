@@ -47,6 +47,7 @@ const App = () => {
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [schema, setSchema] = React.useState<string | null>(null);
+	const [isCodeValid, setIsCodeValid] = React.useState(false);
 
 	React.useEffect(() => {
 		// TODO: improve detecting schema
@@ -92,6 +93,7 @@ const App = () => {
 					<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
 						<SplitViewPane>
 							<MessageEditor
+								setIsValid={setIsCodeValid}
 								messageSchema={editorStore.currentOptionsStore.schema}
 								ref={messageEditorRef}
 							/>
@@ -147,7 +149,7 @@ const App = () => {
 								)
 							}
 							onClick={historyStore.editMessageMode ? historyStore.saveEditedMessage : sendMessage}
-							disabled={!editorStore.currentOptionsStore.allOptionsSelected}>
+							disabled={!editorStore.currentOptionsStore.allOptionsSelected || !isCodeValid}>
 							{historyStore.editMessageMode ? 'Save' : 'Send Message'}
 						</Button>
 					</div>

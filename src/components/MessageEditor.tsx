@@ -29,6 +29,7 @@ import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
+	setIsValid: (isValid: boolean) => void;
 }
 
 export interface MessageEditorMethods {
@@ -37,7 +38,7 @@ export interface MessageEditorMethods {
 
 const DEFAULT_EDITOR_HEIGHT = 700;
 
-const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
+const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const historyStore = useMessageHistoryStore();
 
 	const monacoRef = React.useRef<Monaco>();
@@ -123,6 +124,26 @@ const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMet
 			});
 		}
 	}, [messageSchema]);
+
+	const validate = React.useCallback(
+		(value: string) => {
+			try {
+				JSON.parse(value);
+				setIsValid(true);
+			} catch (_) {
+				setIsValid(false);
+			}
+		},
+		[setIsValid],
+	);
+
+	React.useEffect(() => {
+		if (historyStore.editMessageMode) {
+			validate(historyStore.editedMessageCode);
+		} else {
+			validate(code);
+		}
+	}, [code, validate, historyStore.editMessageMode, historyStore.editedMessageCode]);
 
 	const onValueChange: ControlledEditorOnChange = (event, value) => {
 		if (historyStore.editMessageMode) {
