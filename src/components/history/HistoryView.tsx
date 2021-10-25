@@ -25,10 +25,12 @@ import { useRootStore } from '../../hooks/useRootStore';
 import useMessageWorker from '../../hooks/useMessageWorker';
 import { IncomingMessageActions } from '../../workers/MessageWorker';
 
+const rangeInMinutes = 30;
+
 const HistoryTab = () => {
 	const { messagesStores, editorStore } = useRootStore();
 	const replayStore = messagesStores.parsedMessage.historyStore;
-	const { selectedSession, selectedDictionary, selectedMessageType } = editorStore.options.parsedMessage;
+	const { selectedSession, selectedDictionary } = editorStore.options.parsedMessage;
 	const messageWorker = useMessageWorker();
 
 	React.useEffect(() => {
@@ -50,17 +52,13 @@ const HistoryTab = () => {
 	}, []);
 
 	const url = React.useMemo(() => {
+		const timestampFrom = new Date();
+		timestampFrom.setMinutes(timestampFrom.getMinutes() - rangeInMinutes);
+
 		const messageStoreState = {
-			timestampFrom: null,
+			timestampFrom: +timestampFrom,
 			timestampTo: Date.now(),
 			streams: [selectedSession],
-			sse: {
-				type: {
-					hint: '',
-					type: 'string[]',
-					values: selectedMessageType ? [selectedMessageType] : [],
-				},
-			},
 		};
 
 		const messageStoreStateString = new URLSearchParams({
@@ -78,7 +76,7 @@ const HistoryTab = () => {
 			`${!isDev ? 'report-viewer' : ''}` +
 			`/?viewMode=embeddedMessages&${messageStoreStateString}`
 		);
-	}, [selectedMessageType, selectedSession]);
+	}, [selectedSession]);
 
 	if (!selectedSession) return null;
 
