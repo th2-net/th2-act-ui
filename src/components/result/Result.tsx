@@ -15,19 +15,21 @@
  ***************************************************************************** */
 
 import React from 'react';
-import {
-	ActSendingResponse,
-	MessageSendingResponse,
-	ParsedMessageSendingResponse,
-} from '../models/Message';
-import '../styles/result.scss';
-import ResultMonacoEditor from './ResultMonacoEditor';
+import { Box, Link, Typography } from '@mui/material';
+import { grey } from '@mui/material/colors';
+import { ActSendingResponse, MessageSendingResponse, ParsedMessageSendingResponse } from '../../models/Message';
+import '../../styles/result.scss';
+import ResultMonacoEditor from '../ResultMonacoEditor';
 
 const isDev = process.env.NODE_ENV === 'development';
 
 const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 	if (!response) {
-		return <div className='result' />;
+		return (
+			<div className='result'>
+				<Typography sx={{ pt: 1, pl: 2, color: grey[700] }}>No data to display</Typography>
+			</div>
+		);
 	}
 
 	const { code, message } = response;
@@ -61,52 +63,51 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 			if (typeof obj === 'object' && obj !== null && 'eventId' in obj) {
 				eventId = (obj as ActSendingResponse | ParsedMessageSendingResponse).eventId;
 				const session = (obj as ParsedMessageSendingResponse).session;
-				workspaceState =					eventId && typeof eventId === 'string'
-					? [
-						{
-							events: {
-								filter: {
-									attachedMessageId: {
-										type: 'string',
-										negative: false,
-										values: '',
+				workspaceState =
+					eventId && typeof eventId === 'string'
+						? [
+								{
+									events: {
+										filter: {
+											attachedMessageId: {
+												type: 'string',
+												negative: false,
+												values: '',
+											},
+											type: {
+												type: 'string[]',
+												values: [],
+												negative: false,
+											},
+											name: {
+												type: 'string[]',
+												values: [],
+												negative: false,
+											},
+											body: {
+												type: 'string[]',
+												values: [],
+												negative: false,
+											},
+											status: {
+												type: 'switcher',
+												values: 'any',
+											},
+										},
+										panelArea: 50,
+										selectedEventId: eventId,
+										flattenedListView: false,
 									},
-									type: {
-										type: 'string[]',
-										values: [],
-										negative: false,
-									},
-									name: {
-										type: 'string[]',
-										values: [],
-										negative: false,
-									},
-									body: {
-										type: 'string[]',
-										values: [],
-										negative: false,
-									},
-									status: {
-										type: 'switcher',
-										values: 'any',
+									layout: [50, 50],
+									messages: {
+										streams: session ? [session] : [],
 									},
 								},
-								panelArea: 50,
-								selectedEventId: eventId,
-								flattenedListView: false,
-							},
-							layout: [50, 50],
-							messages: {
-								streams: session ? [session] : [],
-							},
-						},
 						  ]
-					: [];
+						: [];
 			}
 
-			const url = eventId
-				? `${rootLink}/?workspaces=${window.btoa(JSON.stringify(workspaceState))}`
-				: null;
+			const url = eventId ? `${rootLink}/?workspaces=${window.btoa(JSON.stringify(workspaceState))}` : null;
 			return url;
 		} catch (error) {
 			return null;
@@ -115,16 +116,28 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 
 	const { link, content } = parseContent();
 
-	return <div>
-		{link && (
-			<div className='result-link' title={link}>
-				<a href={link} target="_blank" rel="noreferrer">{link}</a>
+	return (
+		<Box overflow='hidden'>
+			{link && (
+				<Link
+					href={link}
+					target='_blank'
+					sx={{
+						display: 'block',
+						width: '100%',
+						p: 3,
+						whiteSpace: 'nowrap',
+						overflow: 'hidden',
+						textOverflow: 'ellipsis',
+					}}>
+					{link}
+				</Link>
+			)}
+			<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
+				<ResultMonacoEditor value={content} />
 			</div>
-		)}
-		<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
-			<ResultMonacoEditor value={content} />
-		</div>
-	</div>;
+		</Box>
+	);
 };
 
 export default Result;

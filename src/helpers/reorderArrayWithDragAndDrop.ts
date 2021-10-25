@@ -19,7 +19,7 @@ export const reorderArray = (
 	destinationIndex: number,
 	sourceIndex: number,
 	draggableMessage: any,
-	sourceArray: {array: any[]},
+	sourceArray: { array: any[] },
 ) => {
 	const arrayCopy = sourceArray.array.slice();
 	arrayCopy.splice(sourceIndex, 1);

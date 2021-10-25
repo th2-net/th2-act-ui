@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /** ****************************************************************************
  * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
@@ -15,31 +14,22 @@
  * limitations under the License.
  ***************************************************************************** */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import {
-	Droppable, DroppableProvided, DropResult, DragDropContext,
-} from 'react-beautiful-dnd';
-import { nanoid } from 'nanoid';
-import { useStore } from '../hooks/useStore';
+import { Droppable, DroppableProvided, DropResult, DragDropContext } from 'react-beautiful-dnd';
 import '../styles/message-list.scss';
 import '../styles/splitter.scss';
 import { reorderArray } from '../helpers/reorderArrayWithDragAndDrop';
-import { ParsedMessageItem, ActMessageItem } from '../models/Message';
-import DraggableMessageItem from './MessageItem';
+import DraggableMessageList from './DraggableMessageList';
+import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
 
-export type Indicator =
-	| 'indicator_unvisible'
-	| 'indicator_edited'
-	| 'indicator_successful'
-	| 'indicator_unsuccessful';
-
-const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }) => {
-	const store = useStore();
-	const messageListDataStore = store.messageListDataStore;
+const MessageList = () => {
+	const historyStore = useMessageHistoryStore();
 
 	const dragEndHandler = (result: DropResult) => {
-		messageListDataStore.clearIndicators();
+		historyStore.resetStatuses();
 		const { destination, source } = result;
 		if (!destination) {
 			return;
@@ -47,8 +37,9 @@ const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }
 		if (destination.droppableId === source.droppableId && destination.index === source.index) {
 			return;
 		}
-		const array = messageListDataStore.getCurrentMessagesArray;
-		reorderArray(destination.index, source.index, array[source.index], { array });
+		reorderArray(destination.index, source.index, historyStore.replayList[source.index], {
+			array: historyStore.replayList,
+		});
 	};
 
 	return (
@@ -57,18 +48,7 @@ const MessageList = (props: { messages: ParsedMessageItem[] | ActMessageItem[] }
 				<Droppable droppableId='droppableId'>
 					{(provided: DroppableProvided) => (
 						<ul {...provided.droppableProps} ref={provided.innerRef}>
-							{(
-								(props.messages as ParsedMessageItem[])
-								|| (props.messages as ActMessageItem[])
-							).map((item: ParsedMessageItem | ActMessageItem, index: number) => (
-								<DraggableMessageItem
-									key={item.id}
-									keyId={item.id || nanoid()}
-									index={index}
-									message={item}
-									editMessageMode={messageListDataStore.editMessageMode}
-								/>
-							))}
+							<DraggableMessageList />
 							{provided.placeholder}
 						</ul>
 					)}

@@ -15,14 +15,17 @@
  ***************************************************************************** */
 
 import React from 'react';
-import RootStoreContext from '../contexts/storeContext';
+import MessageWorker from '../workers/MessageWorker';
 
-export const useStore = () => {
-	const store = React.useContext(RootStoreContext);
+export const MessageWorkerContext = React.createContext<MessageWorker | null>(null);
 
-	if (!store) {
-		throw new Error('useRootStore should be used inside of RootStoreContextProvider');
-	}
-
-	return store;
+type MessageWorkerProviderProps = {
+	value: MessageWorker;
+	children: React.ReactNode;
 };
+
+const MessageWorkerProvider = ({ value, children }: MessageWorkerProviderProps) => (
+	<MessageWorkerContext.Provider value={value}>{children}</MessageWorkerContext.Provider>
+);
+
+export default MessageWorkerProvider;

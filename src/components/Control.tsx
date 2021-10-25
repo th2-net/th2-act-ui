@@ -16,87 +16,105 @@
 
 import { observer } from 'mobx-react-lite';
 import React from 'react';
-import { useStore } from '../hooks/useStore';
-import Select from './Select';
-import SplashScreen from './SplashScreen';
+import {
+	Box,
+	CircularProgress,
+	FormControlLabel,
+	InputLabel,
+	MenuItem,
+	Radio,
+	RadioGroup,
+	Select,
+	Typography,
+} from '@mui/material';
+import { useRootStore } from '../hooks/useRootStore';
+import useEditorStore from '../hooks/useEditorStore';
+import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
 
-export type SchemaType = 'parsed-message' | 'raw-message' | 'act';
+export type SchemaType = 'parsedMessage' | 'act';
 
 const Control = () => {
-	const store = useStore();
-	const messageListDataStore = store.messageListDataStore;
+	const store = useRootStore();
+	const { options } = useEditorStore();
+	const { editMessageMode } = useMessageHistoryStore();
 
 	const controlConfigs = [
 		{
-			name: 'parsed-message',
+			name: 'parsedMessage',
+			label: 'Parsed Message',
 			selects: [
 				{
 					label: 'Session',
 					id: 'session',
-					options: store.sessions.slice().sort(),
-					selected: store.selectedSession || '',
-					disabled: store.isSessionsLoading,
-					valid: store.isSchemaApplied ? !!store.selectedSession : true,
-					onChange: (opt: string) => (store.selectedSession = opt),
+					options: options.parsedMessage.sessions,
+					selected: options.parsedMessage.selectedSession || '',
+					disabled: options.parsedMessage.isSessionsLoading,
+					onChange: options.parsedMessage.selectSession,
+					isLoading: options.parsedMessage.isSessionsLoading,
 				},
 				{
 					label: 'Dictionary',
 					id: 'dictionary',
-					options: store.dictionaries.slice().sort(),
-					selected: store.selectedDictionaryName || '',
-					disabled: store.isSessionsLoading || store.isDictionariesLoading
-					|| messageListDataStore.editMessageMode,
-					valid: store.isSchemaApplied ? !!store.selectedDictionaryName : true,
-					onChange: (opt: string) => (store.selectedDictionaryName = opt),
+					options: options.parsedMessage.dictionaries,
+					selected: options.parsedMessage.selectedDictionary || '',
+					disabled:
+						options.parsedMessage.isSessionsLoading ||
+						options.parsedMessage.isDictionariesLoading ||
+						editMessageMode,
+					onChange: options.parsedMessage.selectDictionary,
+					isLoading: options.parsedMessage.isDictionariesLoading,
 				},
 				{
 					label: 'Msg Type',
 					id: 'msg-type',
-					options: store.dictionary.slice().sort(),
-					selected: store.selectedMessageType || '',
+					options: options.parsedMessage.messageTypes,
+					selected: options.parsedMessage.selectedMessageType || '',
 					disabled:
-						store.isSessionsLoading
-						|| store.isDictionariesLoading
-						|| store.isDictionaryLoading || messageListDataStore.editMessageMode,
-					valid: store.isSchemaApplied ? !!store.selectedMessageType : true,
-					onChange: (opt: string) => (store.selectedMessageType = opt),
+						options.parsedMessage.isSessionsLoading ||
+						options.parsedMessage.isDictionariesLoading ||
+						options.parsedMessage.isMessageTypesLoading ||
+						editMessageMode,
+					onChange: options.parsedMessage.selectMessageType,
+					isLoading: options.parsedMessage.isMessageTypesLoading,
 				},
 			],
 		},
 		{
 			name: 'act',
+			label: 'Act',
 			selects: [
 				{
 					label: 'Act',
 					id: 'act',
-					options: store.acts.slice().sort(),
-					selected: store.selectedActBox || '',
-					disabled: store.isActsLoading,
-					valid: store.isSchemaApplied ? !!store.selectedActBox : true,
-					onChange: (opt: string) => (store.selectedActBox = opt),
+					options: options.act.acts,
+					selected: options.act.selectedAct || '',
+					disabled: options.act.isActsLoading,
+					onChange: options.act.selectAct,
+					isLoading: options.act.isActsLoading,
 				},
 				{
 					label: 'Service',
 					id: 'service',
-					options: store.services.slice().sort(),
-					selected: store.selectedService || '',
-					disabled: store.isActsLoading || store.isServicesLoading
-					|| messageListDataStore.editMessageMode,
-					valid: store.isSchemaApplied ? !!store.selectedService : true,
-					onChange: (opt: string) => (store.selectedService = opt),
+					options: options.act.services,
+					selected: options.act.selectedService || '',
+					disabled: options.act.isActsLoading || options.act.isServicesLoading || editMessageMode,
+					onChange: options.act.selectService,
+					isLoading: options.act.isServicesLoading,
 				},
 				{
 					label: 'Method',
 					id: 'method',
-					options: store.serviceDetails
-						? store.serviceDetails.methods.map(method => method.methodName).slice().sort()
+					options: options.act.serviceDetails
+						? options.act.serviceDetails.methods.map(method => method.methodName)
 						: [],
-					selected: store.selectedMethod?.methodName || '',
+					selected: options.act.selectedMethod?.methodName || '',
 					disabled:
-						store.isActsLoading || store.isServicesLoading || store.isMethodsLoading
-						|| messageListDataStore.editMessageMode,
-					valid: store.isSchemaApplied ? !!store.selectedMethod : true,
-					onChange: (methodName: string) => store.setSelectedMethod(methodName),
+						options.act.isActsLoading ||
+						options.act.isServicesLoading ||
+						options.act.isServiceDetailsLoading ||
+						editMessageMode,
+					onChange: options.act.selectMethod,
+					isLoading: options.act.isServiceDetailsLoading,
 				},
 			],
 		},
@@ -104,42 +122,53 @@ const Control = () => {
 
 	return (
 		<>
-			<div key='mode' className='app__row'>
-				<h3 className='app__title'>Send as</h3>
-				{controlConfigs.map(config => (
-					<label key={config.name} htmlFor={config.name}>
-						<input
-							type='radio'
+			<Box display='flex' alignItems='center'>
+				<Box mr={2}>
+					<Typography>Send as</Typography>
+				</Box>
+				<RadioGroup
+					row
+					value={store.schemaType}
+					onChange={e => store.setSchemaType(e.target.value as SchemaType)}>
+					{controlConfigs.map(config => (
+						<FormControlLabel
 							value={config.name}
-							id={config.name}
-							checked={config.name === store.selectedSchemaType}
-							onChange={e =>
-								store.setSelectedSchemaType(e.target.value as SchemaType)
-							}
-							name='message-type'
+							control={<Radio color='primary' />}
+							label={config.label}
+							key={config.name}
 						/>
-						{config.name
-							.split('-')
-							.map(part => part.charAt(0).toUpperCase() + part.slice(1))
-							.join(' ')}
-					</label>
-				))}
-			</div>
+					))}
+				</RadioGroup>
+			</Box>
 			<div key='parameters' className='app__row app__controls'>
-				{
-					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-					controlConfigs
-						.find(config => config.name === store.selectedSchemaType)!
-						.selects.map(props => (
-							<React.Fragment key={props.id}>
-								<Select {...props} />
-								{(props.disabled && !messageListDataStore.editMessageMode)
-								&& <SplashScreen key='splash' />}
-							</React.Fragment>
-						))
-				}
-
-				{store.isSchemaLoading && <SplashScreen />}
+				<Box display='flex' gap={2} alignItems='center'>
+					{
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						controlConfigs
+							.find(config => config.name === store.schemaType)!
+							.selects.map(props => (
+								<React.Fragment key={props.id}>
+									<InputLabel htmlFor={props.id}>{props.label}</InputLabel>
+									<Select
+										id={props.id}
+										sx={{ minWidth: 100, height: 30 }}
+										autoComplete='true'
+										onChange={event => props.onChange(event.target.value)}
+										// error={!props.valid}
+										disabled={props.disabled}
+										value={props.selected}
+										defaultValue={props.selected}>
+										{props.options.map((opt, index) => (
+											<MenuItem key={index} value={opt}>
+												{opt}
+											</MenuItem>
+										))}
+									</Select>
+									{props.isLoading && <CircularProgress size={14} />}
+								</React.Fragment>
+							))
+					}
+				</Box>
 			</div>
 		</>
 	);

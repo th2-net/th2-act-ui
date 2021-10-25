@@ -17,9 +17,15 @@
 import React from 'react';
 import '../styles/embedded-editor.scss';
 
-export const EmbeddedEditor = (props: { schema: string; object: string }) => {
-	const url = `/editor2/?schema=${props.schema}&${
-		props.object && `object=${props.object}`
-	}&editorMode=dictionaryEditor&embedded=true`;
-	return <iframe className='embedded-editor' src={url}></iframe>;
+type Props = {
+	schema: string;
+	object: string;
+};
+// TODO: take a schema from url
+export const EmbeddedEditor = ({ schema, object }: Props) => {
+	const searchParams = React.useMemo(
+		() => new URLSearchParams({ schema, object, editorMode: 'dictionaryEditor', embedded: 'true' }),
+		[schema, object],
+	);
+	return <iframe className='embedded-editor' src={`/editor2/?${searchParams}`} />;
 };

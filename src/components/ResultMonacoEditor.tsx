@@ -39,7 +39,8 @@ const ResultMonacoEditor = (props: { value: string }) => {
 				readOnly: true,
 				lineNumbers: 'off',
 				wordWrap: 'on',
-			}}></Editor>
+			}}
+		/>
 	);
 };
 

@@ -15,14 +15,10 @@
  ***************************************************************************** */
 
 import React from 'react';
-import RootStoreContext, { createRootStore } from '../contexts/storeContext';
+import RootStoreContext, { createRootStore } from '../contexts/rootStoreContext';
 
 function RootStoreProvider({ children }: React.PropsWithChildren<{}>) {
-	return (
-		<RootStoreContext.Provider value={createRootStore()}>
-			{children}
-		</RootStoreContext.Provider>
-	);
+	return <RootStoreContext.Provider value={createRootStore()}>{children}</RootStoreContext.Provider>;
 }
 
 export default RootStoreProvider;

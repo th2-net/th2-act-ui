@@ -1,5 +1,5 @@
 /** ****************************************************************************
- * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,26 @@
  * limitations under the License.
  ***************************************************************************** */
 
-.embedded-editor{
-    width: 100%;
-	height: 100%;
-    border: none;
-}
+import React from 'react';
+import { observer } from 'mobx-react-lite';
+import { ActReplayItem, ReplayItem, ParsedMessageReplayItem } from '../models/Message';
+import DraggableMessageItem from './MessageItem';
+import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
+
+const DraggableMessageList = () => {
+	const historyStore = useMessageHistoryStore();
+
+	return (
+		<>
+			{(historyStore.replayList as ReplayItem[]).map((item, index: number) => (
+				<DraggableMessageItem
+					key={item.id}
+					index={index}
+					message={item as ParsedMessageReplayItem | ActReplayItem}
+				/>
+			))}
+		</>
+	);
+};
+
+export default observer(DraggableMessageList);

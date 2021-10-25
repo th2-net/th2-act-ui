@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /** ****************************************************************************
  * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
@@ -15,72 +14,53 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import React, { useState } from 'react';
+import { InputAdornment, TextField } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import { Draggable, DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
-import '../styles/message-list.scss';
-import '../styles/indicator.scss';
-import {
-	Box, InputAdornment, TextField, Typography,
-} from '@material-ui/core';
-import {
-	ParsedMessageItem,
-	ActMessageItem,
-	isParsedMessageItem,
-	isActMessageItem,
-} from '../models/Message';
-import { Indicator } from './MessageList';
-import { useStore } from '../hooks/useStore';
+import React, { useState } from 'react';
+import { useRootStore } from '../hooks/useRootStore';
+import MessageCardControls from './MessageControls';
+import MessageEntity from './MessageEntity';
+import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
+import { ActReplayItem, isActReplayItem, isParsedMessageReplayItem, ParsedMessageReplayItem } from '../models/Message';
+import useEditorStore from '../hooks/useEditorStore';
 
-interface MessageItemProps {
+type Props = {
 	index: number;
-	message: ParsedMessageItem | ActMessageItem;
-}
+	message: ActReplayItem | ParsedMessageReplayItem;
+};
 
-interface DraggableMessageItemProps extends MessageItemProps {
-	keyId: string;
-	editMessageMode: boolean;
-}
-
-const DraggableMessageItem = observer(
-	({
-		index, message, keyId, editMessageMode,
-	}: DraggableMessageItemProps) => (
-		<Draggable draggableId={keyId} index={index} key={keyId}>
-			{(prov: DraggableProvided, snapshot: DraggableStateSnapshot) => (
-				<li
-					{...prov.draggableProps}
-					ref={prov.innerRef}
-					key={keyId}
-					draggable={false}
-					className={
-						snapshot.isDragging ? 'message-list__item dragging' : 'message-list__item'
-					}>
-					<div
-						className={
-							editMessageMode
-								? 'message-list__drag-handler-container_hidden'
-								: 'message-list__drag-handler-container'
-						}>
-						<div
-							{...prov.dragHandleProps}
-							draggable={true}
-							className='message-list__drag-handler'></div>
-					</div>
-					<MessageItem index={index} message={message} />
-				</li>
-			)}
-		</Draggable>
-	),
-);
-
-const MessageItem = observer(({ index, message }: MessageItemProps) => {
+const MessageItem = observer(({ index, message }: Props) => {
+	const store = useRootStore();
+	const editorStore = useEditorStore();
+	const historyStore = useMessageHistoryStore();
 	const [delay, setDelayValue] = useState(message.delay.toString());
-	const messageListDataStore = useStore().messageListDataStore;
+
+	const selectMessage = () => {
+		historyStore.setEditedMessageId(message.id);
+		historyStore.setEditMessageMode(true);
+		historyStore.setEditedMessageCode(message.message);
+
+		if (isActReplayItem(message)) {
+			store.setSchemaType('act');
+			const { selectAct, selectService, selectMethod } = editorStore.options.act;
+
+			selectAct(message.actBox);
+			selectService(message.fullServiceName);
+			selectMethod(message.methodName);
+		} else if (isParsedMessageReplayItem(message)) {
+			store.setSchemaType('parsedMessage');
+			const { selectSession, selectDictionary, selectMessageType } = editorStore.options.parsedMessage;
+
+			selectSession(message.session);
+			selectDictionary(message.dictionary);
+			selectMessageType(message.messageType);
+		}
+	};
+
 	return (
 		<div
 			className={
-				messageListDataStore.editedMessageId === message.id
+				historyStore.editedMessageId === message.id
 					? 'message-list__message-card_edited'
 					: 'message-list__message-card'
 			}>
@@ -88,21 +68,9 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 				onClick={() => {
 					const selection = window.getSelection();
 					if (selection && selection?.toString().length === 0) {
-						messageListDataStore.selectMessage(message.id || '');
+						selectMessage();
 					}
 				}}>
-				<Box display="flex" alignItems="center">
-					<Box mr={1}>
-						<Typography>Name: </Typography>
-					</Box>
-					<TextField
-						size="small"
-						onClick={e => e.stopPropagation()}
-						value={message.name}
-						placeholder="Untitled"
-						onChange={e => messageListDataStore.renameMessage(message.id, e.target.value)}
-					/>
-				</Box>
 				<MessageEntity message={message} />
 				<b style={{ marginRight: '10px' }}>delay:</b>
 				<TextField
@@ -116,90 +84,14 @@ const MessageItem = observer(({ index, message }: MessageItemProps) => {
 					value={delay}
 					placeholder='0'
 					onChange={e => {
-						messageListDataStore.setEditedMessageSendDelay(Number(e.target.value) || 0);
-						if (!Number(e.target.value)) {
-							console.log(`includes${(e.target.value as string).replace('-', '')}`);
-							setDelayValue(e.target.value.replace('-', ''));
-						}
-						console.log(`not includes ${e.target.value}`);
-						setDelayValue(e.target.value);
+						historyStore.changeDelay(Number(e.target.value) || 0);
+						setDelayValue(historyStore.editedMessageSendDelay.toString());
 					}}
 				/>
 			</div>
-			<MessageCardControls
-				id={message.id || ''}
-				indicator={message.indicator}
-				message={message}
-				index={index}
-			/>
+			<MessageCardControls id={message.id} message={message} index={index} />
 		</div>
 	);
 });
 
-const MessageEntity = (props: { message: ParsedMessageItem | ActMessageItem }) => {
-	if (isParsedMessageItem(props.message)) {
-		return (
-			<div className='message-list__message-content'>
-				<p>
-					<b>session: </b>
-					{props.message.sessionId}
-					<b> dictionary: </b>
-					{props.message.dictionary}
-					<b> messageType: </b>
-					{props.message.messageType}
-				</p>
-			</div>
-		);
-	}
-	if (isActMessageItem(props.message)) {
-		return (
-			<div>
-				<p>
-					<b>actBox: </b>
-					{props.message.actBox}
-				</p>
-				<p>
-					<b>fullServiceName: </b>
-					{props.message.fullServiceName}
-				</p>
-				<p>
-					<b>methodName: </b>
-					{props.message.methodName}
-				</p>
-			</div>
-		);
-	}
-	return null;
-};
-
-const MessageCardControls = observer(
-	(props: {
-		id: string;
-		indicator: Indicator;
-		message: ParsedMessageItem | ActMessageItem;
-		index: number;
-	}) => {
-		const messageListDataStore = useStore().messageListDataStore;
-		return (
-			<div className='message-list__message-card-controls'>
-				<button
-					disabled={messageListDataStore.editMessageMode}
-					className='message-list__delete-message-btn'
-					onClick={() => {
-						messageListDataStore.deleteMessage(props.id);
-					}}>
-					x
-				</button>
-				<div>
-					<button
-						className={
-							messageListDataStore.getCurrentMessagesArray.slice()[props.index]
-								.indicator
-						}></button>
-				</div>
-			</div>
-		);
-	},
-);
-
-export default DraggableMessageItem;
+export default MessageItem;

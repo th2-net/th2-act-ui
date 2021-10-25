@@ -17,8 +17,8 @@
 
 import * as React from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { createStyleSelector } from '../helpers/styleCreators';
-import '../styles/splitter.scss';
+import { createStyleSelector } from '../../helpers/styleCreators';
+import '../../styles/splitter.scss';
 
 export interface Props {
 	/**
@@ -187,9 +187,7 @@ export default class SplitView extends React.Component<Props, State> {
 				const [topHeight, bottomHeight] = this.getPanelsHeightByArea(panelArea);
 				rootStyle = { gridTemplateRows: `${topHeight}px auto ${bottomHeight}px` };
 
-				const [topPreviewHeight, bottomPreviewHeight] = this.getPanelsHeightByArea(
-					previewPanelArea,
-				);
+				const [topPreviewHeight, bottomPreviewHeight] = this.getPanelsHeightByArea(previewPanelArea);
 				previewStyle = {
 					gridTemplateRows: `${topPreviewHeight}px auto ${bottomPreviewHeight}px`,
 				};

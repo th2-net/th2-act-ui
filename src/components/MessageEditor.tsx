@@ -15,26 +15,20 @@
  ***************************************************************************** */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
+
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import ResizeObserver from 'resize-observer-polyfill';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import {
-	monaco,
-	EditorDidMount,
-	ControlledEditor,
-	ControlledEditorOnChange,
-	Monaco,
-} from '@monaco-editor/react';
+import { monaco, EditorDidMount, ControlledEditor, ControlledEditorOnChange, Monaco } from '@monaco-editor/react';
 // eslint-disable-next-line import/no-unresolved
 import { Uri } from 'monaco-editor';
 import { toJS } from 'mobx';
 import { createInitialActMessage } from '../helpers/schema';
-import { useStore } from '../hooks/useStore';
+import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
-	setIsValid: (isValid: boolean) => void;
 }
 
 export interface MessageEditorMethods {
@@ -43,9 +37,8 @@ export interface MessageEditorMethods {
 
 const DEFAULT_EDITOR_HEIGHT = 700;
 
-const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<MessageEditorMethods>) => {
-	const store = useStore();
-	const messageListDataStore = store.messageListDataStore;
+const MessageEditor = ({ messageSchema }: Props, ref: React.Ref<MessageEditorMethods>) => {
+	const historyStore = useMessageHistoryStore();
 
 	const monacoRef = React.useRef<Monaco>();
 	const valueGetter = React.useRef<(() => string) | null>(null);
@@ -116,8 +109,8 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 			});
 		} else {
 			setCode('{}');
-			if (messageListDataStore.editMessageMode) {
-				messageListDataStore.setEditorCode('{}');
+			if (historyStore.editMessageMode) {
+				historyStore.setEditedMessageCode('{}');
 			}
 			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 				validate: true,
@@ -131,37 +124,18 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 		}
 	}, [messageSchema]);
 
-	const validate = React.useCallback((value: string) => {
-		try {
-			JSON.parse(value);
-			setIsValid(true);
-		} catch (_) {
-			setIsValid(false);
-		}
-	}, [setIsValid]);
-
-	React.useEffect(() => {
-		if (messageListDataStore.editMessageMode) {
-			validate(messageListDataStore.editorCode);
-		} else {
-			validate(code);
-		}
-	}, [code, validate, messageListDataStore.editMessageMode, messageListDataStore.editorCode]);
-
 	const onValueChange: ControlledEditorOnChange = (event, value) => {
-		const newValue = value || '{}';
-
-		if (messageListDataStore.editMessageMode) {
-			messageListDataStore.setEditorCode(newValue);
+		if (historyStore.editMessageMode) {
+			historyStore.setEditedMessageCode(value || '{}');
 		} else {
-			setCode(newValue);
+			setCode(value || '{}');
 		}
 	};
 
 	const initiateSchema = (message: JSONSchema4 | JSONSchema7) => {
 		const initialSchema = createInitialActMessage(message) || '{}';
 		setCode(initialSchema);
-		store.setIsSchemaApplied(true);
+		// setIsSchemaApplied(true);
 	};
 
 	React.useImperativeHandle(
@@ -185,9 +159,7 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 			<ControlledEditor
 				height={editorHeight}
 				language='json'
-				value={
-					messageListDataStore.editMessageMode ? messageListDataStore.editorCode : code
-				}
+				value={historyStore.editMessageMode ? historyStore.editedMessageCode : code}
 				onChange={onValueChange}
 				editorDidMount={handleEditorDidMount}
 			/>
