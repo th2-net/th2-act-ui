@@ -93,19 +93,15 @@ const App = () => {
 		}
 	};
 
-	const selectTab = (e: React.ChangeEvent<{}>, tab: number) => {
-		setCurrentTab(tab);
-	};
-
 	useEffect(() => {
 		store.init();
 	}, [store]);
 
-	useEffect(() => {
-		if (store.schemaType !== 'parsedMessage' && currentTab === 3) {
+	React.useEffect(() => {
+		if (store.schemaType === 'act') {
 			setCurrentTab(0);
 		}
-	}, [store.schemaType, currentTab]);
+	}, [store.schemaType]);
 
 	return (
 		<MessageWorkerProvider value={messageWorker}>
@@ -125,7 +121,7 @@ const App = () => {
 							<Box sx={{ height: '100%', display: 'grid', gridTemplateRows: 'auto 1fr' }}>
 								<Tabs
 									value={currentTab}
-									onChange={selectTab}
+									onChange={(_, tab) => setCurrentTab(tab)}
 									sx={{
 										bgcolor: 'white',
 										width: 'min-content',
@@ -133,22 +129,32 @@ const App = () => {
 										borderTopRightRadius: 6,
 									}}>
 									<Tab label='Result' className='app__tab' />
-									<Tab label='History' className='app__tab' />
-									<Tab label='Replay' className='app_tab' />
-									{store.schemaType === 'parsedMessage' && (
-										<Tab label='Dictionary' className='app__tab' />
-									)}
+									<Tab
+										label='History'
+										className='app__tab'
+										disabled={store.schemaType !== 'parsedMessage'}
+									/>
+									<Tab
+										label='Replay'
+										className='app__tab'
+										disabled={store.schemaType !== 'parsedMessage'}
+									/>
+									<Tab
+										label='Dictionary'
+										className='app__tab'
+										disabled={store.schemaType !== 'parsedMessage'}
+									/>
 								</Tabs>
-								<TabPanel tabIndex={0} currentTab={currentTab}>
+								<TabPanel currentTab={currentTab} tabIndex={0}>
 									<Result response={messagesStore.messageSendingResponse} />
 								</TabPanel>
-								<TabPanel tabIndex={1} currentTab={currentTab}>
+								<TabPanel currentTab={currentTab} tabIndex={1}>
 									<HistoryView />
 								</TabPanel>
-								<TabPanel tabIndex={2} currentTab={currentTab}>
+								<TabPanel currentTab={currentTab} tabIndex={2}>
 									<ReplayView />
 								</TabPanel>
-								<TabPanel tabIndex={3} currentTab={currentTab}>
+								<TabPanel currentTab={currentTab} tabIndex={3}>
 									<EmbeddedEditor
 										schema={schema}
 										object={store.editorStore.options.parsedMessage.selectedDictionary || ''}
