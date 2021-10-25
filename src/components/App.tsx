@@ -18,7 +18,7 @@ import { hot } from 'react-hot-loader/root';
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
 import { Tab, Tabs, Button, CircularProgress, Box } from '@mui/material';
-import { Send, Check } from '@mui/icons-material';
+import { Send, Check, Replay } from '@mui/icons-material';
 import { useEffect } from 'react';
 import Result from './result/Result';
 import '../styles/root.scss';
@@ -44,10 +44,32 @@ const App = () => {
 	const messagesStore = useMessagesStore();
 	const editorStore = useEditorStore();
 	const historyStore = useMessageHistoryStore();
+	const { replayList, resetStatuses } = historyStore;
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [schema, setSchema] = React.useState<string | null>(null);
 	const [isCodeValid, setIsCodeValid] = React.useState(false);
+	const [isReplaying, setIsReplaying] = React.useState(false);
+
+	const startReplay = () => {
+		if (replayList[0]) {
+			resetStatuses();
+			setIsReplaying(true);
+			replayMessageRecursive(0);
+		}
+	};
+
+	const replayMessageRecursive = (index: number) => {
+		setTimeout(() => {
+			historyStore.replayMessage(replayList[index].id).then(() => {
+				if (index < replayList.length - 1) {
+					replayMessageRecursive(index + 1);
+				} else {
+					setIsReplaying(false);
+				}
+			});
+		}, replayList[index].delay);
+	};
 
 	React.useEffect(() => {
 		// TODO: improve detecting schema
@@ -136,21 +158,30 @@ const App = () => {
 						</SplitViewPane>
 					</SplitView>
 					<div className='app__buttons'>
-						<Button
-							variant='contained'
-							endIcon={
-								messagesStore.isSending ? (
-									<CircularProgress color='inherit' size={14} />
-								) : historyStore.editMessageMode ? (
-									<Check />
-								) : (
-									<Send />
-								)
-							}
-							onClick={historyStore.editMessageMode ? historyStore.saveEditedMessage : sendMessage}
-							disabled={!editorStore.currentOptionsStore.allOptionsSelected || !isCodeValid}>
-							{historyStore.editMessageMode ? 'Save' : 'Send Message'}
-						</Button>
+						{currentTab === 2 ? (
+							<Button
+								variant='contained'
+								endIcon={isReplaying ? <CircularProgress color='inherit' size={14} /> : <Replay />}
+								onClick={() => !isReplaying && startReplay()}>
+								{isReplaying ? 'Replaying' : 'Start replay'}
+							</Button>
+						) : (
+							<Button
+								variant='contained'
+								endIcon={
+									messagesStore.isSending ? (
+										<CircularProgress color='inherit' size={14} />
+									) : historyStore.editMessageMode ? (
+										<Check />
+									) : (
+										<Send />
+									)
+								}
+								onClick={historyStore.editMessageMode ? historyStore.saveEditedMessage : sendMessage}
+								disabled={!editorStore.currentOptionsStore.allOptionsSelected || !isCodeValid}>
+								{historyStore.editMessageMode ? 'Save' : 'Send Message'}
+							</Button>
+						)}
 					</div>
 				</div>
 			</div>

@@ -98,6 +98,8 @@ export default class ActReplayStore extends ReplayStore<ActReplayItem, ActMessag
 				alert('Error while sending');
 				msg.status = 'fail';
 			}
+
+			this.replayList = [...this.replayList];
 		}
 	});
 

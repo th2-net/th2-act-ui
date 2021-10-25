@@ -106,6 +106,8 @@ export default class ParsedMessageReplayStore extends ReplayStore<ParsedMessageR
 				alert('Error while sending');
 				msg.status = 'fail';
 			}
+
+			this.replayList = [...this.replayList];
 		}
 	});
 
