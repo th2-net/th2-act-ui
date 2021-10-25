@@ -111,6 +111,7 @@ export type EventMessage = {
 	sessionId: string;
 	body: MessageBody | null;
 	bodyBase64: string | null;
+	jsonBody: string | null;
 };
 
 type MessageBody = {

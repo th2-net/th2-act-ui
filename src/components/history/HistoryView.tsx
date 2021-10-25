@@ -19,6 +19,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import '../../styles/message-history.scss';
 import '../../styles/splitter.scss';
+import { nanoid } from 'nanoid';
 import { EventMessage } from '../../models/Message';
 import { useRootStore } from '../../hooks/useRootStore';
 import useMessageWorker from '../../hooks/useMessageWorker';
@@ -31,17 +32,16 @@ const HistoryTab = () => {
 	const messageWorker = useMessageWorker();
 
 	React.useEffect(() => {
-		// TODO: fix message body
 		const addToReplay = (message: EventMessage) =>
 			replayStore.addMessage({
-				id: message.messageId,
+				id: nanoid(),
 				session: message.sessionId,
 				dictionary: selectedDictionary ?? 'unknown',
 				messageType: message.messageType,
 				delay: 0,
 				status: 'ready',
 				createdAt: +new Date(),
-				message: '',
+				message: message.jsonBody ?? '{}',
 			});
 
 		messageWorker.subscribeOnMessage(IncomingMessageActions.ReplayMessage, addToReplay);
