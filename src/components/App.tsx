@@ -158,7 +158,7 @@ const App = () => {
 						</SplitViewPane>
 					</SplitView>
 					<div className='app__buttons'>
-						{currentTab === 2 ? (
+						{currentTab === 2 && !historyStore.editMessageMode ? (
 							<Button
 								variant='contained'
 								endIcon={isReplaying ? <CircularProgress color='inherit' size={14} /> : <Replay />}

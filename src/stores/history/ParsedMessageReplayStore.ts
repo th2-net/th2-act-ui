@@ -46,24 +46,12 @@ export default class ParsedMessageReplayStore extends ReplayStore<ParsedMessageR
 		});
 
 		this.replayList = localStorageWorker.getParsedMessageHistory();
-		this.setEditMessageMode(localStorageWorker.getEditParsedMessageMode());
-		this.editedMessageId = localStorageWorker.getEditedParsedMessageId();
 
 		reaction(
 			() => this.replayList,
 			parsedMessageHistory => {
 				localStorageWorker.setParsedMessageHistory(parsedMessageHistory);
 			},
-		);
-
-		reaction(
-			() => this.editedMessageId,
-			editedMessageId => localStorageWorker.setEditedParsedMessageId(editedMessageId),
-		);
-
-		reaction(
-			() => this.editMessageMode,
-			editMessageMode => localStorageWorker.setEditParsedMessageMode(editMessageMode),
 		);
 	}
 

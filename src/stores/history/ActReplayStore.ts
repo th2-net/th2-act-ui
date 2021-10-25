@@ -38,24 +38,12 @@ export default class ActReplayStore extends ReplayStore<ActReplayItem, ActMessag
 		});
 
 		this.replayList = localStorageWorker.getActMessageHistory();
-		this.setEditMessageMode(localStorageWorker.getEditActMessageMode());
-		this.editedMessageId = localStorageWorker.getEditedActMessageId();
 
 		reaction(
 			() => this.replayList,
 			actMessagesHistory => {
 				localStorageWorker.setActMessageHistory(actMessagesHistory);
 			},
-		);
-
-		reaction(
-			() => this.editedMessageId,
-			editedMessageId => localStorageWorker.setEditedActMessageId(editedMessageId),
-		);
-
-		reaction(
-			() => this.editMessageMode,
-			editMessageMode => localStorageWorker.setEditActMessageMode(editMessageMode),
 		);
 	}
 

@@ -12,6 +12,7 @@ import {
 	ReplayStatus,
 } from '../../models/Message';
 import useMessageHistoryStore from '../../hooks/useMessageHistoryStore';
+import { useRootStore } from '../../hooks/useRootStore';
 
 type Props = {
 	droppableProvided: DroppableProvided;
@@ -25,7 +26,35 @@ const colors: Record<ReplayStatus, string> = {
 };
 
 const ReplayTableBody = ({ droppableProvided }: Props) => {
-	const { replayList, renameMessage, changeDelay, removeMessage } = useMessageHistoryStore();
+	const {
+		replayList,
+		renameMessage,
+		changeDelay,
+		removeMessage,
+		setEditedMessageId,
+		setEditMessageMode,
+		setEditedMessageCode,
+	} = useMessageHistoryStore();
+	const { editorStore } = useRootStore();
+	const { options } = editorStore;
+
+	const handleEditCodeClicked = (replayItemIndex: number) => {
+		const replayItem = replayList[replayItemIndex];
+
+		if (isActReplayItem(replayItem)) {
+			options.act.selectAct(replayItem.actBox);
+			options.act.selectService(replayItem.fullServiceName);
+			options.act.selectMethod(replayItem.methodName);
+		} else if (isParsedMessageReplayItem(replayItem)) {
+			options.parsedMessage.selectSession(replayItem.session);
+			options.parsedMessage.selectDictionary(replayItem.dictionary);
+			options.parsedMessage.selectMessageType(replayItem.messageType);
+		}
+
+		setEditedMessageId(replayItem.id);
+		setEditedMessageCode(replayItem.message);
+		setEditMessageMode(true);
+	};
 
 	return (
 		<TableBody ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
@@ -83,7 +112,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 								{replayItem.status.toUpperCase()}
 							</TableCell>
 							<TableCell sx={{ whiteSpace: 'nowrap' }}>
-								<IconButton title='Edit code'>
+								<IconButton title='Edit code' onClick={() => handleEditCodeClicked(index)}>
 									<Edit />
 								</IconButton>
 								<IconButton title='Remove' onClick={() => removeMessage(replayItem.id)}>
