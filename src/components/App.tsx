@@ -46,6 +46,16 @@ const App = () => {
 	const historyStore = useMessageHistoryStore();
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
+	const [schema, setSchema] = React.useState<string | null>(null);
+
+	React.useEffect(() => {
+		// TODO: improve detecting schema
+
+		const urlSchema = window.location.pathname.split('/')[1];
+		if (urlSchema) {
+			setSchema(urlSchema);
+		}
+	}, [setSchema]);
 
 	const messageEditorRef = React.useRef<MessageEditorMethods>(null);
 
@@ -69,7 +79,7 @@ const App = () => {
 	}, [store]);
 
 	useEffect(() => {
-		if (store.schemaType !== 'parsedMessage' && currentTab === 2) {
+		if (store.schemaType !== 'parsedMessage' && currentTab === 3) {
 			setCurrentTab(0);
 		}
 	}, [store.schemaType, currentTab]);
@@ -116,8 +126,8 @@ const App = () => {
 								</TabPanel>
 								<TabPanel tabIndex={3} currentTab={currentTab}>
 									<EmbeddedEditor
-										schema='schema-qa'
-										object={store.editorStore.options.parsedMessage.selectedMessageType || ''}
+										schema={schema}
+										object={store.editorStore.options.parsedMessage.selectedDictionary || ''}
 									/>
 								</TabPanel>
 							</Box>

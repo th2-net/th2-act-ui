@@ -16,16 +16,20 @@
 
 import React from 'react';
 import '../styles/embedded-editor.scss';
+import { grey } from '@mui/material/colors';
+import { Box } from '@mui/material';
 
 type Props = {
-	schema: string;
-	object: string;
+	schema: string | null;
+	object: string | null;
 };
-// TODO: take a schema from url
+
 export const EmbeddedEditor = ({ schema, object }: Props) => {
-	const searchParams = React.useMemo(
-		() => new URLSearchParams({ schema, object, editorMode: 'dictionaryEditor', embedded: 'true' }),
-		[schema, object],
-	);
+	if (!schema) return <Box sx={{ pt: 1, pl: 2, color: grey[700] }}>Please provide a schema to url</Box>;
+
+	if (!object) return <Box sx={{ pt: 1, pl: 2, color: grey[700] }}>Please select a dictionary</Box>;
+
+	const searchParams = new URLSearchParams({ schema, object, editorMode: 'dictionaryEditor', embedded: 'true' });
+
 	return <iframe className='embedded-editor' src={`/editor2/?${searchParams}`} />;
 };
