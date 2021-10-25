@@ -54,7 +54,7 @@ const App = () => {
 
 		const urlSchema = window.location.pathname.split('/')[1];
 		if (urlSchema) {
-			setSchema(urlSchema);
+			setSchema(urlSchema.replace(/^th2-/, ''));
 		}
 	}, [setSchema]);
 
