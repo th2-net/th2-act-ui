@@ -31,7 +31,6 @@ const ResultMonacoEditor = (props: { value: string }) => {
 
 	return (
 		<Editor
-			height='250px'
 			language='json'
 			value={props.value}
 			options={{
@@ -39,6 +38,7 @@ const ResultMonacoEditor = (props: { value: string }) => {
 				readOnly: true,
 				lineNumbers: 'off',
 				wordWrap: 'on',
+				automaticLayout: true,
 			}}
 		/>
 	);

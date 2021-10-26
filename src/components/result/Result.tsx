@@ -117,7 +117,7 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 	const { link, content } = parseContent();
 
 	return (
-		<Box overflow='hidden'>
+		<Box overflow='hidden' display='flex' flexDirection='column' height='100%'>
 			{link && (
 				<Link
 					href={link}
@@ -133,9 +133,9 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 					{link}
 				</Link>
 			)}
-			<div className={`result ${code === 200 ? 'ok' : 'error'}`}>
+			<Box flexGrow={1}>
 				<ResultMonacoEditor value={content} />
-			</div>
+			</Box>
 		</Box>
 	);
 };
