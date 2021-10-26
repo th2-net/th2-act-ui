@@ -118,7 +118,12 @@ const App = () => {
 						</SplitViewPane>
 
 						<SplitViewPane>
-							<Box sx={{ height: '100%', display: 'grid', gridTemplateRows: 'auto 1fr' }}>
+							<Box
+								sx={{
+									height: '100%',
+									display: 'grid',
+									gridTemplateRows: 'auto 1fr',
+								}}>
 								<Tabs
 									value={currentTab}
 									onChange={(_, tab) => setCurrentTab(tab)}

@@ -41,7 +41,10 @@ const HistoryTab = () => {
 				dictionary: selectedDictionary ?? 'unknown',
 				messageType: message.messageType,
 				delay: 0,
-				status: 'ready',
+				status: {
+					type: 'ready',
+					response: null,
+				},
 				createdAt: +new Date(),
 				message: message.jsonBody ?? '{}',
 			});

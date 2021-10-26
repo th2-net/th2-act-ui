@@ -19,7 +19,7 @@ import { Box, Link, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { ActSendingResponse, MessageSendingResponse, ParsedMessageSendingResponse } from '../../models/Message';
 import '../../styles/result.scss';
-import ResultMonacoEditor from '../ResultMonacoEditor';
+import ResultMonacoEditor from './ResultMonacoEditor';
 
 const isDev = process.env.NODE_ENV === 'development';
 

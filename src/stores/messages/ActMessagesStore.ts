@@ -35,7 +35,10 @@ export default class ActMessagesStore extends MessagesStore<ActMessageOptions> {
 				createdAt: +new Date(),
 				message: JSON.stringify(message, null, 4),
 				delay: 0,
-				status: 'ready',
+				status: {
+					type: 'ready',
+					response: null,
+				},
 			});
 		} catch (error) {
 			console.error('Error occurred while calling method');

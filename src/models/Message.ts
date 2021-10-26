@@ -74,7 +74,10 @@ export interface ReplayItem {
 	message: string;
 	delay: number;
 	id: string;
-	status: ReplayStatus;
+	status: {
+		type: ReplayStatus;
+		response: MessageSendingResponse | null;
+	};
 }
 
 export interface ParsedMessageReplayItem extends ReplayItem {

@@ -93,7 +93,7 @@ export default abstract class ReplayStore<T extends ReplayItem, U> {
 	resetStatuses = () => {
 		this.replayList = this.replayList.map(message => ({
 			...message,
-			status: 'ready',
+			status: { type: 'ready', response: null },
 		}));
 	};
 

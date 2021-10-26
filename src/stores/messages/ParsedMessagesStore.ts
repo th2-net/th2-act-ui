@@ -35,7 +35,10 @@ export default class ParsedMessagesStore extends MessagesStore<ParsedMessageOpti
 				...options,
 				message: JSON.stringify(message, null, 4),
 				delay: 0,
-				status: 'ready',
+				status: {
+					type: 'ready',
+					response: null,
+				},
 			});
 		} catch (error) {
 			console.error('Error occurred while calling method');

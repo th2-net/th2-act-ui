@@ -2,27 +2,20 @@ import React from 'react';
 import { Draggable, DraggableProvided, DraggableStateSnapshot, DroppableProvided } from 'react-beautiful-dnd';
 import { IconButton, InputAdornment, TableBody, TableCell, TableRow, TextField } from '@mui/material';
 import { DeleteOutline, Edit, ReorderRounded } from '@mui/icons-material';
-import { blue, green, red, yellow } from '@mui/material/colors';
+import { red } from '@mui/material/colors';
 import { observer } from 'mobx-react-lite';
 import {
 	ActReplayItem,
 	isActReplayItem,
 	isParsedMessageReplayItem,
 	ParsedMessageReplayItem,
-	ReplayStatus,
 } from '../../models/Message';
 import useMessageHistoryStore from '../../hooks/useMessageHistoryStore';
 import { useRootStore } from '../../hooks/useRootStore';
+import ReplayStatusCell from './ReplayStatusCell';
 
 type Props = {
 	droppableProvided: DroppableProvided;
-};
-
-const colors: Record<ReplayStatus, string> = {
-	ready: blue[500],
-	edited: yellow[500],
-	success: green[500],
-	fail: red[500],
 };
 
 const ReplayTableBody = ({ droppableProvided }: Props) => {
@@ -108,9 +101,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 									}}
 								/>
 							</TableCell>
-							<TableCell sx={{ color: colors[replayItem.status] }}>
-								{replayItem.status.toUpperCase()}
-							</TableCell>
+							<ReplayStatusCell status={replayItem.status} />
 							<TableCell sx={{ whiteSpace: 'nowrap' }}>
 								<IconButton title='Edit code' onClick={() => handleEditCodeClicked(index)}>
 									<Edit />

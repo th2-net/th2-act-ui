@@ -71,7 +71,10 @@ export default class ParsedMessageReplayStore extends ReplayStore<ParsedMessageR
 			createdAt: message.createdAt,
 			message: this.editedMessageCode,
 			delay: message.delay,
-			status: 'edited',
+			status: {
+				type: 'edited',
+				response: null,
+			},
 		};
 	};
 
@@ -88,11 +91,12 @@ export default class ParsedMessageReplayStore extends ReplayStore<ParsedMessageR
 					message: JSON.parse(message),
 				});
 
-				msg.status = result.code === 200 ? 'success' : 'fail';
+				msg.status.type = result.code === 200 ? 'success' : 'fail';
+				msg.status.response = result;
 			} catch (error) {
 				// eslint-disable-next-line no-alert
 				alert('Error while sending');
-				msg.status = 'fail';
+				msg.status.type = 'fail';
 			}
 
 			this.replayList = [...this.replayList];
@@ -133,7 +137,10 @@ export default class ParsedMessageReplayStore extends ReplayStore<ParsedMessageR
 						delay,
 						id: nanoid(),
 						createdAt: +new Date(),
-						status: 'ready',
+						status: {
+							type: 'ready',
+							response: null,
+						},
 					});
 				},
 			);

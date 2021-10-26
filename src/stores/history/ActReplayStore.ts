@@ -63,7 +63,10 @@ export default class ActReplayStore extends ReplayStore<ActReplayItem, ActMessag
 			createdAt: message.createdAt,
 			message: this.editedMessageCode,
 			delay: message.delay,
-			status: 'edited',
+			status: {
+				type: 'edited',
+				response: null,
+			},
 		};
 	};
 
@@ -80,11 +83,12 @@ export default class ActReplayStore extends ReplayStore<ActReplayItem, ActMessag
 					message: JSON.parse(message),
 				});
 
-				msg.status = result.code === 200 ? 'success' : 'fail';
+				msg.status.type = result.code === 200 ? 'success' : 'fail';
+				msg.status.response = result;
 			} catch (error) {
 				// eslint-disable-next-line no-alert
 				alert('Error while sending');
-				msg.status = 'fail';
+				msg.status.type = 'fail';
 			}
 
 			this.replayList = [...this.replayList];
@@ -120,7 +124,10 @@ export default class ActReplayStore extends ReplayStore<ActReplayItem, ActMessag
 					delay,
 					id: nanoid(),
 					createdAt: +new Date(),
-					status: 'ready',
+					status: {
+						type: 'ready',
+						response: null,
+					},
 				});
 			});
 		} catch (e) {
