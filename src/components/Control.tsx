@@ -29,14 +29,12 @@ import {
 } from '@mui/material';
 import { useRootStore } from '../hooks/useRootStore';
 import useEditorStore from '../hooks/useEditorStore';
-import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
 
 export type SchemaType = 'parsedMessage' | 'act';
 
 const Control = () => {
 	const store = useRootStore();
 	const { options } = useEditorStore();
-	const { editMessageMode } = useMessageHistoryStore();
 
 	const controlConfigs = [
 		{
@@ -57,10 +55,7 @@ const Control = () => {
 					id: 'dictionary',
 					options: options.parsedMessage.dictionaries,
 					selected: options.parsedMessage.selectedDictionary || '',
-					disabled:
-						options.parsedMessage.isSessionsLoading ||
-						options.parsedMessage.isDictionariesLoading ||
-						editMessageMode,
+					disabled: options.parsedMessage.isSessionsLoading || options.parsedMessage.isDictionariesLoading,
 					onChange: options.parsedMessage.selectDictionary,
 					isLoading: options.parsedMessage.isDictionariesLoading,
 				},
@@ -72,8 +67,7 @@ const Control = () => {
 					disabled:
 						options.parsedMessage.isSessionsLoading ||
 						options.parsedMessage.isDictionariesLoading ||
-						options.parsedMessage.isMessageTypesLoading ||
-						editMessageMode,
+						options.parsedMessage.isMessageTypesLoading,
 					onChange: options.parsedMessage.selectMessageType,
 					isLoading: options.parsedMessage.isMessageTypesLoading,
 				},
@@ -97,7 +91,7 @@ const Control = () => {
 					id: 'service',
 					options: options.act.services,
 					selected: options.act.selectedService || '',
-					disabled: options.act.isActsLoading || options.act.isServicesLoading || editMessageMode,
+					disabled: options.act.isActsLoading || options.act.isServicesLoading,
 					onChange: options.act.selectService,
 					isLoading: options.act.isServicesLoading,
 				},
@@ -111,8 +105,7 @@ const Control = () => {
 					disabled:
 						options.act.isActsLoading ||
 						options.act.isServicesLoading ||
-						options.act.isServiceDetailsLoading ||
-						editMessageMode,
+						options.act.isServiceDetailsLoading,
 					onChange: options.act.selectMethod,
 					isLoading: options.act.isServiceDetailsLoading,
 				},
