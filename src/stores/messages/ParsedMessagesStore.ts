@@ -14,8 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { flow, makeObservable } from 'mobx';
-import { nanoid } from 'nanoid';
+import { flow } from 'mobx';
 import api from '../../api';
 import MessagesStore from './MessagesStore';
 import ParsedMessageReplayStore from '../history/ParsedMessageReplayStore';
@@ -27,10 +26,6 @@ export default class ParsedMessagesStore extends MessagesStore<ParsedMessageOpti
 
 	constructor(rootStore: RootStore) {
 		super(rootStore);
-
-		makeObservable(this, {
-			sendMessage: flow,
-		});
 	}
 
 	sendMessage = flow(function* (this: ParsedMessagesStore, message: object) {
@@ -43,18 +38,6 @@ export default class ParsedMessagesStore extends MessagesStore<ParsedMessageOpti
 			this.messageSendingResponse = yield api.sendMessage({
 				...options,
 				message,
-			});
-
-			this.historyStore.addMessage({
-				id: nanoid(),
-				createdAt: +new Date(),
-				...options,
-				message: JSON.stringify(message, null, 4),
-				delay: 0,
-				status: {
-					type: 'ready',
-					response: null,
-				},
 			});
 		} catch (error) {
 			console.error('Error occurred while calling method');

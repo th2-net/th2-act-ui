@@ -14,8 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { flow, makeObservable } from 'mobx';
-import { nanoid } from 'nanoid';
+import { flow } from 'mobx';
 import ActReplayStore from '../history/ActReplayStore';
 import api from '../../api';
 import MessagesStore from './MessagesStore';
@@ -27,10 +26,6 @@ export default class ActMessagesStore extends MessagesStore<ActMessageOptions> {
 
 	constructor(rootStore: RootStore) {
 		super(rootStore);
-
-		makeObservable(this, {
-			sendMessage: flow,
-		});
 	}
 
 	sendMessage = flow(function* (this: ActMessagesStore, message: object) {
@@ -43,18 +38,6 @@ export default class ActMessagesStore extends MessagesStore<ActMessageOptions> {
 			this.messageSendingResponse = yield api.callMethod({
 				...options,
 				message,
-			});
-
-			this.historyStore.addMessage({
-				id: nanoid(),
-				...options,
-				createdAt: +new Date(),
-				message: JSON.stringify(message, null, 4),
-				delay: 0,
-				status: {
-					type: 'ready',
-					response: null,
-				},
 			});
 		} catch (error) {
 			console.error('Error occurred while calling method');
