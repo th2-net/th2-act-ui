@@ -30,7 +30,7 @@ const rangeInMinutes = 30;
 const HistoryTab = () => {
 	const { messagesStores, editorStore } = useRootStore();
 	const replayStore = messagesStores.parsedMessage.historyStore;
-	const { selectedSession, selectedDictionary } = editorStore.options.parsedMessage;
+	const { selectedSession } = editorStore.options.parsedMessage;
 	const messageWorker = useMessageWorker();
 
 	React.useEffect(() => {
@@ -38,7 +38,7 @@ const HistoryTab = () => {
 			replayStore.addMessage({
 				id: nanoid(),
 				session: message.sessionId,
-				dictionary: selectedDictionary ?? 'unknown',
+				dictionary: editorStore.options.parsedMessage.selectedDictionary ?? 'unknown',
 				messageType: message.messageType,
 				delay: 0,
 				status: {
@@ -51,6 +51,7 @@ const HistoryTab = () => {
 
 		messageWorker.subscribeOnMessage(IncomingMessageActions.ReplayMessage, addToReplay);
 
+		// TODO: fix unsubscribe
 		return () => messageWorker.unsubscribeFromMessage(IncomingMessageActions.ReplayMessage, addToReplay);
 	}, []);
 
