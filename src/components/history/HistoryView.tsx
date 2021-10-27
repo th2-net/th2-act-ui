@@ -62,6 +62,13 @@ const HistoryTab = () => {
 			timestampFrom: +timestampFrom,
 			timestampTo: Date.now(),
 			streams: [selectedSession],
+			sse: {
+				type: {
+					type: 'string[]',
+					values: ['Heartbeat'],
+					negative: true,
+				},
+			},
 		};
 
 		const messageStoreStateString = new URLSearchParams({
