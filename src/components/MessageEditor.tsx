@@ -17,7 +17,6 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
-import ResizeObserver from 'resize-observer-polyfill';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { monaco, EditorDidMount, ControlledEditor, ControlledEditorOnChange, Monaco } from '@monaco-editor/react';
@@ -36,8 +35,6 @@ export interface MessageEditorMethods {
 	getFilledMessage: () => object | null;
 }
 
-const DEFAULT_EDITOR_HEIGHT = 700;
-
 const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const historyStore = useMessageHistoryStore();
 
@@ -49,28 +46,6 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 	const handleEditorDidMount: EditorDidMount = _valueGetter => {
 		valueGetter.current = _valueGetter;
 	};
-
-	const [editorHeight, setEditorHeight] = React.useState(DEFAULT_EDITOR_HEIGHT);
-
-	const editorHeightObserver = React.useRef(
-		new ResizeObserver((entries: ResizeObserverEntry[]) => {
-			setEditorHeight(entries[0]?.contentRect.height || DEFAULT_EDITOR_HEIGHT);
-		}),
-	);
-
-	const rootRef = React.useRef<HTMLDivElement>(null);
-
-	React.useEffect(() => {
-		if (rootRef.current) {
-			editorHeightObserver.current.observe(rootRef.current);
-		}
-
-		return () => {
-			if (rootRef.current) {
-				editorHeightObserver.current.unobserve(rootRef.current);
-			}
-		};
-	}, []);
 
 	React.useEffect(() => {
 		monaco.init().then((_monaco: Monaco) => {
@@ -176,15 +151,15 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 	);
 
 	return (
-		<div ref={rootRef}>
-			<ControlledEditor
-				height={editorHeight}
-				language='json'
-				value={historyStore.editMessageMode ? historyStore.editedMessageCode : code}
-				onChange={onValueChange}
-				editorDidMount={handleEditorDidMount}
-			/>
-		</div>
+		<ControlledEditor
+			language='json'
+			value={historyStore.editMessageMode ? historyStore.editedMessageCode : code}
+			onChange={onValueChange}
+			editorDidMount={handleEditorDidMount}
+			options={{
+				automaticLayout: true,
+			}}
+		/>
 	);
 };
 
