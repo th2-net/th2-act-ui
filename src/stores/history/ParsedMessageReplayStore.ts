@@ -68,6 +68,7 @@ export default class ParsedMessageReplayStore extends ReplayStore<ParsedMessageR
 		return {
 			id,
 			...options,
+			name: message.name,
 			createdAt: message.createdAt,
 			message: this.editedMessageCode,
 			delay: message.delay,
