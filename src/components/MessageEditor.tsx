@@ -13,16 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
-
-// eslint-disable-next-line import/no-extraneous-dependencies
-
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import { monaco, EditorDidMount, ControlledEditor, ControlledEditorOnChange, Monaco } from '@monaco-editor/react';
+import Editor, { OnChange, OnValidate, useMonaco } from '@monaco-editor/react';
 // eslint-disable-next-line import/no-unresolved
-import { Uri } from 'monaco-editor';
-import { toJS } from 'mobx';
+import { MarkerSeverity } from 'monaco-editor';
 import { createInitialActMessage } from '../helpers/schema';
 import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
 
@@ -37,23 +33,31 @@ export interface MessageEditorMethods {
 
 const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const historyStore = useMessageHistoryStore();
-
-	const monacoRef = React.useRef<Monaco>();
-	const valueGetter = React.useRef<(() => string) | null>(null);
-	const uri = React.useRef<Uri>();
 	const [code, setCode] = React.useState('{}');
-
-	const handleEditorDidMount: EditorDidMount = _valueGetter => {
-		valueGetter.current = _valueGetter;
-	};
+	const monaco = useMonaco();
 
 	React.useEffect(() => {
-		monaco.init().then((_monaco: Monaco) => {
-			monacoRef.current = _monaco;
+		if (monaco) {
 			if (messageSchema) {
 				initiateSchema(messageSchema);
+
+				const json = JSON.stringify(messageSchema);
+				const blob = new Blob([json], { type: 'application/json' });
+				const uri = URL.createObjectURL(blob);
+
+				monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+					validate: true,
+					schemaValidation: 'error',
+					enableSchemaRequest: true,
+					schemas: [
+						{
+							uri,
+							fileMatch: ['*'],
+						},
+					],
+				});
 			} else {
-				monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
+				monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
 					validate: true,
 					schemas: [
 						{
@@ -63,64 +67,10 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 					],
 				});
 			}
-		});
-	}, []);
-
-	React.useEffect(() => {
-		if (!monacoRef.current) return;
-		if (messageSchema) {
-			const schema = toJS(messageSchema);
-			uri.current = monacoRef.current.Uri.parse('://b/$schema.json');
-
-			initiateSchema(messageSchema);
-			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
-				validate: true,
-				schemas: [
-					{
-						uri: 'http://myserver/$schema.json',
-						fileMatch: ['*'],
-						schema,
-					},
-				],
-			});
-		} else {
-			setCode('{}');
-			if (historyStore.editMessageMode) {
-				historyStore.setEditedMessageCode('{}');
-			}
-			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
-				validate: true,
-				schemas: [
-					{
-						uri: 'do.not.load',
-						schema: {},
-					},
-				],
-			});
 		}
-	}, [messageSchema]);
+	}, [monaco, messageSchema]);
 
-	const validate = React.useCallback(
-		(value: string) => {
-			try {
-				JSON.parse(value);
-				setIsValid(true);
-			} catch (_) {
-				setIsValid(false);
-			}
-		},
-		[setIsValid],
-	);
-
-	React.useEffect(() => {
-		if (historyStore.editMessageMode) {
-			validate(historyStore.editedMessageCode);
-		} else {
-			validate(code);
-		}
-	}, [code, validate, historyStore.editMessageMode, historyStore.editedMessageCode]);
-
-	const onValueChange: ControlledEditorOnChange = (event, value) => {
+	const onValueChange: OnChange = value => {
 		if (historyStore.editMessageMode) {
 			historyStore.setEditedMessageCode(value || '{}');
 		} else {
@@ -133,6 +83,13 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 		setCode(initialSchema);
 		// setIsSchemaApplied(true);
 	};
+
+	const onValidate: OnValidate = React.useCallback(
+		markers => {
+			setIsValid(markers.filter(marker => marker.severity === MarkerSeverity.Error).length === 0);
+		},
+		[setIsValid],
+	);
 
 	React.useImperativeHandle(
 		ref,
@@ -151,11 +108,11 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 	);
 
 	return (
-		<ControlledEditor
+		<Editor
 			language='json'
 			value={historyStore.editMessageMode ? historyStore.editedMessageCode : code}
 			onChange={onValueChange}
-			editorDidMount={handleEditorDidMount}
+			onValidate={onValidate}
 			options={{
 				automaticLayout: true,
 			}}
