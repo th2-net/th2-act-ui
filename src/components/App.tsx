@@ -153,13 +153,13 @@ const App = () => {
 								<TabPanel currentTab={currentTab} tabIndex={0}>
 									<Result response={messagesStore.messageSendingResponse} />
 								</TabPanel>
-								<TabPanel currentTab={currentTab} tabIndex={1}>
+								<TabPanel currentTab={currentTab} tabIndex={1} keepMounted>
 									<HistoryView />
 								</TabPanel>
 								<TabPanel currentTab={currentTab} tabIndex={2}>
 									<ReplayView />
 								</TabPanel>
-								<TabPanel currentTab={currentTab} tabIndex={3}>
+								<TabPanel currentTab={currentTab} tabIndex={3} keepMounted>
 									<EmbeddedEditor
 										schema={schema}
 										object={store.editorStore.options.parsedMessage.selectedDictionary || ''}
