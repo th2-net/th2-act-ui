@@ -17,9 +17,10 @@
 import React from 'react';
 import { Draggable, DraggableProvided, DraggableStateSnapshot, DroppableProvided } from 'react-beautiful-dnd';
 import { IconButton, InputAdornment, TableBody, TableCell, TableRow, TextField } from '@mui/material';
-import { DeleteOutline, Edit, ReorderRounded } from '@mui/icons-material';
-import { red } from '@mui/material/colors';
+import { DeleteOutline, DriveFileMove, Edit, ReorderRounded, Save } from '@mui/icons-material';
+import { blue, red } from '@mui/material/colors';
 import { observer } from 'mobx-react-lite';
+import { nanoid } from 'nanoid';
 import {
 	ActReplayItem,
 	isActReplayItem,
@@ -29,6 +30,7 @@ import {
 import useMessageHistoryStore from '../../hooks/useMessageHistoryStore';
 import { useRootStore } from '../../hooks/useRootStore';
 import ReplayStatusCell from './ReplayStatusCell';
+import useEditorStore from '../../hooks/useEditorStore';
 
 type Props = {
 	droppableProvided: DroppableProvided;
@@ -43,9 +45,13 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 		setEditedMessageId,
 		setEditMessageMode,
 		setEditedMessageCode,
+		editedMessageId,
+		saveEditedMessage,
+		editMessageMode,
 	} = useMessageHistoryStore();
-	const { editorStore } = useRootStore();
+	const { editorStore, messagesStores } = useRootStore();
 	const { options } = editorStore;
+	const { code } = useEditorStore();
 
 	const handleEditCodeClicked = (replayItemIndex: number) => {
 		const replayItem = replayList[replayItemIndex];
@@ -67,67 +73,110 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 
 	return (
 		<TableBody ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
+			<TableRow sx={{ bgcolor: editMessageMode ? 'white' : blue[50] }}>
+				<TableCell colSpan={2}>New Message</TableCell>
+				<TableCell>{options.parsedMessage.selectedSession}</TableCell>
+				<TableCell>{options.parsedMessage.selectedDictionary}</TableCell>
+				<TableCell colSpan={4}>{options.parsedMessage.selectedMessageType}</TableCell>
+				<TableCell>
+					{editMessageMode && (
+						<IconButton title='Edit message' onClick={() => setEditMessageMode(false)}>
+							<Edit />
+						</IconButton>
+					)}
+					<IconButton
+						title='Save to replay'
+						disabled={!options.parsedMessage.selectedOptions}
+						onClick={() => {
+							if (options.parsedMessage.selectedOptions) {
+								messagesStores.parsedMessage.historyStore.addMessage({
+									id: nanoid(),
+									message: code,
+									...options.parsedMessage.selectedOptions,
+									status: { type: 'ready', response: null },
+									createdAt: +new Date(),
+									delay: 0,
+								});
+							}
+						}}>
+						<DriveFileMove />
+					</IconButton>
+				</TableCell>
+			</TableRow>
 			{(replayList as unknown as ActReplayItem[] & ParsedMessageReplayItem[]).map((replayItem, index: number) => (
 				<Draggable draggableId={replayItem.id} index={index} key={replayItem.id}>
-					{(draggableProvided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
-						<TableRow
-							ref={draggableProvided.innerRef}
-							{...draggableProvided.draggableProps}
-							sx={{ opacity: snapshot.isDragging ? '0.80' : '1' }}>
-							<TableCell>
-								<div {...draggableProvided.dragHandleProps}>
-									<ReorderRounded />
-								</div>
-							</TableCell>
-							<TableCell>
-								<TextField
-									placeholder='Untitled'
-									value={replayItem.name ?? ''}
-									onChange={e => renameMessage(replayItem.id, e.target.value)}
-									size='small'
-									variant='standard'
-									sx={{ minWidth: 60 }}
-								/>
-							</TableCell>
-							{isActReplayItem(replayItem) && (
-								<>
-									<TableCell>{replayItem.actBox}</TableCell>
-									<TableCell>{replayItem.fullServiceName}</TableCell>
-									<TableCell>{replayItem.methodName}</TableCell>
-								</>
-							)}
-							{isParsedMessageReplayItem(replayItem) && (
-								<>
-									<TableCell>{replayItem.session}</TableCell>
-									<TableCell>{replayItem.dictionary}</TableCell>
-									<TableCell>{replayItem.messageType}</TableCell>
-								</>
-							)}
-							<TableCell>{new Date(replayItem.createdAt).toLocaleString()}</TableCell>
-							<TableCell>
-								<TextField
-									value={replayItem.delay}
-									onChange={e => changeDelay(replayItem.id, parseInt(e.target.value))}
-									size='small'
-									type='number'
-									variant='standard'
-									sx={{ minWidth: 90 }}
-									InputProps={{
-										endAdornment: <InputAdornment position='end'>ms</InputAdornment>,
-									}}
-								/>
-							</TableCell>
-							<ReplayStatusCell status={replayItem.status} />
-							<TableCell sx={{ whiteSpace: 'nowrap' }}>
-								<IconButton title='Edit code' onClick={() => handleEditCodeClicked(index)}>
-									<Edit />
-								</IconButton>
-								<IconButton title='Remove' onClick={() => removeMessage(replayItem.id)}>
-									<DeleteOutline sx={{ color: red[500] }} />
-								</IconButton>
-							</TableCell>
-						</TableRow>
-					)}
+					{(draggableProvided: DraggableProvided, snapshot: DraggableStateSnapshot) => {
+						const isEditing = editedMessageId === replayItem.id;
+
+						return (
+							<TableRow
+								ref={draggableProvided.innerRef}
+								{...draggableProvided.draggableProps}
+								sx={{
+									opacity: snapshot.isDragging ? '0.80' : '1',
+									bgcolor: isEditing ? blue[50] : 'white',
+								}}>
+								<TableCell>
+									<div {...draggableProvided.dragHandleProps}>
+										<ReorderRounded />
+									</div>
+								</TableCell>
+								<TableCell>
+									<TextField
+										placeholder='Untitled'
+										value={replayItem.name ?? ''}
+										onChange={e => renameMessage(replayItem.id, e.target.value)}
+										size='small'
+										variant='standard'
+										sx={{ minWidth: 60 }}
+									/>
+								</TableCell>
+								{isActReplayItem(replayItem) && (
+									<>
+										<TableCell>{replayItem.actBox}</TableCell>
+										<TableCell>{replayItem.fullServiceName}</TableCell>
+										<TableCell>{replayItem.methodName}</TableCell>
+									</>
+								)}
+								{isParsedMessageReplayItem(replayItem) && (
+									<>
+										<TableCell>{replayItem.session}</TableCell>
+										<TableCell>{replayItem.dictionary}</TableCell>
+										<TableCell>{replayItem.messageType}</TableCell>
+									</>
+								)}
+								<TableCell>{new Date(replayItem.createdAt).toLocaleString()}</TableCell>
+								<TableCell>
+									<TextField
+										value={replayItem.delay}
+										onChange={e => changeDelay(replayItem.id, parseInt(e.target.value))}
+										size='small'
+										type='number'
+										variant='standard'
+										sx={{ minWidth: 90 }}
+										InputProps={{
+											endAdornment: <InputAdornment position='end'>ms</InputAdornment>,
+										}}
+									/>
+								</TableCell>
+								<ReplayStatusCell status={replayItem.status} />
+								<TableCell sx={{ whiteSpace: 'nowrap' }}>
+									{isEditing ? (
+										<IconButton title='Save' onClick={() => saveEditedMessage()}>
+											<Save />
+										</IconButton>
+									) : (
+										<IconButton title='Edit message' onClick={() => handleEditCodeClicked(index)}>
+											<Edit />
+										</IconButton>
+									)}
+									<IconButton title='Remove' onClick={() => removeMessage(replayItem.id)}>
+										<DeleteOutline sx={{ color: red[500] }} />
+									</IconButton>
+								</TableCell>
+							</TableRow>
+						);
+					}}
 				</Draggable>
 			))}
 			{droppableProvided.placeholder}

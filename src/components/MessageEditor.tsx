@@ -21,6 +21,7 @@ import Editor, { OnChange, OnValidate, useMonaco } from '@monaco-editor/react';
 import { MarkerSeverity } from 'monaco-editor';
 import { createInitialActMessage } from '../helpers/schema';
 import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
+import useEditorStore from '../hooks/useEditorStore';
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
@@ -33,7 +34,7 @@ export interface MessageEditorMethods {
 
 const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const historyStore = useMessageHistoryStore();
-	const [code, setCode] = React.useState('{}');
+	const { code, setCode } = useEditorStore();
 	const monaco = useMonaco();
 
 	React.useEffect(() => {

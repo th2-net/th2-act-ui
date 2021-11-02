@@ -169,7 +169,7 @@ const App = () => {
 						</SplitViewPane>
 					</SplitView>
 					<div className='app__buttons'>
-						{currentTab === 2 && !historyStore.editMessageMode ? (
+						{currentTab === 2 ? (
 							<Button
 								variant='contained'
 								endIcon={isReplaying ? <CircularProgress color='inherit' size={14} /> : <Replay />}
@@ -188,9 +188,9 @@ const App = () => {
 										<Send />
 									)
 								}
-								onClick={historyStore.editMessageMode ? historyStore.saveEditedMessage : sendMessage}
+								onClick={sendMessage}
 								disabled={!editorStore.currentOptionsStore.allOptionsSelected || !isCodeValid}>
-								{historyStore.editMessageMode ? 'Save' : 'Send Message'}
+								Send Message
 							</Button>
 						)}
 					</div>
