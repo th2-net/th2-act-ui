@@ -14,8 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 
-.embedded-editor {
-    width: 100%;
-	height: 100%;
-    border: none;
-}
+import useMessagesStore from './useMessagesStore';
+
+const useReplayStore = () => useMessagesStore().replayStore;
+
+export default useReplayStore;

@@ -14,8 +14,14 @@
  * limitations under the License.
  ***************************************************************************** */
 
-.embedded-editor {
-    width: 100%;
-	height: 100%;
-    border: none;
-}
+import { createTheme } from '@mui/material';
+import { blue, red } from '@mui/material/colors';
+
+const theme = createTheme({
+	palette: {
+		primary: blue,
+		secondary: red,
+	},
+});
+
+export default theme;

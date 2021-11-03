@@ -131,16 +131,10 @@ const api = {
 		console.error(servicesResponse.statusText);
 		return null;
 	},
-	async getActSchema(
-		serviceName: string,
-		methodName: string,
-	): Promise<JSONSchemaResponse | null> {
-		const schemaResponse = await fetch(
-			`backend/json_schema/${serviceName}?method=${methodName}`,
-			{
-				cache: 'no-cache',
-			},
-		);
+	async getActSchema(serviceName: string, methodName: string): Promise<JSONSchemaResponse | null> {
+		const schemaResponse = await fetch(`backend/json_schema/${serviceName}?method=${methodName}`, {
+			cache: 'no-cache',
+		});
 
 		if (schemaResponse.ok) {
 			return schemaResponse.json();

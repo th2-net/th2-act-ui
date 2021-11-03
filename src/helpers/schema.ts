@@ -31,10 +31,9 @@ export function createInitialActMessage(schema: JSONSchema4 | JSONSchema7) {
 			let currentSchema = jsonSchema;
 
 			if (currentSchema.definitions) {
-				Object.entries(currentSchema.definitions)
-					.forEach(
-						([key, schm]) => definitionsMap.set(schm.id || key, schm),
-					);
+				Object.entries(currentSchema.definitions).forEach(([key, schm]) =>
+					definitionsMap.set(schm.id || key, schm),
+				);
 			}
 
 			if (currentSchema.$ref) {
@@ -51,25 +50,26 @@ export function createInitialActMessage(schema: JSONSchema4 | JSONSchema7) {
 			switch (currentSchema.type) {
 				case 'object': {
 					if (!currentSchema.properties && typeof currentSchema.additionalProperties !== 'object') {
-						throw new Error('Object schema doesn\'t contain properties');
+						throw new Error("Object schema doesn't contain properties");
 					}
 
 					if (currentSchema.properties) {
 						const data = {
-							...Object.keys(currentSchema.properties)
-								.reduce((prev, curr) => {
-									if (!currentSchema.properties) {
-										throw new Error('Object schema doesn\'t contain properties');
-									}
-									return {
-										...prev,
-										...extractSchema(currentSchema.properties[curr], curr),
-									};
-								}, {}),
+							...Object.keys(currentSchema.properties).reduce((prev, curr) => {
+								if (!currentSchema.properties) {
+									throw new Error("Object schema doesn't contain properties");
+								}
+								return {
+									...prev,
+									...extractSchema(currentSchema.properties[curr], curr),
+								};
+							}, {}),
 						};
-						return isArray ? data : {
-							[title]: data,
-						};
+						return isArray
+							? data
+							: {
+									[title]: data,
+							  };
 					}
 					return {
 						[title]: {},
@@ -115,24 +115,24 @@ export function createInitialActMessage(schema: JSONSchema4 | JSONSchema7) {
 						[title]: null,
 					};
 				}
-				default: return {};
+				default:
+					return {};
 			}
 		};
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		const content = schema.properties!;
 		if (schema.definitions) {
-			Object.entries(schema.definitions)
-				.forEach(
-					([key, schm]) => {
-						definitionsMap.set(schm.id || key, schm);
-					},
-				);
+			Object.entries(schema.definitions).forEach(([key, schm]) => {
+				definitionsMap.set(schm.id || key, schm);
+			});
 		}
-		const result = Object.keys(content)
-			.reduce((prev, curr) => ({
+		const result = Object.keys(content).reduce(
+			(prev, curr) => ({
 				...prev,
 				...extractSchema(content[curr], curr),
-			}), {});
+			}),
+			{},
+		);
 		return JSON.stringify(result, null, 4);
 	} catch (error) {
 		console.error('Error occurred while initiating message', error);

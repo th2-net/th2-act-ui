@@ -27,20 +27,26 @@ module.exports = webpackMerge(commonConfig, {
 	entry: ['react-hot-loader/patch', appSrc],
 	devtool: 'inline-source-map',
 	devServer: {
-		watchOptions: {
-			poll: true,
-			ignored: [/node_modules/, 'src/__tests__/']
+		watchFiles: {
+			options: {
+				usePolling: true,
+				ignored: ['src/__tests__/', '**/node_modules'],
+			},
+		},
+		client: {
+			overlay: false,
 		},
 		compress: true,
-		port: 9001,
-		host: "0.0.0.0",
+		port: 9002,
+		host: '0.0.0.0',
 		historyApiFallback: true,
 		hot: true,
 		proxy: {
 			'/backend': {
-				target: 'https://th2-qa.exp.exactpro.com:30443/th2-commonv3/act-ui/',
+				target: 'http://th2-qa:31464/',
+				pathRewrite: { '^/backend': '' },
 				changeOrigin: true,
-				secure: false
+				secure: false,
 			},
 			'/editor2': {
 				target: 'http://th2-qa:30000',
@@ -54,35 +60,33 @@ module.exports = webpackMerge(commonConfig, {
 			{
 				test: /\.(ts|tsx)$/,
 				enforce: 'pre',
-				use: [{
-					options: {
-						eslintPath: require.resolve('eslint'),
-						failOnError: false,
-						cache: false,
-						quite: true,
-						formatter: require('eslint-formatter-pretty'),
+				use: [
+					{
+						options: {
+							eslintPath: require.resolve('eslint'),
+							failOnError: false,
+							cache: false,
+							quite: true,
+							formatter: require('eslint-formatter-pretty'),
+						},
+						loader: require.resolve('eslint-loader'),
 					},
-					loader: require.resolve('eslint-loader'),
-				}],
+				],
 				exclude: /node_modules/,
 			},
 			{
 				test: /\.scss$/,
 				exclude: /node_modules/,
-				use: [
-					'style-loader',
-					'css-loader',
-					'sass-loader'
-				].filter(loader => loader)
+				use: ['style-loader', 'css-loader', 'sass-loader'].filter(loader => loader),
 			},
-		]
+		],
 	},
 	plugins: [
 		new ForkTsCheckerWebpackPlugin({
 			eslint: {
 				files: './src/**/*{ts,tsx,js,jsx}',
 				enabled: true,
-			}
-		})
-	]
+			},
+		}),
+	],
 });

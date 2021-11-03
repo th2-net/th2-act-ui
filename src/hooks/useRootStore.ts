@@ -11,28 +11,18 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License.
+ *  limitations under the License.
  ***************************************************************************** */
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import 'regenerator-runtime/runtime';
-import 'core-js/stable';
-import 'core-js/features/array/flat-map';
-import 'core-js/features/array/flat';
-import { ThemeProvider } from '@mui/material';
-import App from './components/App';
-import ErrorBoundary from './components/util/ErrorBoundary';
-import StoresProvider from './components/StoresProvider';
-import theme from './theme';
+import React from 'react';
+import RootStoreContext from '../contexts/rootStoreContext';
 
-ReactDOM.render(
-	<ErrorBoundary>
-		<StoresProvider>
-			<ThemeProvider theme={theme}>
-				<App />
-			</ThemeProvider>
-		</StoresProvider>
-	</ErrorBoundary>,
-	document.getElementById('index'),
-);
+export const useRootStore = () => {
+	const store = React.useContext(RootStoreContext);
+
+	if (!store) {
+		throw new Error('useRootStore should be used inside of RootStoreContextProvider');
+	}
+
+	return store;
+};
