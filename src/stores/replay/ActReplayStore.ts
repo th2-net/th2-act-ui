@@ -29,6 +29,13 @@ type ActReplayExportData = Pick<
 	'actBox' | 'fullServiceName' | 'methodName' | 'message' | 'name' | 'delay'
 >;
 
+const isActReplayExportData = (object: any): object is ActReplayExportData =>
+	typeof object.actBox === 'string' &&
+	typeof object.fullServiceName === 'string' &&
+	typeof object.methodName === 'string' &&
+	typeof object.message === 'string' &&
+	typeof object.delay === 'number';
+
 export default class ActReplayStore extends ReplayStore<ActReplayItem, ActMessageOptions> {
 	constructor(rootStore: RootStore) {
 		super(rootStore);
@@ -37,12 +44,12 @@ export default class ActReplayStore extends ReplayStore<ActReplayItem, ActMessag
 			replayMessage: action,
 		});
 
-		this.replayList = localStorageWorker.getActMessageHistory();
+		this.replayList = localStorageWorker.getActReplay();
 
 		reaction(
 			() => this.replayList,
-			actMessagesHistory => {
-				localStorageWorker.setActMessageHistory(actMessagesHistory);
+			replayList => {
+				localStorageWorker.setActReplay(replayList);
 			},
 		);
 	}
@@ -65,7 +72,6 @@ export default class ActReplayStore extends ReplayStore<ActReplayItem, ActMessag
 			delay: message.delay,
 			status: {
 				type: 'edited',
-				response: null,
 			},
 		};
 	};
@@ -114,6 +120,10 @@ export default class ActReplayStore extends ReplayStore<ActReplayItem, ActMessag
 		try {
 			const jsonData = JSON.parse(jsonString);
 
+			if (!Array.isArray(jsonData) || jsonData.every(object => !isActReplayExportData(object))) {
+				throw new Error('Incorrect json data');
+			}
+
 			jsonData.forEach(({ actBox, fullServiceName, methodName, message, name, delay }: ActReplayExportData) => {
 				this.addMessage({
 					actBox,
@@ -126,7 +136,6 @@ export default class ActReplayStore extends ReplayStore<ActReplayItem, ActMessag
 					createdAt: +new Date(),
 					status: {
 						type: 'ready',
-						response: null,
 					},
 				});
 			});

@@ -49,7 +49,7 @@ const ReplayStatusCell = ({ status }: Props) => {
 				onClose={() => toggleResult(false)}
 				anchorEl={anchorRef.current}
 				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-				<Box sx={{ width: 500, height: 250 }} className='scrollbar'>
+				<Box width={500} height={250} className='scrollbar'>
 					<Result response={status.response} />
 				</Box>
 			</Popover>

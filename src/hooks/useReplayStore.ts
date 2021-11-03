@@ -14,40 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 
-.message-history {
-	display: grid;
-	overflow: hidden;
-	grid-template-rows: auto 40px;
-	grid-row-gap: 10px;
+import useMessagesStore from './useMessagesStore';
 
-	&_edited {
-		display: grid;
-		overflow: hidden;
-		grid-template-rows: 30px auto 40px;
-		grid-row-gap: 10px;
-	}
+const useReplayStore = () => useMessagesStore().replayStore;
 
-	&__message-list-container {
-		overflow: auto;
-	}
-
-	&__controls {
-		margin-top: auto;
-
-		&-button {
-			margin-right: 5px;
-            padding: 5px 10px;
-		}
-	}
-}
-
-.add-new-message {
-	width: 100%;
-	height: 30px;
-	background: #1111;
-	padding: 3px;
-	border: 2px dashed darkslategrey;
-	border-radius: 4px;
-	text-align: center;
-	cursor: pointer;
-}
+export default useReplayStore;

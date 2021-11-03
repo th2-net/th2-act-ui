@@ -27,7 +27,7 @@ import {
 	isParsedMessageReplayItem,
 	ParsedMessageReplayItem,
 } from '../../models/Message';
-import useMessageHistoryStore from '../../hooks/useMessageHistoryStore';
+import useReplayStore from '../../hooks/useReplayStore';
 import { useRootStore } from '../../hooks/useRootStore';
 import ReplayStatusCell from './ReplayStatusCell';
 import useEditorStore from '../../hooks/useEditorStore';
@@ -48,7 +48,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 		editedMessageId,
 		saveEditedMessage,
 		editMessageMode,
-	} = useMessageHistoryStore();
+	} = useReplayStore();
 	const { editorStore, messagesStores } = useRootStore();
 	const { options } = editorStore;
 	const { code } = useEditorStore();
@@ -89,11 +89,11 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 						disabled={!options.parsedMessage.selectedOptions}
 						onClick={() => {
 							if (options.parsedMessage.selectedOptions) {
-								messagesStores.parsedMessage.historyStore.addMessage({
+								messagesStores.parsedMessage.replayStore.addMessage({
 									id: nanoid(),
 									message: code,
 									...options.parsedMessage.selectedOptions,
-									status: { type: 'ready', response: null },
+									status: { type: 'ready' },
 									createdAt: +new Date(),
 									delay: 0,
 								});

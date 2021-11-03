@@ -17,7 +17,6 @@
 
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import '../../styles/message-history.scss';
 import '../../styles/splitter.scss';
 import { nanoid } from 'nanoid';
 import { EventMessage } from '../../models/Message';
@@ -29,7 +28,7 @@ const rangeInMinutes = 30;
 
 const HistoryTab = () => {
 	const { messagesStores, editorStore } = useRootStore();
-	const replayStore = messagesStores.parsedMessage.historyStore;
+	const replayStore = messagesStores.parsedMessage.replayStore;
 	const { selectedSession } = editorStore.options.parsedMessage;
 	const messageWorker = useMessageWorker();
 
@@ -43,7 +42,6 @@ const HistoryTab = () => {
 				delay: 0,
 				status: {
 					type: 'ready',
-					response: null,
 				},
 				createdAt: +new Date(),
 				message: message.jsonBody ?? '{}',

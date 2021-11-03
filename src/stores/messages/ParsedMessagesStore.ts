@@ -17,12 +17,12 @@
 import { flow } from 'mobx';
 import api from '../../api';
 import MessagesStore from './MessagesStore';
-import ParsedMessageReplayStore from '../history/ParsedMessageReplayStore';
+import ParsedMessageReplayStore from '../replay/ParsedMessageReplayStore';
 import { ParsedMessageOptions } from '../options/ParsedMessageOptionsStore';
 import RootStore from '../RootStore';
 
 export default class ParsedMessagesStore extends MessagesStore<ParsedMessageOptions> {
-	historyStore = new ParsedMessageReplayStore(this.rootStore);
+	replayStore = new ParsedMessageReplayStore(this.rootStore);
 
 	constructor(rootStore: RootStore) {
 		super(rootStore);

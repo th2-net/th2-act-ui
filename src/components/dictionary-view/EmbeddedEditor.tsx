@@ -14,8 +14,32 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import useMessagesStore from './useMessagesStore';
+import React from 'react';
+import '../../styles/embedded-editor.scss';
+import { grey } from '@mui/material/colors';
+import { Box } from '@mui/material';
 
-const useMessageHistoryStore = () => useMessagesStore().historyStore;
+type Props = {
+	schema: string | null;
+	object: string | null;
+};
 
-export default useMessageHistoryStore;
+export const EmbeddedEditor = ({ schema, object }: Props) => {
+	if (!schema)
+		return (
+			<Box pt={1} pl={2} color={grey[700]}>
+				Please provide a schema to url
+			</Box>
+		);
+
+	if (!object)
+		return (
+			<Box pt={1} pl={2} color={grey[700]}>
+				Please select a dictionary
+			</Box>
+		);
+
+	const searchParams = new URLSearchParams({ schema, object, editorMode: 'dictionaryEditor', embedded: 'true' });
+
+	return <iframe className='embedded-editor' src={`/editor2/?${searchParams}`} />;
+};

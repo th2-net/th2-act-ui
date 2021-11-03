@@ -19,9 +19,9 @@ import { observer } from 'mobx-react-lite';
 import Editor, { OnChange, OnValidate, useMonaco } from '@monaco-editor/react';
 // eslint-disable-next-line import/no-unresolved
 import { MarkerSeverity } from 'monaco-editor';
-import { createInitialActMessage } from '../helpers/schema';
-import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
-import useEditorStore from '../hooks/useEditorStore';
+import { createInitialActMessage } from '../../helpers/schema';
+import useReplayStore from '../../hooks/useReplayStore';
+import useEditorStore from '../../hooks/useEditorStore';
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
@@ -33,7 +33,7 @@ export interface MessageEditorMethods {
 }
 
 const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<MessageEditorMethods>) => {
-	const historyStore = useMessageHistoryStore();
+	const replayStore = useReplayStore();
 	const { code, setCode } = useEditorStore();
 	const monaco = useMonaco();
 
@@ -72,8 +72,8 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 	}, [monaco, messageSchema]);
 
 	const onValueChange: OnChange = value => {
-		if (historyStore.editMessageMode) {
-			historyStore.setEditedMessageCode(value || '{}');
+		if (replayStore.editMessageMode) {
+			replayStore.setEditedMessageCode(value || '{}');
 		} else {
 			setCode(value || '{}');
 		}
@@ -111,7 +111,7 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 	return (
 		<Editor
 			language='json'
-			value={historyStore.editMessageMode ? historyStore.editedMessageCode : code}
+			value={replayStore.editMessageMode ? replayStore.editedMessageCode : code}
 			onChange={onValueChange}
 			onValidate={onValidate}
 			options={{

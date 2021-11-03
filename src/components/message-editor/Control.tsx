@@ -27,8 +27,8 @@ import {
 	Select,
 	Typography,
 } from '@mui/material';
-import { useRootStore } from '../hooks/useRootStore';
-import useEditorStore from '../hooks/useEditorStore';
+import { useRootStore } from '../../hooks/useRootStore';
+import useEditorStore from '../../hooks/useEditorStore';
 
 export type SchemaType = 'parsedMessage' | 'act';
 

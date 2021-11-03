@@ -16,19 +16,19 @@
 
 import React from 'react';
 import { Box, Link, Typography } from '@mui/material';
-import { grey } from '@mui/material/colors';
+import { green, grey, red } from '@mui/material/colors';
+import Editor from '@monaco-editor/react';
+import { CheckCircle, Error } from '@mui/icons-material';
 import { ActSendingResponse, MessageSendingResponse, ParsedMessageSendingResponse } from '../../models/Message';
-import '../../styles/result.scss';
-import ResultMonacoEditor from './ResultMonacoEditor';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-const Result = ({ response }: { response: MessageSendingResponse | null }) => {
+const Result = ({ response }: { response?: MessageSendingResponse }) => {
 	if (!response) {
 		return (
-			<div className='result'>
-				<Typography sx={{ pt: 1, pl: 2, color: grey[700] }}>No data to display</Typography>
-			</div>
+			<Box pt={1} pl={2}>
+				<Typography sx={{ color: grey[700] }}>No data to display</Typography>
+			</Box>
 		);
 	}
 
@@ -117,7 +117,20 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 	const { link, content } = parseContent();
 
 	return (
-		<Box overflow='hidden' display='flex' flexDirection='column' height='100%'>
+		<Box overflow='hidden' display='flex' flexDirection='column' height='100%' gap={2} pt={2}>
+			<Box display='flex' gap={1} px={3}>
+				{code === 200 ? (
+					<>
+						<CheckCircle color='success' />
+						<Typography color={green[500]}>Success</Typography>
+					</>
+				) : (
+					<>
+						<Error color='error' />
+						<Typography color={red[500]}>Error</Typography>
+					</>
+				)}
+			</Box>
 			{link && (
 				<Link
 					href={link}
@@ -125,7 +138,7 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 					sx={{
 						display: 'block',
 						width: '100%',
-						p: 3,
+						px: 3,
 						whiteSpace: 'nowrap',
 						overflow: 'hidden',
 						textOverflow: 'ellipsis',
@@ -134,7 +147,18 @@ const Result = ({ response }: { response: MessageSendingResponse | null }) => {
 				</Link>
 			)}
 			<Box flexGrow={1}>
-				<ResultMonacoEditor value={content} />
+				<Editor
+					theme={code === 200 ? 'success-theme' : 'fail-theme'}
+					language='json'
+					value={content}
+					options={{
+						minimap: { enabled: false },
+						readOnly: true,
+						lineNumbers: 'off',
+						wordWrap: 'on',
+						automaticLayout: true,
+					}}
+				/>
 			</Box>
 		</Box>
 	);

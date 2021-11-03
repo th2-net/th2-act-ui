@@ -18,14 +18,14 @@ import React from 'react';
 import { DragDropContext, Droppable, DroppableProvided, DropResult } from 'react-beautiful-dnd';
 import { Table, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import { observer } from 'mobx-react-lite';
-import useMessageHistoryStore from '../../hooks/useMessageHistoryStore';
+import useReplayStore from '../../hooks/useReplayStore';
 import ReplayTableBody from './ReplayTableBody';
 import { isActReplayItem } from '../../models/Message';
 
 // TODO: fix drag'n'drop
 // TODO: add replay
 const ReplayTable = () => {
-	const { replayList, reorder } = useMessageHistoryStore();
+	const { replayList, reorder } = useReplayStore();
 
 	const handleDragEnd = (result: DropResult) => {
 		if (!result.destination) return;

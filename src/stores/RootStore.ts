@@ -18,7 +18,7 @@ import { action, flow, makeObservable, observable, reaction } from 'mobx';
 import EditorStore from './EditorStore';
 import ActMessagesStore from './messages/ActMessagesStore';
 import ParsedMessagesStore from './messages/ParsedMessagesStore';
-import { SchemaType } from '../components/Control';
+import { SchemaType } from '../components/message-editor/Control';
 import localStorageWorker from '../helpers/localStorageWorker';
 
 type MessagesStores = {

@@ -76,7 +76,7 @@ export interface ReplayItem {
 	id: string;
 	status: {
 		type: ReplayStatus;
-		response: MessageSendingResponse | null;
+		response?: MessageSendingResponse;
 	};
 }
 

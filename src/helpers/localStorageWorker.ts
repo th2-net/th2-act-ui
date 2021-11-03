@@ -15,35 +15,31 @@
  ***************************************************************************** */
 
 import { ActReplayItem, isActReplayItem, isParsedMessageReplayItem, ParsedMessageReplayItem } from '../models/Message';
-import { SchemaType } from '../components/Control';
+import { SchemaType } from '../components/message-editor/Control';
 import { Method } from '../models/Service';
 
 enum localStorageKeys {
-	PARSED_MESSAGE_HISTORY = 'parsedMessagesHistory',
-	ACT_MESSAGE_HISTORY = 'actMessagesHistory',
+	SELECTED_SCHEMA_TYPE = 'selectedSchemaType',
+	PARSED_MESSAGE_REPLAY = 'parsedMessagesReplay',
+	ACT_MESSAGE_REPLAY = 'actMessagesReplay',
 	SELECTED_SESSION_ID = 'selectedSessionId',
 	SELECTED_DICTIONARY_NAME = 'selectedDictionaryName',
-	EDIT_PARSED_MESSAGE_MODE = 'editParsedMessageMode',
-	EDIT_ACT_MESSAGE_MODE = 'editActMessageMode',
-	SELECTED_ACT_BOX = 'selectedActBox',
-	EDITED_PARSED_MESSAGE_ID = 'editedParsedMessageId',
-	EDITED_ACT_MESSAGE_ID = 'editedActMessageId',
-	SELECTED_SERVICE = 'selectedService',
 	SELECTED_MESSAGE_TYPE = 'selectedMessageType',
+	SELECTED_ACT_BOX = 'selectedActBox',
+	SELECTED_SERVICE = 'selectedService',
 	SELECTED_METHOD_NAME = 'selectedMethodName',
-	SELECTED_SCHEMA_TYPE = 'selectedSchemaType',
 }
 
 class LocalStorageWorker {
-	getParsedMessageHistory() {
-		const history = JSON.parse(localStorage.getItem(localStorageKeys.PARSED_MESSAGE_HISTORY) ?? '[]');
+	getParsedMessageReplay() {
+		const replay = JSON.parse(localStorage.getItem(localStorageKeys.PARSED_MESSAGE_REPLAY) ?? '[]');
 
-		return Array.isArray(history) ? history.filter(isParsedMessageReplayItem) : [];
+		return Array.isArray(replay) ? replay.filter(isParsedMessageReplayItem) : [];
 	}
 
-	getActMessageHistory() {
-		const history = JSON.parse(localStorage.getItem(localStorageKeys.ACT_MESSAGE_HISTORY) ?? '[]');
-		return Array.isArray(history) ? history.filter(isActReplayItem) : [];
+	getActReplay() {
+		const replay = JSON.parse(localStorage.getItem(localStorageKeys.ACT_MESSAGE_REPLAY) ?? '[]');
+		return Array.isArray(replay) ? replay.filter(isActReplayItem) : [];
 	}
 
 	getSelectedSessionId(): string | null {
@@ -54,24 +50,8 @@ class LocalStorageWorker {
 		return localStorage.getItem(localStorageKeys.SELECTED_DICTIONARY_NAME);
 	}
 
-	getEditParsedMessageMode(): boolean {
-		return localStorage.getItem(localStorageKeys.EDIT_PARSED_MESSAGE_MODE) === 'true';
-	}
-
-	getEditActMessageMode(): boolean {
-		return localStorage.getItem(localStorageKeys.EDIT_ACT_MESSAGE_MODE) === 'true';
-	}
-
 	getSelectedActBox(): string | null {
 		return localStorage.getItem(localStorageKeys.SELECTED_ACT_BOX);
-	}
-
-	getEditedParsedMessageId(): string | null {
-		return localStorage.getItem(localStorageKeys.EDITED_PARSED_MESSAGE_ID);
-	}
-
-	getEditedActMessageId(): string | null {
-		return localStorage.getItem(localStorageKeys.EDITED_ACT_MESSAGE_ID);
 	}
 
 	getSelectedService(): string | null {
@@ -92,12 +72,12 @@ class LocalStorageWorker {
 		return schemaType === 'parsedMessage' || schemaType === 'act' ? schemaType : 'parsedMessage';
 	}
 
-	setParsedMessageHistory(messageHistory: ParsedMessageReplayItem[]) {
-		localStorage.setItem(localStorageKeys.PARSED_MESSAGE_HISTORY, JSON.stringify(messageHistory));
+	setParsedMessageReplay(replay: ParsedMessageReplayItem[]) {
+		localStorage.setItem(localStorageKeys.PARSED_MESSAGE_REPLAY, JSON.stringify(replay));
 	}
 
-	setActMessageHistory(messageHistory: ActReplayItem[]) {
-		localStorage.setItem(localStorageKeys.ACT_MESSAGE_HISTORY, JSON.stringify(messageHistory));
+	setActReplay(replay: ActReplayItem[]) {
+		localStorage.setItem(localStorageKeys.ACT_MESSAGE_REPLAY, JSON.stringify(replay));
 	}
 
 	setSelectedSessionId(id: string) {
@@ -108,32 +88,8 @@ class LocalStorageWorker {
 		return localStorage.setItem(localStorageKeys.SELECTED_DICTIONARY_NAME, dictionaryName);
 	}
 
-	setEditParsedMessageMode(mode: boolean) {
-		return localStorage.setItem(localStorageKeys.EDIT_PARSED_MESSAGE_MODE, mode.toString());
-	}
-
-	setEditActMessageMode(mode: boolean) {
-		return localStorage.setItem(localStorageKeys.EDIT_ACT_MESSAGE_MODE, mode.toString());
-	}
-
 	setSelectedActBox(actBox: string) {
 		return localStorage.setItem(localStorageKeys.SELECTED_ACT_BOX, actBox);
-	}
-
-	setEditedParsedMessageId(id: string | null) {
-		if (id) {
-			localStorage.setItem(localStorageKeys.EDITED_PARSED_MESSAGE_ID, id);
-		} else {
-			localStorage.removeItem(localStorageKeys.EDITED_PARSED_MESSAGE_ID);
-		}
-	}
-
-	setEditedActMessageId(id: string | null) {
-		if (id) {
-			localStorage.setItem(localStorageKeys.EDITED_ACT_MESSAGE_ID, id);
-		} else {
-			localStorage.removeItem(localStorageKeys.EDITED_ACT_MESSAGE_ID);
-		}
 	}
 
 	setSelectedService(service: string) {

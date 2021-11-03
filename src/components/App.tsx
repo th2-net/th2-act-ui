@@ -22,17 +22,16 @@ import { Send, Check, Replay } from '@mui/icons-material';
 import { useEffect } from 'react';
 import Result from './result/Result';
 import '../styles/root.scss';
-import MessageEditor, { MessageEditorMethods } from './MessageEditor';
+import MessageEditor, { MessageEditorMethods } from './message-editor/MessageEditor';
 import { useRootStore } from '../hooks/useRootStore';
-import Control from './Control';
-import '../styles/message-list.scss';
-import { EmbeddedEditor } from './EmbeddedEditor';
+import Control from './message-editor/Control';
+import { EmbeddedEditor } from './dictionary-view/EmbeddedEditor';
 import SplitView from './split-view/SplitView';
 import SplitViewPane from './split-view/SplitViewPane';
-import TabPanel from './TabPanel';
+import TabPanel from './util/TabPanel';
 import useMessagesStore from '../hooks/useMessagesStore';
 import useEditorStore from '../hooks/useEditorStore';
-import useMessageHistoryStore from '../hooks/useMessageHistoryStore';
+import useReplayStore from '../hooks/useReplayStore';
 import ReplayView from './replay/ReplayView';
 import MessageWorker from '../stores/MessageWorker';
 import MessageWorkerProvider from '../contexts/messageWorkerContext';
@@ -43,8 +42,8 @@ const App = () => {
 	const [messageWorker] = React.useState(() => new MessageWorker());
 	const messagesStore = useMessagesStore();
 	const editorStore = useEditorStore();
-	const historyStore = useMessageHistoryStore();
-	const { replayList, resetStatuses } = historyStore;
+	const replayStore = useReplayStore();
+	const { replayList, resetStatuses } = replayStore;
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [schema, setSchema] = React.useState<string | null>(null);
@@ -61,7 +60,7 @@ const App = () => {
 
 	const replayMessageRecursive = (index: number) => {
 		setTimeout(() => {
-			historyStore.replayMessage(replayList[index].id).then(() => {
+			replayStore.replayMessage(replayList[index].id).then(() => {
 				if (index < replayList.length - 1) {
 					replayMessageRecursive(index + 1);
 				} else {
@@ -118,12 +117,7 @@ const App = () => {
 						</SplitViewPane>
 
 						<SplitViewPane>
-							<Box
-								sx={{
-									height: '100%',
-									display: 'grid',
-									gridTemplateRows: 'auto 1fr',
-								}}>
+							<Box height='100%' display='grid' gridTemplateRows='auto 1fr'>
 								<Tabs
 									value={currentTab}
 									onChange={(_, tab) => setCurrentTab(tab)}
@@ -151,7 +145,7 @@ const App = () => {
 									/>
 								</Tabs>
 								<TabPanel currentTab={currentTab} tabIndex={0}>
-									<Result response={messagesStore.messageSendingResponse} />
+									<Result response={messagesStore.messageSendingResponse ?? undefined} />
 								</TabPanel>
 								<TabPanel currentTab={currentTab} tabIndex={1} keepMounted>
 									<HistoryView />
@@ -162,7 +156,7 @@ const App = () => {
 								<TabPanel currentTab={currentTab} tabIndex={3} keepMounted>
 									<EmbeddedEditor
 										schema={schema}
-										object={store.editorStore.options.parsedMessage.selectedDictionary || ''}
+										object={store.editorStore.options.parsedMessage.selectedDictionary}
 									/>
 								</TabPanel>
 							</Box>
@@ -170,19 +164,26 @@ const App = () => {
 					</SplitView>
 					<div className='app__buttons'>
 						{currentTab === 2 ? (
-							<Button
-								variant='contained'
-								endIcon={isReplaying ? <CircularProgress color='inherit' size={14} /> : <Replay />}
-								onClick={() => !isReplaying && startReplay()}>
-								{isReplaying ? 'Replaying' : 'Start replay'}
-							</Button>
+							<>
+								{isReplaying ? (
+									<Button
+										variant='contained'
+										endIcon={<CircularProgress color='inherit' size={14} />}>
+										Replaying
+									</Button>
+								) : (
+									<Button variant='contained' endIcon={<Replay />} onClick={() => startReplay()}>
+										Start replay
+									</Button>
+								)}
+							</>
 						) : (
 							<Button
 								variant='contained'
 								endIcon={
 									messagesStore.isSending ? (
 										<CircularProgress color='inherit' size={14} />
-									) : historyStore.editMessageMode ? (
+									) : replayStore.editMessageMode ? (
 										<Check />
 									) : (
 										<Send />

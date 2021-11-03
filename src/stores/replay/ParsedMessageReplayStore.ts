@@ -45,12 +45,12 @@ export default class ParsedMessageReplayStore extends ReplayStore<ParsedMessageR
 			importFromJSON: action,
 		});
 
-		this.replayList = localStorageWorker.getParsedMessageHistory();
+		this.replayList = localStorageWorker.getParsedMessageReplay();
 
 		reaction(
 			() => this.replayList,
-			parsedMessageHistory => {
-				localStorageWorker.setParsedMessageHistory(parsedMessageHistory);
+			replayList => {
+				localStorageWorker.setParsedMessageReplay(replayList);
 			},
 		);
 	}
@@ -74,7 +74,6 @@ export default class ParsedMessageReplayStore extends ReplayStore<ParsedMessageR
 			delay: message.delay,
 			status: {
 				type: 'edited',
-				response: null,
 			},
 		};
 	};
@@ -140,7 +139,6 @@ export default class ParsedMessageReplayStore extends ReplayStore<ParsedMessageR
 						createdAt: +new Date(),
 						status: {
 							type: 'ready',
-							response: null,
 						},
 					});
 				},

@@ -18,10 +18,10 @@ import React from 'react';
 import { Box, Button } from '@mui/material';
 import { ClearAll, Download, Upload } from '@mui/icons-material';
 import ReplayTable from './ReplayTable';
-import useMessageHistoryStore from '../../hooks/useMessageHistoryStore';
+import useReplayStore from '../../hooks/useReplayStore';
 
 const ReplayView = () => {
-	const { exportReplayList, clearReplayList, clearUntitled, importFromJSON } = useMessageHistoryStore();
+	const { exportReplayList, clearReplayList, clearUntitled, importFromJSON } = useReplayStore();
 
 	const loadFromFile = (file: FileList | null) => {
 		if (file != null) {
@@ -36,9 +36,9 @@ const ReplayView = () => {
 	};
 
 	return (
-		<Box sx={{ display: 'grid', gridTemplateRows: '1fr auto', height: '100%' }}>
+		<Box display='grid' gridTemplateRows='1fr auto' height='100%'>
 			<ReplayTable />
-			<Box sx={{ display: 'flex', gap: 1, p: 1 }}>
+			<Box display='flex' gap={1} p={1}>
 				<Button variant='outlined' size='small' startIcon={<ClearAll />} onClick={clearReplayList}>
 					Clear
 				</Button>
