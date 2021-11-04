@@ -131,7 +131,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 					</>
 				) : (
 					<>
-						<TableCell colSpan={2}>New GRPC Call</TableCell>
+						<TableCell colSpan={2}>New gRPC Call</TableCell>
 						<SimpleKeyValueCell label='Box' value={options.act.selectedAct ?? ''} />
 						<SimpleKeyValueCell label='Service' value={options.act.selectedService ?? ''} />
 						<SimpleKeyValueCell

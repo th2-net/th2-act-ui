@@ -74,7 +74,7 @@ const Control = () => {
 		},
 		{
 			name: 'act',
-			label: 'GRPC Call',
+			label: 'gRPC Call',
 			selects: [
 				{
 					label: 'Box',
