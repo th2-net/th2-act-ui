@@ -25,7 +25,6 @@ import {
 	Radio,
 	RadioGroup,
 	Select,
-	Typography,
 } from '@mui/material';
 import { useRootStore } from '../../hooks/useRootStore';
 import useEditorStore from '../../hooks/useEditorStore';
@@ -39,7 +38,7 @@ const Control = () => {
 	const controlConfigs = [
 		{
 			name: 'parsedMessage',
-			label: 'Parsed Message',
+			label: 'Send Message',
 			selects: [
 				{
 					label: 'Session',
@@ -75,11 +74,11 @@ const Control = () => {
 		},
 		{
 			name: 'act',
-			label: 'Act',
+			label: 'GRPC Call',
 			selects: [
 				{
-					label: 'Act',
-					id: 'act',
+					label: 'Box',
+					id: 'box',
 					options: options.act.acts,
 					selected: options.act.selectedAct || '',
 					disabled: options.act.isActsLoading,
@@ -116,9 +115,6 @@ const Control = () => {
 	return (
 		<>
 			<Box display='flex' alignItems='center'>
-				<Box mr={2}>
-					<Typography>Send as</Typography>
-				</Box>
 				<RadioGroup
 					row
 					value={store.schemaType}

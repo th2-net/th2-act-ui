@@ -14,8 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import useMessagesStore from './useMessagesStore';
+import { useRootStore } from './useRootStore';
 
-const useReplayStore = () => useMessagesStore().replayStore;
+const useReplayStore = () => useRootStore().replayStore;
 
 export default useReplayStore;

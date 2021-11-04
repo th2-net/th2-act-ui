@@ -60,7 +60,7 @@ const App = () => {
 
 	const replayMessageRecursive = (index: number) => {
 		setTimeout(() => {
-			replayStore.replayMessage(replayList[index].id).then(() => {
+			replayStore.replay(replayList[index].id).then(() => {
 				if (index < replayList.length - 1) {
 					replayMessageRecursive(index + 1);
 				} else {
@@ -97,10 +97,10 @@ const App = () => {
 	}, [store]);
 
 	React.useEffect(() => {
-		if (store.schemaType === 'act') {
+		if (store.schemaType === 'act' && (currentTab === 1 || currentTab === 3)) {
 			setCurrentTab(0);
 		}
-	}, [store.schemaType]);
+	}, [store.schemaType, currentTab]);
 
 	return (
 		<MessageWorkerProvider value={messageWorker}>
@@ -133,11 +133,7 @@ const App = () => {
 										className='app__tab'
 										disabled={store.schemaType !== 'parsedMessage'}
 									/>
-									<Tab
-										label='Replay'
-										className='app__tab'
-										disabled={store.schemaType !== 'parsedMessage'}
-									/>
+									<Tab label='Replay' className='app__tab' />
 									<Tab
 										label='Dictionary'
 										className='app__tab'
@@ -183,7 +179,7 @@ const App = () => {
 								endIcon={
 									messagesStore.isSending ? (
 										<CircularProgress color='inherit' size={14} />
-									) : replayStore.editMessageMode ? (
+									) : replayStore.editReplayItemMode ? (
 										<Check />
 									) : (
 										<Send />
