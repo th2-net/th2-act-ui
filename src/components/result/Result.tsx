@@ -135,7 +135,6 @@ const Result = ({ response }: { response?: MessageSendingResponse }) => {
 			)}
 			<Box flexGrow={1}>
 				<Editor
-					theme={code === 200 ? 'success-theme' : 'fail-theme'}
 					language='json'
 					value={content}
 					options={{
