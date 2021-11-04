@@ -51,9 +51,11 @@ export default class ReplayStore {
 			saveEditedReplayItem: action,
 			addToReplayList: action,
 			clearReplayList: action,
+			clearUntitled: action,
 			setEditedReplayItemCode: action,
 			resetStatuses: action,
 			changeStatus: action,
+			changeDelay: action,
 			setEditedReplayItemId: action,
 			setEditReplayItemMode: action,
 			removeReplayItem: action,
@@ -211,13 +213,15 @@ export default class ReplayStore {
 					replayItem.status.type = result.code === 200 ? 'success' : 'fail';
 					replayItem.status.response = result;
 				}
-			} catch (_) {
+			} catch (error) {
+				console.error('Error occurred while replaying', error);
+
 				replayItem.status = {
 					type: 'fail',
 				};
+			} finally {
+				this.replayList = [...this.replayList];
 			}
-
-			this.replayList = [...this.replayList];
 		}
 	});
 
