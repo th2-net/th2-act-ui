@@ -20,6 +20,7 @@ import ActMessagesStore from './messages/ActMessagesStore';
 import ParsedMessagesStore from './messages/ParsedMessagesStore';
 import { SchemaType } from '../components/message-editor/Control';
 import localStorageWorker from '../helpers/localStorageWorker';
+import ReplayStore from './ReplayStore';
 
 type MessagesStores = {
 	act: ActMessagesStore;
@@ -27,6 +28,8 @@ type MessagesStores = {
 };
 
 export default class RootStore {
+	replayStore = new ReplayStore(this);
+
 	editorStore = new EditorStore(this);
 
 	messagesStores: MessagesStores = {

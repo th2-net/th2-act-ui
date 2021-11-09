@@ -15,10 +15,9 @@
  ***************************************************************************** */
 
 import React from 'react';
-import { Box, Link, Typography } from '@mui/material';
-import { green, grey, red } from '@mui/material/colors';
+import { Alert, Box, Link, Typography } from '@mui/material';
+import { grey } from '@mui/material/colors';
 import Editor from '@monaco-editor/react';
-import { CheckCircle, Error } from '@mui/icons-material';
 import { ActSendingResponse, MessageSendingResponse, ParsedMessageSendingResponse } from '../../models/Message';
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -117,20 +116,8 @@ const Result = ({ response }: { response?: MessageSendingResponse }) => {
 	const { link, content } = parseContent();
 
 	return (
-		<Box overflow='hidden' display='flex' flexDirection='column' height='100%' gap={2} pt={2}>
-			<Box display='flex' gap={1} px={3}>
-				{code === 200 ? (
-					<>
-						<CheckCircle color='success' />
-						<Typography color={green[500]}>Success</Typography>
-					</>
-				) : (
-					<>
-						<Error color='error' />
-						<Typography color={red[500]}>Error</Typography>
-					</>
-				)}
-			</Box>
+		<Box overflow='hidden' display='flex' flexDirection='column' height='100%' gap={2}>
+			{code === 200 ? <Alert severity='success'>Success</Alert> : <Alert severity='error'>Error</Alert>}
 			{link && (
 				<Link
 					href={link}
@@ -148,7 +135,6 @@ const Result = ({ response }: { response?: MessageSendingResponse }) => {
 			)}
 			<Box flexGrow={1}>
 				<Editor
-					theme={code === 200 ? 'success-theme' : 'fail-theme'}
 					language='json'
 					value={content}
 					options={{

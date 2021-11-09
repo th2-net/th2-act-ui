@@ -15,15 +15,12 @@
  ***************************************************************************** */
 
 import { flow } from 'mobx';
-import ActReplayStore from '../replay/ActReplayStore';
 import api from '../../api';
 import MessagesStore from './MessagesStore';
 import { ActMessageOptions } from '../options/ActOptionsStore';
 import RootStore from '../RootStore';
 
 export default class ActMessagesStore extends MessagesStore<ActMessageOptions> {
-	replayStore = new ActReplayStore(this.rootStore);
-
 	constructor(rootStore: RootStore) {
 		super(rootStore);
 	}

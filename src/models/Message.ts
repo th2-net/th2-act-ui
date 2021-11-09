@@ -24,12 +24,6 @@ export interface ParsedMessage {
 	[messageType: string]: JSONSchema7;
 }
 
-export type FieldBase = {
-	type: 'simple' | 'array' | 'map';
-	name: string;
-	required: boolean;
-};
-
 export interface MessageRequestModel {
 	session: string;
 	dictionary: string;
@@ -81,12 +75,14 @@ export interface ReplayItem {
 }
 
 export interface ParsedMessageReplayItem extends ReplayItem {
+	type: 'parsedMessage';
 	session: string;
 	dictionary: string;
 	messageType: string;
 }
 
 export interface ActReplayItem extends ReplayItem {
+	type: 'act';
 	actBox: string;
 	fullServiceName: string;
 	methodName: string;
@@ -94,12 +90,12 @@ export interface ActReplayItem extends ReplayItem {
 
 export function isParsedMessageReplayItem(object: unknown): object is ParsedMessageReplayItem {
 	return (
-		typeof object === 'object' && object !== null && typeof (object as ParsedMessageReplayItem).session === 'string'
+		typeof object === 'object' && object !== null && (object as ParsedMessageReplayItem).type === 'parsedMessage'
 	);
 }
 
 export function isActReplayItem(object: unknown): object is ActReplayItem {
-	return typeof object === 'object' && object !== null && typeof (object as ActReplayItem).actBox === 'string';
+	return typeof object === 'object' && object !== null && (object as ActReplayItem).type === 'act';
 }
 
 export type EventMessage = {

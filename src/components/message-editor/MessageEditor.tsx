@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ***************************************************************************** */
+
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
@@ -72,8 +73,8 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 	}, [monaco, messageSchema]);
 
 	const onValueChange: OnChange = value => {
-		if (replayStore.editMessageMode) {
-			replayStore.setEditedMessageCode(value || '{}');
+		if (replayStore.editReplayItemMode) {
+			replayStore.setEditedReplayItemCode(value || '{}');
 		} else {
 			setCode(value || '{}');
 		}
@@ -111,7 +112,7 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 	return (
 		<Editor
 			language='json'
-			value={replayStore.editMessageMode ? replayStore.editedMessageCode : code}
+			value={replayStore.editReplayItemMode ? replayStore.editedReplayItemCode : code}
 			onChange={onValueChange}
 			onValidate={onValidate}
 			options={{

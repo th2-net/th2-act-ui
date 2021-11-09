@@ -20,8 +20,7 @@ import { Method } from '../models/Service';
 
 enum localStorageKeys {
 	SELECTED_SCHEMA_TYPE = 'selectedSchemaType',
-	PARSED_MESSAGE_REPLAY = 'parsedMessagesReplay',
-	ACT_MESSAGE_REPLAY = 'actMessagesReplay',
+	REPLAY_LIST = 'replayList',
 	SELECTED_SESSION_ID = 'selectedSessionId',
 	SELECTED_DICTIONARY_NAME = 'selectedDictionaryName',
 	SELECTED_MESSAGE_TYPE = 'selectedMessageType',
@@ -31,15 +30,12 @@ enum localStorageKeys {
 }
 
 class LocalStorageWorker {
-	getParsedMessageReplay() {
-		const replay = JSON.parse(localStorage.getItem(localStorageKeys.PARSED_MESSAGE_REPLAY) ?? '[]');
+	getReplayList(): Array<ActReplayItem | ParsedMessageReplayItem> {
+		const replayList = JSON.parse(localStorage.getItem(localStorageKeys.REPLAY_LIST) ?? '[]');
 
-		return Array.isArray(replay) ? replay.filter(isParsedMessageReplayItem) : [];
-	}
-
-	getActReplay() {
-		const replay = JSON.parse(localStorage.getItem(localStorageKeys.ACT_MESSAGE_REPLAY) ?? '[]');
-		return Array.isArray(replay) ? replay.filter(isActReplayItem) : [];
+		return Array.isArray(replayList)
+			? replayList.filter(replayItem => isActReplayItem(replayItem) || isParsedMessageReplayItem(replayItem))
+			: [];
 	}
 
 	getSelectedSessionId(): string | null {
@@ -72,12 +68,8 @@ class LocalStorageWorker {
 		return schemaType === 'parsedMessage' || schemaType === 'act' ? schemaType : 'parsedMessage';
 	}
 
-	setParsedMessageReplay(replay: ParsedMessageReplayItem[]) {
-		localStorage.setItem(localStorageKeys.PARSED_MESSAGE_REPLAY, JSON.stringify(replay));
-	}
-
-	setActReplay(replay: ActReplayItem[]) {
-		localStorage.setItem(localStorageKeys.ACT_MESSAGE_REPLAY, JSON.stringify(replay));
+	setReplayList(replayList: Array<ParsedMessageReplayItem | ActReplayItem>) {
+		localStorage.setItem(localStorageKeys.REPLAY_LIST, JSON.stringify(replayList));
 	}
 
 	setSelectedSessionId(id: string) {
