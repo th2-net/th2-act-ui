@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /** ****************************************************************************
  * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
@@ -15,6 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import '../../styles/splitter.scss';
@@ -27,14 +28,14 @@ import { IncomingMessageActions } from '../../stores/MessageWorker';
 const rangeInMinutes = 30;
 
 const HistoryTab = () => {
-	const { messagesStores, editorStore } = useRootStore();
-	const replayStore = messagesStores.parsedMessage.replayStore;
+	const { editorStore, replayStore } = useRootStore();
 	const { selectedSession } = editorStore.options.parsedMessage;
 	const messageWorker = useMessageWorker();
 
 	React.useEffect(() => {
 		const addToReplay = (message: EventMessage) =>
-			replayStore.addMessage({
+			replayStore.addToReplayList({
+				type: 'parsedMessage',
 				id: nanoid(),
 				session: message.sessionId,
 				dictionary: editorStore.options.parsedMessage.selectedDictionary ?? 'unknown',
