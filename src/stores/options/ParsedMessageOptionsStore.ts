@@ -72,6 +72,13 @@ export default class ParsedMessageOptionsStore {
 			session => {
 				if (session) {
 					localStorageWorker.setSelectedSessionId(session);
+
+					this.resetDictionary();
+					this.fetchDictionaries(session).then(() => {
+						if (this.dictionaries.length > 0) {
+							this.selectDictionary(this.dictionaries[0]);
+						}
+					});
 				}
 			},
 		);
@@ -109,6 +116,10 @@ export default class ParsedMessageOptionsStore {
 		this.schema = null;
 	};
 
+	private resetDictionary = () => {
+		this.selectedDictionary = null;
+	};
+
 	selectSession = (session: string) => {
 		this.selectedSession = session;
 	};
@@ -134,11 +145,11 @@ export default class ParsedMessageOptionsStore {
 		}
 	});
 
-	fetchDictionaries = flow(function* (this: ParsedMessageOptionsStore) {
+	fetchDictionaries = flow(function* (this: ParsedMessageOptionsStore, sessionName: string) {
 		this.isDictionariesLoading = true;
 
 		try {
-			this.dictionaries = yield api.getDictionaryList();
+			this.dictionaries = yield api.getDictionaryList(sessionName);
 			this.dictionaries.sort();
 		} catch (error) {
 			console.error('Error occurred while fetching dictionaries');
@@ -190,13 +201,14 @@ export default class ParsedMessageOptionsStore {
 		const savedDictionaryName = localStorageWorker.getSelectedDictionaryName();
 		const savedMessageType = localStorageWorker.getSelectedMessageType();
 
-		yield Promise.all([this.fetchSessions(), this.fetchDictionaries()]);
+		yield this.fetchSessions();
 
 		if (savedSession) {
 			this.selectSession(savedSession);
+			yield this.fetchDictionaries(savedSession);
 		}
 
-		if (savedDictionaryName) {
+		if (savedSession && savedDictionaryName) {
 			this.selectDictionary(savedDictionaryName);
 		}
 

@@ -25,8 +25,8 @@ import {
 import Service from '../models/Service';
 
 const api = {
-	async getDictionaryList(): Promise<string[]> {
-		const dictionariesResponse = await fetch('backend/dictionaries', {
+	async getDictionaryList(sessionName: string): Promise<string[]> {
+		const dictionariesResponse = await fetch(`backend/dictionaries/${sessionName}`, {
 			cache: 'no-cache',
 		});
 
