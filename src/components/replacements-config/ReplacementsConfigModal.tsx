@@ -136,6 +136,7 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 								</TableCell>
 								<TableCell>
 									<Autocomplete
+										freeSolo
 										autoSelect
 										value={sourcePath}
 										onChange={(_, newValue: string | null) =>
