@@ -17,9 +17,9 @@
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import Editor, { OnMount, OnValidate, useMonaco } from '@monaco-editor/react';
+import Editor, { OnValidate, useMonaco } from '@monaco-editor/react';
 // eslint-disable-next-line import/no-unresolved
-import { editor, languages, MarkerSeverity } from 'monaco-editor';
+import { languages, MarkerSeverity } from 'monaco-editor';
 import jsm from 'json-source-map';
 import { createInitialActMessage } from '../../helpers/schema';
 import useReplayStore from '../../hooks/useReplayStore';
@@ -40,7 +40,6 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 	const { code, setCode } = useEditorStore();
 	const { replacements } = useMessagesStore();
 	const monaco = useMonaco();
-	const editorRef = React.useRef<editor.IStandaloneCodeEditor | null>(null);
 
 	const currentValue = replayStore.editReplayItemMode ? replayStore.editedReplayItemCode : code;
 
@@ -118,7 +117,7 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 	}, [currentValue, currentReplacements]);
 
 	React.useEffect(() => {
-		if (monaco && editorRef.current) {
+		if (monaco) {
 			const disposable = monaco.languages.registerCodeLensProvider('json', {
 				provideCodeLenses: () => ({
 					lenses,
@@ -145,10 +144,6 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 		[setIsValid],
 	);
 
-	const onMount: OnMount = _editor => {
-		editorRef.current = _editor;
-	};
-
 	React.useImperativeHandle(
 		ref,
 		() => ({
@@ -171,7 +166,6 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 			value={currentValue}
 			onChange={onValueChange}
 			onValidate={onValidate}
-			onMount={onMount}
 			options={{
 				automaticLayout: true,
 			}}
