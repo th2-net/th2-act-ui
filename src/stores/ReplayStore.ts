@@ -22,12 +22,14 @@ import {
 	isParsedMessageReplayItem,
 	MessageSendingResponse,
 	ParsedMessageReplayItem,
+	ReplacementConfig,
 	ReplayItem,
 } from '../models/Message';
 import RootStore from './RootStore';
 import api from '../api';
 import { downloadFile } from '../helpers/downloadFile';
 import localStorageWorker from '../helpers/localStorageWorker';
+import applyReplacements from '../helpers/applyReplacements';
 
 type ReplayExportData<T extends ReplayItem> = Omit<T, 'id' | 'status' | 'createdAt'>;
 
@@ -70,6 +72,12 @@ export default class ReplayStore {
 		);
 	}
 
+	get replayItemToEdit() {
+		return this.editReplayItemMode && this.editedReplayItemId
+			? this.replayList.find(({ id }) => id === this.editedReplayItemId)
+			: null;
+	}
+
 	buildEditedReplayItem = (id: string): ParsedMessageReplayItem | ActReplayItem | null => {
 		const replayItem = this.replayList.find(item => item.id === id);
 
@@ -81,6 +89,7 @@ export default class ReplayStore {
 				status: {
 					type: 'edited',
 				},
+				replacements: replayItem.replacements,
 			};
 		}
 
@@ -92,6 +101,7 @@ export default class ReplayStore {
 				status: {
 					type: 'edited',
 				},
+				replacements: replayItem.replacements,
 			};
 		}
 
@@ -157,6 +167,12 @@ export default class ReplayStore {
 		}
 	};
 
+	changeReplacements = (id: string, config: ReplacementConfig[]) => {
+		this.replayList = this.replayList.map(replayItem =>
+			replayItem.id === id ? { ...replayItem, replacements: config } : replayItem,
+		);
+	};
+
 	setEditedReplayItemId = (id: string) => {
 		this.editedReplayItemId = id;
 	};
@@ -190,22 +206,34 @@ export default class ReplayStore {
 
 		if (replayItem) {
 			try {
+				const message: object = JSON.parse(replayItem.message);
+				const formattedOriginalMessage = JSON.stringify(message, null, '   ');
+
+				applyReplacements(message, replayItem.replacements, this.replayList);
+
+				const formattedModifiedMessage = JSON.stringify(message, null, '   ');
+
+				replayItem.formattedMessage = {
+					original: formattedOriginalMessage,
+					modified: formattedModifiedMessage,
+				};
+
 				if (isParsedMessageReplayItem(replayItem)) {
-					const { session, dictionary, messageType, message } = replayItem;
+					const { session, dictionary, messageType } = replayItem;
 
 					result = yield api.sendMessage({
 						session,
 						dictionary,
 						messageType,
-						message: JSON.parse(message),
+						message,
 					});
 				} else if (isActReplayItem(replayItem)) {
-					const { fullServiceName, methodName, message } = replayItem;
+					const { fullServiceName, methodName } = replayItem;
 
 					result = yield api.callMethod({
 						fullServiceName,
 						methodName,
-						message: JSON.parse(message),
+						message,
 					});
 				}
 
@@ -229,14 +257,14 @@ export default class ReplayStore {
 		const exportData: Array<ReplayExportData<ParsedMessageReplayItem> | ReplayExportData<ActReplayItem>> =
 			this.replayList.map(replayItem => {
 				if (isParsedMessageReplayItem(replayItem)) {
-					const { session, dictionary, messageType, message, type, delay, name } = replayItem;
+					const { session, dictionary, messageType, message, type, delay, name, replacements } = replayItem;
 
-					return { session, dictionary, messageType, message, type, delay, name };
+					return { session, dictionary, messageType, message, type, delay, name, replacements };
 				}
 
-				const { actBox, fullServiceName, methodName, message, type, delay, name } = replayItem;
+				const { actBox, fullServiceName, methodName, message, type, delay, name, replacements } = replayItem;
 
-				return { actBox, fullServiceName, methodName, message, type, delay, name };
+				return { actBox, fullServiceName, methodName, message, type, delay, name, replacements };
 			});
 
 		downloadFile(JSON.stringify(exportData, null, '    '), 'replay', 'application/json');

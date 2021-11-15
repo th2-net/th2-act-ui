@@ -23,6 +23,7 @@ import Result from '../result/Result';
 
 type Props = {
 	status: ReplayItem['status'];
+	formattedMessage: ReplayItem['formattedMessage'];
 };
 
 const colors: Record<ReplayStatus, string> = {
@@ -32,7 +33,7 @@ const colors: Record<ReplayStatus, string> = {
 	fail: red[500],
 };
 
-const ReplayStatusCell = ({ status }: Props) => {
+const ReplayStatusCell = ({ status, formattedMessage }: Props) => {
 	const [showResult, toggleResult] = React.useState(false);
 	const anchorRef = React.useRef<HTMLButtonElement | null>(null);
 
@@ -49,8 +50,8 @@ const ReplayStatusCell = ({ status }: Props) => {
 				onClose={() => toggleResult(false)}
 				anchorEl={anchorRef.current}
 				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-				<Box width={500} height={250} className='scrollbar'>
-					<Result response={status.response} />
+				<Box width={800} height={500} className='scrollbar'>
+					<Result response={status.response} formattedMessage={formattedMessage} />
 				</Box>
 			</Popover>
 		</TableCell>

@@ -14,8 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { makeObservable, observable } from 'mobx';
-import { MessageSendingResponse } from '../../models/Message';
+import { action, makeObservable, observable } from 'mobx';
+import { MessageSendingResponse, ReplacementConfig, ReplayItem } from '../../models/Message';
 import RootStore from '../RootStore';
 
 export default abstract class MessagesStore<T> {
@@ -23,12 +23,23 @@ export default abstract class MessagesStore<T> {
 
 	messageSendingResponse: MessageSendingResponse | null = null;
 
+	replacements: ReplacementConfig[] = [];
+
+	formattedMessage: ReplayItem['formattedMessage'] | null = null;
+
 	protected constructor(protected readonly rootStore: RootStore) {
 		makeObservable(this, {
 			isSending: observable,
 			messageSendingResponse: observable,
+			replacements: observable,
+			formattedMessage: observable,
+			setReplacements: action,
 		});
 	}
 
 	abstract sendMessage: (message: object) => void;
+
+	setReplacements = (replacements: ReplacementConfig[]) => {
+		this.replacements = replacements;
+	};
 }

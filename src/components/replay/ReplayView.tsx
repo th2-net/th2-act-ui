@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import React from 'react';
-import { Box, Button } from '@mui/material';
+import { Box, Button, Stack } from '@mui/material';
 import { ClearAll, Download, Upload } from '@mui/icons-material';
 import ReplayTable from './ReplayTable';
 import useReplayStore from '../../hooks/useReplayStore';
@@ -38,7 +38,7 @@ const ReplayView = () => {
 	return (
 		<Box display='grid' gridTemplateRows='1fr auto' height='100%'>
 			<ReplayTable />
-			<Box display='flex' gap={1} p={1}>
+			<Stack direction='row' spacing={1} p={1}>
 				<Button variant='outlined' size='small' startIcon={<ClearAll />} onClick={clearReplayList}>
 					Clear
 				</Button>
@@ -59,7 +59,7 @@ const ReplayView = () => {
 						/>
 					</Button>
 				</label>
-			</Box>
+			</Stack>
 		</Box>
 	);
 };

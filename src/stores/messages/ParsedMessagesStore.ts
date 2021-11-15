@@ -19,6 +19,7 @@ import api from '../../api';
 import MessagesStore from './MessagesStore';
 import { ParsedMessageOptions } from '../options/ParsedMessageOptionsStore';
 import RootStore from '../RootStore';
+import applyReplacements from '../../helpers/applyReplacements';
 
 export default class ParsedMessagesStore extends MessagesStore<ParsedMessageOptions> {
 	constructor(rootStore: RootStore) {
@@ -32,6 +33,17 @@ export default class ParsedMessagesStore extends MessagesStore<ParsedMessageOpti
 		this.isSending = true;
 
 		try {
+			const formattedOriginalMessage = JSON.stringify(message, null, '   ');
+
+			applyReplacements(message, this.replacements, this.rootStore.replayStore.replayList);
+
+			const formattedModifiedMessage = JSON.stringify(message, null, '   ');
+
+			this.formattedMessage = {
+				original: formattedOriginalMessage,
+				modified: formattedModifiedMessage,
+			};
+
 			this.messageSendingResponse = yield api.sendMessage({
 				...options,
 				message,

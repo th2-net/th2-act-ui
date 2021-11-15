@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import React from 'react';
-import { Box, TableCell, TableCellProps, Typography } from '@mui/material';
+import { Stack, TableCell, TableCellProps, Typography } from '@mui/material';
 
 type Props = {
 	label: string;
@@ -25,12 +25,12 @@ type Props = {
 
 const SimpleKeyValueCell = ({ label, value, tableCellProps }: Props) => (
 	<TableCell {...tableCellProps}>
-		<Box display='flex' flexDirection='column'>
+		<Stack>
 			<Typography color='textSecondary' variant='caption'>
 				{label}
 			</Typography>
 			<Typography variant='body2'>{value}</Typography>
-		</Box>
+		</Stack>
 	</TableCell>
 );
 

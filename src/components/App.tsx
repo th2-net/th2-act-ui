@@ -141,7 +141,10 @@ const App = () => {
 									/>
 								</Tabs>
 								<TabPanel currentTab={currentTab} tabIndex={0}>
-									<Result response={messagesStore.messageSendingResponse ?? undefined} />
+									<Result
+										response={messagesStore.messageSendingResponse ?? undefined}
+										formattedMessage={messagesStore.formattedMessage ?? undefined}
+									/>
 								</TabPanel>
 								<TabPanel currentTab={currentTab} tabIndex={1} keepMounted>
 									<HistoryView />

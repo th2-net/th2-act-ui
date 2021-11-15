@@ -46,6 +46,7 @@ const HistoryTab = () => {
 				},
 				createdAt: +new Date(),
 				message: message.jsonBody ?? '{}',
+				replacements: [],
 			});
 
 		messageWorker.subscribeOnMessage(IncomingMessageActions.ReplayMessage, addToReplay);

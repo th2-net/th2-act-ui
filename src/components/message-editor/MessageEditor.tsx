@@ -17,12 +17,14 @@
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import Editor, { OnChange, OnValidate, useMonaco } from '@monaco-editor/react';
+import Editor, { OnMount, OnValidate, useMonaco } from '@monaco-editor/react';
 // eslint-disable-next-line import/no-unresolved
-import { MarkerSeverity } from 'monaco-editor';
+import { editor, languages, MarkerSeverity } from 'monaco-editor';
+import jsm from 'json-source-map';
 import { createInitialActMessage } from '../../helpers/schema';
 import useReplayStore from '../../hooks/useReplayStore';
 import useEditorStore from '../../hooks/useEditorStore';
+import useMessagesStore from '../../hooks/useMessagesStore';
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
@@ -36,7 +38,19 @@ export interface MessageEditorMethods {
 const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<MessageEditorMethods>) => {
 	const replayStore = useReplayStore();
 	const { code, setCode } = useEditorStore();
+	const { replacements } = useMessagesStore();
 	const monaco = useMonaco();
+	const editorRef = React.useRef<editor.IStandaloneCodeEditor | null>(null);
+
+	const currentValue = replayStore.editReplayItemMode ? replayStore.editedReplayItemCode : code;
+
+	const onValueChange = (value: string | undefined) => {
+		if (replayStore.editReplayItemMode) {
+			replayStore.setEditedReplayItemCode(value || '{}');
+		} else {
+			setCode(value || '{}');
+		}
+	};
 
 	React.useEffect(() => {
 		if (monaco) {
@@ -72,18 +86,56 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 		}
 	}, [monaco, messageSchema]);
 
-	const onValueChange: OnChange = value => {
-		if (replayStore.editReplayItemMode) {
-			replayStore.setEditedReplayItemCode(value || '{}');
-		} else {
-			setCode(value || '{}');
+	const currentReplacements = React.useMemo(() => {
+		if (!replayStore.replayItemToEdit) return replacements;
+		return replayStore.replayItemToEdit.replacements;
+	}, [replayStore, replayStore.replayList, replayStore.editedReplayItemId, replayStore.editReplayItemMode]);
+
+	const lenses: languages.CodeLens[] = React.useMemo(() => {
+		if (!currentReplacements) return [];
+		try {
+			const { pointers } = jsm.parse(currentValue);
+
+			const paths = currentReplacements
+				.map(({ destinationPath }) => (destinationPath === '/' ? '' : destinationPath))
+				.filter(path => path in pointers);
+
+			return paths.map(path => ({
+				range: {
+					startLineNumber: (pointers[path].key?.line ?? pointers[path].value.line) + 1,
+					startColumn: (pointers[path].key?.column ?? pointers[path].value.column) + 1,
+					endLineNumber: (pointers[path].keyEnd?.line ?? pointers[path].valueEnd.line) + 1,
+					endColumn: (pointers[path].keyEnd?.column ?? pointers[path].valueEnd.column) + 1,
+				},
+				command: {
+					id: '-1',
+					title: `A value of ${path || '/'} will be replaced`,
+				},
+			}));
+		} catch {
+			return [];
 		}
-	};
+	}, [currentValue, currentReplacements]);
+
+	React.useEffect(() => {
+		if (monaco && editorRef.current) {
+			const disposable = monaco.languages.registerCodeLensProvider('json', {
+				provideCodeLenses: () => ({
+					lenses,
+					dispose: () => undefined,
+				}),
+				resolveCodeLens: (_, codeLens) => codeLens,
+			});
+
+			return disposable.dispose;
+		}
+
+		return () => undefined;
+	}, [currentValue, monaco, currentReplacements, lenses]);
 
 	const initiateSchema = (message: JSONSchema4 | JSONSchema7) => {
 		const initialSchema = createInitialActMessage(message) || '{}';
 		setCode(initialSchema);
-		// setIsSchemaApplied(true);
 	};
 
 	const onValidate: OnValidate = React.useCallback(
@@ -93,28 +145,33 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 		[setIsValid],
 	);
 
+	const onMount: OnMount = _editor => {
+		editorRef.current = _editor;
+	};
+
 	React.useImperativeHandle(
 		ref,
 		() => ({
 			getFilledMessage: () => {
 				let filledMessage: object | null;
 				try {
-					filledMessage = JSON.parse(code);
+					filledMessage = JSON.parse(currentValue);
 				} catch {
 					filledMessage = null;
 				}
 				return filledMessage;
 			},
 		}),
-		[code],
+		[currentValue],
 	);
 
 	return (
 		<Editor
 			language='json'
-			value={replayStore.editReplayItemMode ? replayStore.editedReplayItemCode : code}
+			value={currentValue}
 			onChange={onValueChange}
 			onValidate={onValidate}
+			onMount={onMount}
 			options={{
 				automaticLayout: true,
 			}}

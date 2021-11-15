@@ -62,16 +62,26 @@ export interface ActSendingResponse {
 
 export type ReplayStatus = 'ready' | 'edited' | 'fail' | 'success';
 
+export interface ReplacementConfig {
+	destinationPath: string;
+	sourcePath: string;
+}
+
 export interface ReplayItem {
 	name?: string;
 	createdAt: number;
 	message: string;
+	formattedMessage?: {
+		original: string;
+		modified: string;
+	};
 	delay: number;
 	id: string;
 	status: {
 		type: ReplayStatus;
 		response?: MessageSendingResponse;
 	};
+	replacements: ReplacementConfig[];
 }
 
 export interface ParsedMessageReplayItem extends ReplayItem {

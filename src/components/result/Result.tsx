@@ -15,14 +15,25 @@
  ***************************************************************************** */
 
 import React from 'react';
-import { Alert, Box, Link, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Link, Stack, Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import Editor from '@monaco-editor/react';
-import { ActSendingResponse, MessageSendingResponse, ParsedMessageSendingResponse } from '../../models/Message';
+import Editor, { DiffEditor } from '@monaco-editor/react';
+import { ExpandMore, Info } from '@mui/icons-material';
+import {
+	ActSendingResponse,
+	MessageSendingResponse,
+	ParsedMessageSendingResponse,
+	ReplayItem,
+} from '../../models/Message';
 
 const isDev = process.env.NODE_ENV === 'development';
 
-const Result = ({ response }: { response?: MessageSendingResponse }) => {
+type Props = {
+	response?: MessageSendingResponse;
+	formattedMessage?: ReplayItem['formattedMessage'];
+};
+
+const Result = ({ response, formattedMessage }: Props) => {
 	if (!response) {
 		return (
 			<Box pt={1} pl={2}>
@@ -116,24 +127,46 @@ const Result = ({ response }: { response?: MessageSendingResponse }) => {
 	const { link, content } = parseContent();
 
 	return (
-		<Box overflow='hidden' display='flex' flexDirection='column' height='100%' gap={2}>
-			{code === 200 ? <Alert severity='success'>Success</Alert> : <Alert severity='error'>Error</Alert>}
+		<Stack overflow='auto' height='100%' className='scrollbar'>
+			{code === 200 ? <Alert severity='success'>SUCCESS</Alert> : <Alert severity='error'>FAIL</Alert>}
 			{link && (
 				<Link
 					href={link}
 					target='_blank'
 					sx={{
+						flexShrink: 0,
 						display: 'block',
 						width: '100%',
-						px: 3,
+						p: 2,
 						whiteSpace: 'nowrap',
 						overflow: 'hidden',
 						textOverflow: 'ellipsis',
 					}}>
-					{link}
+					Report Link
 				</Link>
 			)}
-			<Box flexGrow={1}>
+			{formattedMessage && formattedMessage.original !== formattedMessage.modified && (
+				<Accordion>
+					<AccordionSummary expandIcon={<ExpandMore />}>
+						<Stack spacing={1} direction='row'>
+							<Info color='info' />
+							<Typography>Some fields have been modified by expressions</Typography>
+						</Stack>
+					</AccordionSummary>
+					<AccordionDetails>
+						<DiffEditor
+							height={500}
+							language='json'
+							original={formattedMessage.original}
+							modified={formattedMessage.modified}
+							options={{
+								readOnly: true,
+							}}
+						/>
+					</AccordionDetails>
+				</Accordion>
+			)}
+			<Box flexGrow={1} mt={2}>
 				<Editor
 					language='json'
 					value={content}
@@ -146,7 +179,7 @@ const Result = ({ response }: { response?: MessageSendingResponse }) => {
 					}}
 				/>
 			</Box>
-		</Box>
+		</Stack>
 	);
 };
 
