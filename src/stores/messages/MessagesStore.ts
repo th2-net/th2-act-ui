@@ -14,8 +14,21 @@
  * limitations under the License.
  ***************************************************************************** */
 
-.embedded-editor {
-    width: 100%;
-	height: 100%;
-    border: none;
+import { makeObservable, observable } from 'mobx';
+import { MessageSendingResponse } from '../../models/Message';
+import RootStore from '../RootStore';
+
+export default abstract class MessagesStore<T> {
+	isSending = false;
+
+	messageSendingResponse: MessageSendingResponse | null = null;
+
+	protected constructor(protected readonly rootStore: RootStore) {
+		makeObservable(this, {
+			isSending: observable,
+			messageSendingResponse: observable,
+		});
+	}
+
+	abstract sendMessage: (message: object) => void;
 }

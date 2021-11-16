@@ -15,20 +15,14 @@
  ***************************************************************************** */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
+
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
-import { Indicator } from '../components/MessageList';
 
 export type Message = ParsedMessage | JSONSchema4;
 
 export interface ParsedMessage {
 	[messageType: string]: JSONSchema7;
 }
-
-export type FieldBase = {
-	type: 'simple' | 'array' | 'map';
-	name: string;
-	required: boolean;
-};
 
 export interface MessageRequestModel {
 	session: string;
@@ -42,6 +36,7 @@ export interface MethodCallRequestModel {
 	methodName: string;
 	message: object;
 }
+
 export interface JSONSchemaResponse {
 	[methodName: string]: string;
 }
@@ -65,37 +60,89 @@ export interface ActSendingResponse {
 	responseMessage: string;
 }
 
-export interface MessageItem{
-	message: object | string;
+export type ReplayStatus = 'ready' | 'edited' | 'fail' | 'success';
+
+export interface ReplayItem {
+	name?: string;
+	createdAt: number;
+	message: string;
 	delay: number;
 	id: string;
-	indicator: Indicator;
+	status: {
+		type: ReplayStatus;
+		response?: MessageSendingResponse;
+	};
 }
 
-export interface ParsedMessageItem extends MessageItem {
-	sessionId: string;
+export interface ParsedMessageReplayItem extends ReplayItem {
+	type: 'parsedMessage';
+	session: string;
 	dictionary: string;
 	messageType: string;
 }
 
-export interface ActMessageItem extends MessageItem {
+export interface ActReplayItem extends ReplayItem {
+	type: 'act';
 	actBox: string;
 	fullServiceName: string;
 	methodName: string;
 }
 
-export function isParsedMessageItem(object: unknown): object is ParsedMessageItem {
+export function isParsedMessageReplayItem(object: unknown): object is ParsedMessageReplayItem {
 	return (
-		typeof object === 'object'
-		&& object !== null
-		&& typeof (object as ParsedMessageItem).sessionId === 'string'
+		typeof object === 'object' && object !== null && (object as ParsedMessageReplayItem).type === 'parsedMessage'
 	);
 }
 
-export function isActMessageItem(object: unknown): object is ActMessageItem {
-	return (
-		typeof object === 'object'
-		&& object !== null
-		&& typeof (object as ActMessageItem).actBox === 'string'
-	);
+export function isActReplayItem(object: unknown): object is ActReplayItem {
+	return typeof object === 'object' && object !== null && (object as ActReplayItem).type === 'act';
 }
+
+export type EventMessage = {
+	type: 'message';
+	messageType: string;
+	messageId: string;
+	timestamp: {
+		nano: number;
+		epochSecond: number;
+	};
+	direction: string;
+	sessionId: string;
+	body: MessageBody | null;
+	bodyBase64: string | null;
+	jsonBody: string | null;
+};
+
+type MessageBody = {
+	metadata: {
+		id: {
+			connectionId: {
+				sessionAlias: string;
+			};
+			sequence: string;
+		};
+		timestamp: string;
+		messageType: string;
+	};
+	fields: MessageBodyFields;
+};
+
+type MessageBodyFields = { [key: string]: MessageBodyField };
+
+type MessageBodyField = ListValueField | MessageValueField | SimpleValueField;
+
+type ListValueField = {
+	listValue: {
+		values?: Array<MessageValueField>;
+	};
+};
+
+type MessageValueField = {
+	messageValue: {
+		fields?: { [key: string]: MessageBodyField };
+	};
+};
+
+type SimpleValueField = {
+	simpleValue: string;
+};

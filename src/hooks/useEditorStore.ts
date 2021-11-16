@@ -14,8 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 
-.embedded-editor {
-    width: 100%;
-	height: 100%;
-    border: none;
-}
+import { useRootStore } from './useRootStore';
+
+const useEditorStore = () => useRootStore().editorStore;
+
+export default useEditorStore;

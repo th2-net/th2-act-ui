@@ -27,12 +27,17 @@ module.exports = webpackMerge(commonConfig, {
 	entry: ['react-hot-loader/patch', appSrc],
 	devtool: 'inline-source-map',
 	devServer: {
-		watchOptions: {
-			poll: true,
-			ignored: [/node_modules/, 'src/__tests__/'],
+		watchFiles: {
+			options: {
+				usePolling: true,
+				ignored: ['src/__tests__/', '**/node_modules'],
+			},
+		},
+		client: {
+			overlay: false,
 		},
 		compress: true,
-		port: 9001,
+		port: 9002,
 		host: '0.0.0.0',
 		historyApiFallback: true,
 		hot: true,
@@ -40,8 +45,8 @@ module.exports = webpackMerge(commonConfig, {
 			'/backend': {
 				target: 'http://th2-qa:30000/th2-commonv3/act-ui/backend/',
 				pathRewrite: { '^/backend': '' },
-				secure: false,
 				changeOrigin: true,
+				secure: false,
 			},
 			'/editor2': {
 				target: 'http://th2-qa:30000',

@@ -14,8 +14,30 @@
  * limitations under the License.
  ***************************************************************************** */
 
-.embedded-editor {
-    width: 100%;
-	height: 100%;
-    border: none;
-}
+import React from 'react';
+import { Box } from '@mui/material';
+
+type Props = {
+	currentTab: number;
+	tabIndex: number;
+	keepMounted?: boolean;
+	children: React.ReactNode;
+};
+
+const TabPanel = ({ currentTab, tabIndex, keepMounted = false, children }: Props) => {
+	const show = currentTab === tabIndex;
+
+	if (!keepMounted && !show) {
+		return null;
+	}
+
+	return (
+		<Box
+			sx={{ height: '100%', bgcolor: 'white', borderRadius: 1, borderTopLeftRadius: 0, overflow: 'hidden' }}
+			hidden={!show}>
+			{children}
+		</Box>
+	);
+};
+
+export default TabPanel;

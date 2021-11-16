@@ -1,4 +1,4 @@
-/** *****************************************************************************
+/** ****************************************************************************
  * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,24 +15,16 @@
  ***************************************************************************** */
 
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import 'regenerator-runtime/runtime';
-import 'core-js/stable';
-import 'core-js/features/array/flat-map';
-import 'core-js/features/array/flat';
-import { ThemeProvider } from '@mui/material';
-import App from './components/App';
-import ErrorBoundary from './components/util/ErrorBoundary';
-import StoresProvider from './components/StoresProvider';
-import theme from './theme';
+import '../../styles/splitter.scss';
 
-ReactDOM.render(
-	<ErrorBoundary>
-		<StoresProvider>
-			<ThemeProvider theme={theme}>
-				<App />
-			</ThemeProvider>
-		</StoresProvider>
-	</ErrorBoundary>,
-	document.getElementById('index'),
+interface Props {
+	children: React.ReactNode;
+}
+
+const SplitViewPane = ({ children }: Props) => (
+	<div className='splitter-pane'>
+		<div className='splitter-pane__content'>{children}</div>
+	</div>
 );
+
+export default SplitViewPane;

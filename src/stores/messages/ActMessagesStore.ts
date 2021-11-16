@@ -14,8 +14,32 @@
  * limitations under the License.
  ***************************************************************************** */
 
-.embedded-editor {
-    width: 100%;
-	height: 100%;
-    border: none;
+import { flow } from 'mobx';
+import api from '../../api';
+import MessagesStore from './MessagesStore';
+import { ActMessageOptions } from '../options/ActOptionsStore';
+import RootStore from '../RootStore';
+
+export default class ActMessagesStore extends MessagesStore<ActMessageOptions> {
+	constructor(rootStore: RootStore) {
+		super(rootStore);
+	}
+
+	sendMessage = flow(function* (this: ActMessagesStore, message: object) {
+		const options = this.rootStore.editorStore.options.act.selectedOptions;
+		if (!options) return;
+
+		this.isSending = true;
+
+		try {
+			this.messageSendingResponse = yield api.callMethod({
+				...options,
+				message,
+			});
+		} catch (error) {
+			console.error('Error occurred while calling method');
+		} finally {
+			this.isSending = false;
+		}
+	});
 }
