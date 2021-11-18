@@ -26,16 +26,24 @@ import useReplayStore from '../../hooks/useReplayStore';
 import useEditorStore from '../../hooks/useEditorStore';
 import useMessagesStore from '../../hooks/useMessagesStore';
 
+enum Commands {
+	OPEN_REPLACEMENTS_CONFIG = 'openReplacementsConfig',
+}
+
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
 	setIsValid: (isValid: boolean) => void;
+	openReplacementsConfig: () => void;
 }
 
 export interface MessageEditorMethods {
 	getFilledMessage: () => object | null;
 }
 
-const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<MessageEditorMethods>) => {
+const MessageEditor = (
+	{ messageSchema, setIsValid, openReplacementsConfig }: Props,
+	ref: React.Ref<MessageEditorMethods>,
+) => {
 	const replayStore = useReplayStore();
 	const { code, setCode } = useEditorStore();
 	const { replacements } = useMessagesStore();
@@ -99,7 +107,7 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 				.map(({ destinationPath }) => (destinationPath === '/' ? '' : destinationPath))
 				.filter(path => path in pointers);
 
-			return paths.map(path => ({
+			return paths.map<languages.CodeLens>(path => ({
 				range: {
 					startLineNumber: (pointers[path].key?.line ?? pointers[path].value.line) + 1,
 					startColumn: (pointers[path].key?.column ?? pointers[path].value.column) + 1,
@@ -107,7 +115,7 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 					endColumn: (pointers[path].keyEnd?.column ?? pointers[path].valueEnd.column) + 1,
 				},
 				command: {
-					id: '-1',
+					id: Commands.OPEN_REPLACEMENTS_CONFIG,
 					title: `A value of ${path || '/'} will be replaced`,
 				},
 			}));
@@ -118,6 +126,8 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 
 	React.useEffect(() => {
 		if (monaco) {
+			monaco.editor.registerCommand(Commands.OPEN_REPLACEMENTS_CONFIG, openReplacementsConfig);
+
 			const disposable = monaco.languages.registerCodeLensProvider('json', {
 				provideCodeLenses: () => ({
 					lenses,

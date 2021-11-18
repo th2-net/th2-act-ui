@@ -15,25 +15,42 @@
  ***************************************************************************** */
 
 import React from 'react';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Box, Link, Stack, Typography } from '@mui/material';
+import {
+	Accordion,
+	AccordionDetails,
+	AccordionSummary,
+	Alert,
+	Box,
+	Link,
+	Stack,
+	Table,
+	TableBody,
+	TableCell,
+	TableContainer,
+	TableHead,
+	TableRow,
+	Typography,
+} from '@mui/material';
 import { grey } from '@mui/material/colors';
-import Editor, { DiffEditor } from '@monaco-editor/react';
+import Editor from '@monaco-editor/react';
 import { ExpandMore, Info } from '@mui/icons-material';
+import { observer } from 'mobx-react-lite';
 import {
 	ActSendingResponse,
+	AppliedReplacement,
 	MessageSendingResponse,
 	ParsedMessageSendingResponse,
-	ReplayItem,
 } from '../../models/Message';
+import Value from '../util/Value';
 
 const isDev = process.env.NODE_ENV === 'development';
 
 type Props = {
 	response?: MessageSendingResponse;
-	formattedMessage?: ReplayItem['formattedMessage'];
+	appliedReplacements?: AppliedReplacement[];
 };
 
-const Result = ({ response, formattedMessage }: Props) => {
+const Result = ({ response, appliedReplacements }: Props) => {
 	if (!response) {
 		return (
 			<Box pt={1} pl={2}>
@@ -145,7 +162,7 @@ const Result = ({ response, formattedMessage }: Props) => {
 					Report Link
 				</Link>
 			)}
-			{formattedMessage && formattedMessage.original !== formattedMessage.modified && (
+			{appliedReplacements && appliedReplacements.length > 0 && (
 				<Accordion>
 					<AccordionSummary expandIcon={<ExpandMore />}>
 						<Stack spacing={1} direction='row'>
@@ -154,15 +171,38 @@ const Result = ({ response, formattedMessage }: Props) => {
 						</Stack>
 					</AccordionSummary>
 					<AccordionDetails>
-						<DiffEditor
-							height={500}
-							language='json'
-							original={formattedMessage.original}
-							modified={formattedMessage.modified}
-							options={{
-								readOnly: true,
-							}}
-						/>
+						<TableContainer>
+							<Table size='small'>
+								<TableHead>
+									<TableRow>
+										<TableCell>Destination path</TableCell>
+										<TableCell>Original value</TableCell>
+										<TableCell>Source path</TableCell>
+										<TableCell>New value</TableCell>
+									</TableRow>
+								</TableHead>
+								<TableBody>
+									{appliedReplacements.map(
+										({ destinationPath, originalValue, sourcePath, newValue }, index) => (
+											<TableRow key={`${destinationPath}-${sourcePath}-${index}`}>
+												<TableCell>
+													<Typography>{destinationPath}</Typography>
+												</TableCell>
+												<TableCell>
+													<Value value={originalValue} />
+												</TableCell>
+												<TableCell>
+													<Typography>{sourcePath}</Typography>
+												</TableCell>
+												<TableCell>
+													<Value value={newValue} />
+												</TableCell>
+											</TableRow>
+										),
+									)}
+								</TableBody>
+							</Table>
+						</TableContainer>
 					</AccordionDetails>
 				</Accordion>
 			)}
@@ -183,4 +223,4 @@ const Result = ({ response, formattedMessage }: Props) => {
 	);
 };
 
-export default Result;
+export default observer(Result);

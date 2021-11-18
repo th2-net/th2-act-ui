@@ -16,21 +16,18 @@
 
 import React from 'react';
 import {
-	Autocomplete,
 	Button,
 	Dialog,
 	DialogActions,
 	DialogContent,
 	DialogTitle,
-	IconButton,
 	Table,
 	TableBody,
 	TableCell,
 	TableHead,
 	TableRow,
-	TextField,
 } from '@mui/material';
-import { Add, Remove } from '@mui/icons-material';
+import { Add } from '@mui/icons-material';
 import { observer } from 'mobx-react-lite';
 import jsm from 'json-source-map';
 import { toJS } from 'mobx';
@@ -38,6 +35,7 @@ import useReplayStore from '../../hooks/useReplayStore';
 import useReplacementsConfigStore from '../../hooks/useReplacementsConfigStore';
 import useMessagesStore from '../../hooks/useMessagesStore';
 import useEditorStore from '../../hooks/useEditorStore';
+import ReplacementsConfigRow from './ReplacementsConfigRow';
 
 type Props = {
 	open: boolean;
@@ -47,7 +45,7 @@ type Props = {
 const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 	const { replayList, editedReplayItemId, changeReplacements, editReplayItemMode, replayItemToEdit } =
 		useReplayStore();
-	const { replacementsConfig, importConfig, changeConfig, addConfig, deleteConfig } = useReplacementsConfigStore();
+	const { replacementsConfig, importConfig, addConfig } = useReplacementsConfigStore();
 	const { replacements, setReplacements } = useMessagesStore();
 	const { code } = useEditorStore();
 
@@ -66,7 +64,7 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 		[replayList, editReplayItemMode, editedReplayItemId, code],
 	);
 
-	const autoCompleteDestinationPaths = React.useMemo(() => {
+	const destinationPaths = React.useMemo(() => {
 		try {
 			return Object.keys(jsm.parse(currentMessage).pointers).map(x => x || '/');
 		} catch {
@@ -80,8 +78,8 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 		replayList.forEach((replayItem, index) => {
 			paths.push(`/${index}`);
 
-			if (replayItem.status.response?.code === 200) {
-				const resultPaths = Object.keys(jsm.parse(replayItem.status.response.message).pointers)
+			if (replayItem.result.response?.code === 200) {
+				const resultPaths = Object.keys(jsm.parse(replayItem.result.response.message).pointers)
 					.filter(x => x)
 					.map(x => `/${index}${x}`);
 
@@ -110,55 +108,20 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 						<TableRow>
 							<TableCell>Replace field</TableCell>
 							<TableCell>Replace with</TableCell>
+							<TableCell>Current value</TableCell>
 							<TableCell />
 						</TableRow>
 					</TableHead>
 					<TableBody>
 						{replacementsConfig.map(({ sourcePath, destinationPath }, configIndex) => (
-							<TableRow key={`${sourcePath}-${destinationPath}-${configIndex}`}>
-								<TableCell>
-									<Autocomplete
-										autoSelect
-										value={destinationPath}
-										onChange={(_, newValue: string | null) =>
-											changeConfig(configIndex, { destinationPath: newValue || '/' })
-										}
-										renderInput={params => (
-											<TextField
-												{...params}
-												size='small'
-												variant='standard'
-												sx={{ minWidth: 300 }}
-											/>
-										)}
-										options={autoCompleteDestinationPaths}
-									/>
-								</TableCell>
-								<TableCell>
-									<Autocomplete
-										freeSolo
-										autoSelect
-										value={sourcePath}
-										onChange={(_, newValue: string | null) =>
-											changeConfig(configIndex, { sourcePath: newValue || '/' })
-										}
-										renderInput={params => (
-											<TextField
-												{...params}
-												size='small'
-												variant='standard'
-												sx={{ minWidth: 300 }}
-											/>
-										)}
-										options={replayResultsPaths}
-									/>
-								</TableCell>
-								<TableCell>
-									<IconButton color='error' onClick={() => deleteConfig(configIndex)}>
-										<Remove />
-									</IconButton>
-								</TableCell>
-							</TableRow>
+							<ReplacementsConfigRow
+								key={`${sourcePath}-${destinationPath}-${configIndex}`}
+								sourcePath={sourcePath}
+								destinationPath={destinationPath}
+								configIndex={configIndex}
+								destinationPaths={destinationPaths}
+								replayResultsPaths={replayResultsPaths}
+							/>
 						))}
 					</TableBody>
 				</Table>

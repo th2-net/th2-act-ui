@@ -43,16 +43,17 @@ const App = () => {
 	const messagesStore = useMessagesStore();
 	const editorStore = useEditorStore();
 	const replayStore = useReplayStore();
-	const { replayList, resetStatuses } = replayStore;
+	const { replayList, resetResults } = replayStore;
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [schema, setSchema] = React.useState<string | null>(null);
 	const [isCodeValid, setIsCodeValid] = React.useState(false);
 	const [isReplaying, setIsReplaying] = React.useState(false);
+	const [showReplacementsConfig, toggleReplacementsConfig] = React.useState(false);
 
 	const startReplay = () => {
 		if (replayList[0]) {
-			resetStatuses();
+			resetResults();
 			setIsReplaying(true);
 			replayMessageRecursive(0);
 		}
@@ -106,12 +107,13 @@ const App = () => {
 		<MessageWorkerProvider value={messageWorker}>
 			<div className='app'>
 				<div className='app__body'>
-					<Control />
+					<Control showConfig={showReplacementsConfig} toggleConfig={toggleReplacementsConfig} />
 					<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
 						<SplitViewPane>
 							<MessageEditor
 								setIsValid={setIsCodeValid}
 								messageSchema={editorStore.currentOptionsStore.schema}
+								openReplacementsConfig={() => toggleReplacementsConfig(true)}
 								ref={messageEditorRef}
 							/>
 						</SplitViewPane>
@@ -143,7 +145,7 @@ const App = () => {
 								<TabPanel currentTab={currentTab} tabIndex={0}>
 									<Result
 										response={messagesStore.messageSendingResponse ?? undefined}
-										formattedMessage={messagesStore.formattedMessage ?? undefined}
+										appliedReplacements={messagesStore.appliedReplacements}
 									/>
 								</TabPanel>
 								<TabPanel currentTab={currentTab} tabIndex={1} keepMounted>

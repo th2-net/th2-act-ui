@@ -31,7 +31,7 @@ import { downloadFile } from '../helpers/downloadFile';
 import localStorageWorker from '../helpers/localStorageWorker';
 import applyReplacements from '../helpers/applyReplacements';
 
-type ReplayExportData<T extends ReplayItem> = Omit<T, 'id' | 'status' | 'createdAt'>;
+type ReplayExportData<T extends ReplayItem> = Omit<T, 'id' | 'result' | 'createdAt'>;
 
 export default class ReplayStore {
 	replayList: Array<ParsedMessageReplayItem | ActReplayItem> = [];
@@ -55,8 +55,8 @@ export default class ReplayStore {
 			clearReplayList: action,
 			clearUntitled: action,
 			setEditedReplayItemCode: action,
-			resetStatuses: action,
-			changeStatus: action,
+			resetResults: action,
+			changeResult: action,
 			changeDelay: action,
 			setEditedReplayItemId: action,
 			setEditReplayItemMode: action,
@@ -86,8 +86,8 @@ export default class ReplayStore {
 				...replayItem,
 				message: this.editedReplayItemCode,
 				...this.rootStore.editorStore.options.parsedMessage.selectedOptions,
-				status: {
-					type: 'edited',
+				result: {
+					status: 'edited',
 				},
 				replacements: replayItem.replacements,
 			};
@@ -98,8 +98,8 @@ export default class ReplayStore {
 				...replayItem,
 				message: this.editedReplayItemCode,
 				...this.rootStore.editorStore.options.act.selectedOptions,
-				status: {
-					type: 'edited',
+				result: {
+					status: 'edited',
 				},
 				replacements: replayItem.replacements,
 			};
@@ -140,10 +140,10 @@ export default class ReplayStore {
 		this.editedReplayItemCode = code;
 	};
 
-	resetStatuses = () => {
+	resetResults = () => {
 		this.replayList = this.replayList.map(replayItem => ({
 			...replayItem,
-			status: { type: 'ready' },
+			result: { status: 'ready' },
 		}));
 	};
 
@@ -153,9 +153,9 @@ export default class ReplayStore {
 		);
 	};
 
-	changeStatus = (id: string, status: ReplayItem['status']) => {
+	changeResult = (id: string, result: ReplayItem['result']) => {
 		this.replayList = this.replayList.map(replayItem =>
-			replayItem.id === id ? { ...replayItem, status } : replayItem,
+			replayItem.id === id ? { ...replayItem, result } : replayItem,
 		);
 	};
 
@@ -207,16 +207,8 @@ export default class ReplayStore {
 		if (replayItem) {
 			try {
 				const message: object = JSON.parse(replayItem.message);
-				const formattedOriginalMessage = JSON.stringify(message, null, '   ');
 
-				applyReplacements(message, replayItem.replacements, this.replayList);
-
-				const formattedModifiedMessage = JSON.stringify(message, null, '   ');
-
-				replayItem.formattedMessage = {
-					original: formattedOriginalMessage,
-					modified: formattedModifiedMessage,
-				};
+				const appliedReplacements = applyReplacements(message, replayItem.replacements, this.replayList);
 
 				if (isParsedMessageReplayItem(replayItem)) {
 					const { session, dictionary, messageType } = replayItem;
@@ -238,14 +230,15 @@ export default class ReplayStore {
 				}
 
 				if (result) {
-					replayItem.status.type = result.code === 200 ? 'success' : 'fail';
-					replayItem.status.response = result;
+					replayItem.result.status = result.code === 200 ? 'success' : 'fail';
+					replayItem.result.response = result;
+					replayItem.result.appliedReplacements = appliedReplacements;
 				}
 			} catch (error) {
 				console.error('Error occurred while replaying', error);
 
-				replayItem.status = {
-					type: 'fail',
+				replayItem.result = {
+					status: 'fail',
 				};
 			} finally {
 				this.replayList = [...this.replayList];
@@ -280,7 +273,7 @@ export default class ReplayStore {
 					.forEach((replayItem: ParsedMessageReplayItem | ActReplayItem) => {
 						this.addToReplayList({
 							...replayItem,
-							status: { type: 'ready' },
+							result: { status: 'ready' },
 							id: nanoid(),
 							createdAt: +new Date(),
 						});

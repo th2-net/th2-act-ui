@@ -15,33 +15,16 @@
  ***************************************************************************** */
 
 import jp from 'jsonpath';
-import { AppliedReplacement, ReplacementConfig, ReplayItem } from '../models/Message';
+import { ReplayItem } from '../models/Message';
 import { JSMPathToJsonPath } from './jsonPath';
-import getValueFromReplayListByJSMPath from './getValueFromReplayListByJSMPath';
 
-const applyReplacements = (
-	message: object,
-	replacements: ReplacementConfig[],
-	replayList: ReplayItem[],
-): AppliedReplacement[] => {
-	const appliedReplacements: AppliedReplacement[] = [];
+const getValueFromReplayListByJSMPath = (replayList: ReplayItem[], path: string) => {
+	const pathArray = path.split('/').slice(1);
+	const replayItemIndex = parseInt(pathArray[0]);
+	const pathToValue = JSMPathToJsonPath(`/${pathArray.slice(1).join('/')}`);
+	const responseMessage = JSON.parse(replayList[replayItemIndex].result.response?.message || '{}');
 
-	replacements.forEach(({ destinationPath, sourcePath }) => {
-		jp.apply(message, JSMPathToJsonPath(destinationPath), () => {
-			const sourceValue = getValueFromReplayListByJSMPath(replayList, sourcePath);
-
-			appliedReplacements.push({
-				destinationPath,
-				sourcePath,
-				originalValue: jp.value(message, JSMPathToJsonPath(destinationPath)),
-				newValue: sourceValue,
-			});
-
-			return sourceValue;
-		});
-	});
-
-	return appliedReplacements;
+	return jp.value(responseMessage, pathToValue);
 };
 
-export default applyReplacements;
+export default getValueFromReplayListByJSMPath;

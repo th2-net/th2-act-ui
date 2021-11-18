@@ -67,19 +67,21 @@ export interface ReplacementConfig {
 	sourcePath: string;
 }
 
+export interface AppliedReplacement extends ReplacementConfig {
+	originalValue: unknown;
+	newValue: unknown;
+}
+
 export interface ReplayItem {
 	name?: string;
 	createdAt: number;
 	message: string;
-	formattedMessage?: {
-		original: string;
-		modified: string;
-	};
 	delay: number;
 	id: string;
-	status: {
-		type: ReplayStatus;
+	result: {
+		status: ReplayStatus;
 		response?: MessageSendingResponse;
+		appliedReplacements?: AppliedReplacement[];
 	};
 	replacements: ReplacementConfig[];
 }

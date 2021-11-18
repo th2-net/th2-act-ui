@@ -38,20 +38,16 @@ import useReplayStore from '../../hooks/useReplayStore';
 
 export type SchemaType = 'parsedMessage' | 'act';
 
-const Control = () => {
+type Props = {
+	showConfig: boolean;
+	toggleConfig: (show: boolean) => void;
+};
+
+const Control = ({ showConfig, toggleConfig }: Props) => {
 	const store = useRootStore();
 	const { options } = useEditorStore();
-	const [showConfig, toggleShowConfig] = React.useState(false);
 	const { replacements } = useMessagesStore();
 	const { replayItemToEdit } = useReplayStore();
-
-	const handleOpenConfig = React.useCallback(() => {
-		toggleShowConfig(true);
-	}, [toggleShowConfig]);
-
-	const handleCloseConfig = React.useCallback(() => {
-		toggleShowConfig(false);
-	}, [toggleShowConfig]);
 
 	const controlConfigs = [
 		{
@@ -181,7 +177,7 @@ const Control = () => {
 							))
 					}
 					<Tooltip title='Replacements config'>
-						<IconButton onClick={handleOpenConfig}>
+						<IconButton onClick={() => toggleConfig(true)}>
 							{currentReplacements.length ? (
 								<Badge color='primary' badgeContent={currentReplacements.length}>
 									<Code />
@@ -191,7 +187,7 @@ const Control = () => {
 							)}
 						</IconButton>
 					</Tooltip>
-					<ReplacementsConfigModal open={showConfig} onClose={handleCloseConfig} />
+					<ReplacementsConfigModal open={showConfig} onClose={() => toggleConfig(false)} />
 				</Stack>
 			</div>
 		</>

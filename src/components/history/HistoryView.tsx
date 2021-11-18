@@ -41,8 +41,8 @@ const HistoryTab = () => {
 				dictionary: editorStore.options.parsedMessage.selectedDictionary ?? 'unknown',
 				messageType: message.messageType,
 				delay: 0,
-				status: {
-					type: 'ready',
+				result: {
+					status: 'ready',
 				},
 				createdAt: +new Date(),
 				message: message.jsonBody ?? '{}',

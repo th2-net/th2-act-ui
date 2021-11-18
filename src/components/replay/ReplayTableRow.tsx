@@ -113,7 +113,7 @@ const ReplayTableRow = ({
 				}}
 			/>
 		</TableCell>
-		<ReplayStatusCell status={replayItem.status} formattedMessage={replayItem.formattedMessage} />
+		<ReplayStatusCell result={replayItem.result} />
 		<TableCell sx={{ whiteSpace: 'nowrap' }}>
 			{isEditing ? (
 				<Tooltip title='Save'>

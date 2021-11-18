@@ -89,8 +89,8 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 					delay: 0,
 					createdAt: +new Date(),
 					message: code,
-					status: {
-						type: 'ready',
+					result: {
+						status: 'ready',
 					},
 					...selectedOptions,
 					replacements: toJS(replacements),
@@ -108,8 +108,8 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 					delay: 0,
 					createdAt: +new Date(),
 					message: code,
-					status: {
-						type: 'ready',
+					result: {
+						status: 'ready',
 					},
 					...selectedOptions,
 					replacements: toJS(replacements),

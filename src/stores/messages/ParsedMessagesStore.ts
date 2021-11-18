@@ -33,16 +33,11 @@ export default class ParsedMessagesStore extends MessagesStore<ParsedMessageOpti
 		this.isSending = true;
 
 		try {
-			const formattedOriginalMessage = JSON.stringify(message, null, '   ');
-
-			applyReplacements(message, this.replacements, this.rootStore.replayStore.replayList);
-
-			const formattedModifiedMessage = JSON.stringify(message, null, '   ');
-
-			this.formattedMessage = {
-				original: formattedOriginalMessage,
-				modified: formattedModifiedMessage,
-			};
+			this.appliedReplacements = applyReplacements(
+				message,
+				this.replacements,
+				this.rootStore.replayStore.replayList,
+			);
 
 			this.messageSendingResponse = yield api.sendMessage({
 				...options,

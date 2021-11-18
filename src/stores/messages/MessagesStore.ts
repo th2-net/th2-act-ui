@@ -15,7 +15,7 @@
  ***************************************************************************** */
 
 import { action, makeObservable, observable } from 'mobx';
-import { MessageSendingResponse, ReplacementConfig, ReplayItem } from '../../models/Message';
+import { AppliedReplacement, MessageSendingResponse, ReplacementConfig } from '../../models/Message';
 import RootStore from '../RootStore';
 
 export default abstract class MessagesStore<T> {
@@ -25,14 +25,14 @@ export default abstract class MessagesStore<T> {
 
 	replacements: ReplacementConfig[] = [];
 
-	formattedMessage: ReplayItem['formattedMessage'] | null = null;
+	appliedReplacements: AppliedReplacement[] = [];
 
 	protected constructor(protected readonly rootStore: RootStore) {
 		makeObservable(this, {
 			isSending: observable,
 			messageSendingResponse: observable,
 			replacements: observable,
-			formattedMessage: observable,
+			appliedReplacements: observable,
 			setReplacements: action,
 		});
 	}

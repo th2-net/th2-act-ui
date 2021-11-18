@@ -22,8 +22,7 @@ import { ReplayItem, ReplayStatus } from '../../models/Message';
 import Result from '../result/Result';
 
 type Props = {
-	status: ReplayItem['status'];
-	formattedMessage: ReplayItem['formattedMessage'];
+	result: ReplayItem['result'];
 };
 
 const colors: Record<ReplayStatus, string> = {
@@ -33,14 +32,14 @@ const colors: Record<ReplayStatus, string> = {
 	fail: red[500],
 };
 
-const ReplayStatusCell = ({ status, formattedMessage }: Props) => {
+const ReplayStatusCell = ({ result }: Props) => {
 	const [showResult, toggleResult] = React.useState(false);
 	const anchorRef = React.useRef<HTMLButtonElement | null>(null);
 
 	return (
-		<TableCell sx={{ color: colors[status.type] }}>
-			{status.type.toUpperCase()}
-			{status.response && (
+		<TableCell sx={{ color: colors[result.status] }}>
+			{result.status.toUpperCase()}
+			{result.response && (
 				<IconButton ref={anchorRef} onClick={() => toggleResult(!showResult)}>
 					{showResult ? <VisibilityOff /> : <Visibility />}
 				</IconButton>
@@ -51,7 +50,7 @@ const ReplayStatusCell = ({ status, formattedMessage }: Props) => {
 				anchorEl={anchorRef.current}
 				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
 				<Box width={800} height={500} className='scrollbar'>
-					<Result response={status.response} formattedMessage={formattedMessage} />
+					<Result response={result.response} appliedReplacements={result.appliedReplacements} />
 				</Box>
 			</Popover>
 		</TableCell>
