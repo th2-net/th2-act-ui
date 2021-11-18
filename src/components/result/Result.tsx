@@ -217,6 +217,7 @@ const Result = ({ response, appliedReplacements }: Props) => {
 						wordWrap: 'on',
 						automaticLayout: true,
 					}}
+					path='/result'
 				/>
 			</Box>
 		</Stack>

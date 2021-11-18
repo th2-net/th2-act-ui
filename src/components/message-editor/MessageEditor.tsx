@@ -17,7 +17,7 @@
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import Editor, { OnValidate, useMonaco } from '@monaco-editor/react';
+import Editor, { OnMount, OnValidate, useMonaco } from '@monaco-editor/react';
 // eslint-disable-next-line import/no-unresolved
 import { languages, MarkerSeverity } from 'monaco-editor';
 import jsm from 'json-source-map';
@@ -93,10 +93,7 @@ const MessageEditor = (
 		}
 	}, [monaco, messageSchema]);
 
-	const currentReplacements = React.useMemo(() => {
-		if (!replayStore.replayItemToEdit) return replacements;
-		return replayStore.replayItemToEdit.replacements;
-	}, [replayStore, replayStore.replayList, replayStore.editedReplayItemId, replayStore.editReplayItemMode]);
+	const currentReplacements = replayStore.replayItemToEdit ? replayStore.replayItemToEdit.replacements : replacements;
 
 	const lenses: languages.CodeLens[] = React.useMemo(() => {
 		if (!currentReplacements) return [];
@@ -122,25 +119,27 @@ const MessageEditor = (
 		} catch {
 			return [];
 		}
-	}, [currentValue, currentReplacements]);
+	}, [currentReplacements]);
+
+	const onMount: OnMount = (_, _monaco) => {
+		_monaco.editor.registerCommand(Commands.OPEN_REPLACEMENTS_CONFIG, () => openReplacementsConfig());
+	};
 
 	React.useEffect(() => {
 		if (monaco) {
-			monaco.editor.registerCommand(Commands.OPEN_REPLACEMENTS_CONFIG, openReplacementsConfig);
-
-			const disposable = monaco.languages.registerCodeLensProvider('json', {
-				provideCodeLenses: () => ({
-					lenses,
+			const provider = monaco.languages.registerCodeLensProvider('json', {
+				provideCodeLenses: model => ({
+					lenses: model.uri.path === '/editor' ? lenses : [],
 					dispose: () => undefined,
 				}),
 				resolveCodeLens: (_, codeLens) => codeLens,
 			});
 
-			return disposable.dispose;
+			return () => provider.dispose();
 		}
 
 		return () => undefined;
-	}, [currentValue, monaco, currentReplacements, lenses]);
+	}, [monaco, lenses]);
 
 	const initiateSchema = (message: JSONSchema4 | JSONSchema7) => {
 		const initialSchema = createInitialActMessage(message) || '{}';
@@ -176,9 +175,11 @@ const MessageEditor = (
 			value={currentValue}
 			onChange={onValueChange}
 			onValidate={onValidate}
+			onMount={onMount}
 			options={{
 				automaticLayout: true,
 			}}
+			path='/editor'
 		/>
 	);
 };

@@ -47,7 +47,7 @@ const App = () => {
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [schema, setSchema] = React.useState<string | null>(null);
-	const [isCodeValid, setIsCodeValid] = React.useState(false);
+	const [isCodeValid, setIsCodeValid] = React.useState(true);
 	const [isReplaying, setIsReplaying] = React.useState(false);
 	const [showReplacementsConfig, toggleReplacementsConfig] = React.useState(false);
 

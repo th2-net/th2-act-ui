@@ -65,6 +65,7 @@ const Value = ({ value }: Props) => {
 						lineNumbers: 'off',
 						wordWrap: 'on',
 					}}
+					path='/value'
 				/>
 			</Popover>
 		</Stack>
