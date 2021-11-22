@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, flow, makeObservable, observable, reaction } from 'mobx';
+import { action, flow, makeObservable, observable, reaction, runInAction } from 'mobx';
 import { nanoid } from 'nanoid';
 import {
 	ActReplayItem,
@@ -34,9 +34,9 @@ import applyReplacements from '../helpers/applyReplacements';
 type ReplayExportData<T extends ReplayItem> = Omit<T, 'id' | 'result' | 'createdAt'>;
 
 export default class ReplayStore {
-	replayList: Array<ParsedMessageReplayItem | ActReplayItem> = [];
+	isReplaying = false;
 
-	editedReplayItemCode = '{}';
+	replayList: Array<ParsedMessageReplayItem | ActReplayItem> = [];
 
 	editReplayItemMode = false;
 
@@ -46,15 +46,14 @@ export default class ReplayStore {
 		this.replayList = localStorageWorker.getReplayList();
 
 		makeObservable(this, {
+			isReplaying: observable,
 			replayList: observable,
-			editedReplayItemCode: observable,
 			editReplayItemMode: observable,
 			editedReplayItemId: observable,
 			saveEditedReplayItem: action,
 			addToReplayList: action,
 			clearReplayList: action,
 			clearUntitled: action,
-			setEditedReplayItemCode: action,
 			resetResults: action,
 			changeResult: action,
 			changeDelay: action,
@@ -64,6 +63,7 @@ export default class ReplayStore {
 			reorder: action,
 			renameReplayItem: action,
 			importFromJSON: action,
+			startReplay: action,
 		});
 
 		reaction(
@@ -81,27 +81,31 @@ export default class ReplayStore {
 	buildEditedReplayItem = (id: string): ParsedMessageReplayItem | ActReplayItem | null => {
 		const replayItem = this.replayList.find(item => item.id === id);
 
+		if (!replayItem) return null;
+
+		const message = this.rootStore.editorStore.code;
+		const { replacements } = replayItem;
+		const result: ReplayItem['result'] = {
+			status: 'edited',
+		};
+
 		if (isParsedMessageReplayItem(replayItem)) {
 			return {
 				...replayItem,
-				message: this.editedReplayItemCode,
+				message,
 				...this.rootStore.editorStore.options.parsedMessage.selectedOptions,
-				result: {
-					status: 'edited',
-				},
-				replacements: replayItem.replacements,
+				result,
+				replacements,
 			};
 		}
 
 		if (isActReplayItem(replayItem)) {
 			return {
 				...replayItem,
-				message: this.editedReplayItemCode,
+				message,
 				...this.rootStore.editorStore.options.act.selectedOptions,
-				result: {
-					status: 'edited',
-				},
-				replacements: replayItem.replacements,
+				result,
+				replacements,
 			};
 		}
 
@@ -134,10 +138,6 @@ export default class ReplayStore {
 
 	clearUntitled = () => {
 		this.replayList = this.replayList.filter(replayItem => !!replayItem.name);
-	};
-
-	setEditedReplayItemCode = (code: string) => {
-		this.editedReplayItemCode = code;
 	};
 
 	resetResults = () => {
@@ -198,6 +198,26 @@ export default class ReplayStore {
 		const [removed] = temp.splice(srcIndex, 1);
 		temp.splice(destIndex, 0, removed);
 		this.replayList = temp;
+	};
+
+	startReplay = () => {
+		if (this.replayList[0]) {
+			this.resetResults();
+			this.isReplaying = true;
+			this.replayMessageRecursive(0);
+		}
+	};
+
+	replayMessageRecursive = (index: number) => {
+		setTimeout(() => {
+			this.replay(this.replayList[index].id).then(() => {
+				if (index < this.replayList.length - 1) {
+					this.replayMessageRecursive(index + 1);
+				} else {
+					runInAction(() => (this.isReplaying = false));
+				}
+			});
+		}, this.replayList[index].delay);
 	};
 
 	replay = flow(function* (this: ReplayStore, id: string) {

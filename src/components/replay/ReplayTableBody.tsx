@@ -47,7 +47,6 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 		removeReplayItem,
 		setEditedReplayItemId,
 		setEditReplayItemMode,
-		setEditedReplayItemCode,
 		editedReplayItemId,
 		saveEditedReplayItem,
 		editReplayItemMode,
@@ -55,8 +54,8 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 	} = useReplayStore();
 	const { editorStore, schemaType, setSchemaType } = useRootStore();
 	const { options } = editorStore;
-	const { code } = useEditorStore();
-	const { replacements } = useMessagesStore();
+	const { code, setCode } = useEditorStore();
+	const { messageCode, setMessageCode, replacements } = useMessagesStore();
 
 	const handleEditCodeClicked = (replayItemIndex: number) => {
 		const replayItem = replayList[replayItemIndex];
@@ -73,9 +72,18 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 			options.parsedMessage.selectMessageType(replayItem.messageType);
 		}
 
+		if (!editReplayItemMode) {
+			setMessageCode(code);
+		}
+
 		setEditedReplayItemId(replayItem.id);
-		setEditedReplayItemCode(replayItem.message);
+		setCode(replayItem.message);
 		setEditReplayItemMode(true);
+	};
+
+	const handleSaveReplayItemClicked = () => {
+		saveEditedReplayItem();
+		setCode(messageCode);
 	};
 
 	const saveToReplay = React.useCallback(() => {
@@ -170,7 +178,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 							isEditing={editedReplayItemId === replayItem.id}
 							replayItem={replayItem}
 							changeDelay={delay => changeDelay(replayItem.id, delay)}
-							save={saveEditedReplayItem}
+							save={handleSaveReplayItemClicked}
 							edit={() => handleEditCodeClicked(index)}
 							remove={() => removeReplayItem(replayItem.id)}
 							rename={newName => renameReplayItem(replayItem.id, newName)}

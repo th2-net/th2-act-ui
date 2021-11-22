@@ -32,37 +32,22 @@ enum Commands {
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
-	setIsValid: (isValid: boolean) => void;
 	openReplacementsConfig: () => void;
 }
 
-export interface MessageEditorMethods {
-	getFilledMessage: () => object | null;
-}
-
-const MessageEditor = (
-	{ messageSchema, setIsValid, openReplacementsConfig }: Props,
-	ref: React.Ref<MessageEditorMethods>,
-) => {
+const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 	const replayStore = useReplayStore();
-	const { code, setCode } = useEditorStore();
-	const { replacements } = useMessagesStore();
+	const { code, setCode, setIsCodeValid } = useEditorStore();
+	const messagesStore = useMessagesStore();
 	const monaco = useMonaco();
-
-	const currentValue = replayStore.editReplayItemMode ? replayStore.editedReplayItemCode : code;
-
-	const onValueChange = (value: string | undefined) => {
-		if (replayStore.editReplayItemMode) {
-			replayStore.setEditedReplayItemCode(value || '{}');
-		} else {
-			setCode(value || '{}');
-		}
-	};
 
 	React.useEffect(() => {
 		if (monaco) {
 			if (messageSchema) {
-				initiateSchema(messageSchema);
+				if (!replayStore.editReplayItemMode) {
+					const initialMessage = createInitialActMessage(messageSchema) || '{}';
+					setCode(initialMessage);
+				}
 
 				const json = JSON.stringify(messageSchema);
 				const blob = new Blob([json], { type: 'application/json' });
@@ -93,12 +78,14 @@ const MessageEditor = (
 		}
 	}, [monaco, messageSchema]);
 
-	const currentReplacements = replayStore.replayItemToEdit ? replayStore.replayItemToEdit.replacements : replacements;
+	const currentReplacements = replayStore.replayItemToEdit
+		? replayStore.replayItemToEdit.replacements
+		: messagesStore.replacements;
 
 	const lenses: languages.CodeLens[] = React.useMemo(() => {
 		if (!currentReplacements) return [];
 		try {
-			const { pointers } = jsm.parse(currentValue);
+			const { pointers } = jsm.parse(code);
 
 			const paths = currentReplacements
 				.map(({ destinationPath }) => (destinationPath === '/' ? '' : destinationPath))
@@ -141,39 +128,18 @@ const MessageEditor = (
 		return () => undefined;
 	}, [monaco, lenses]);
 
-	const initiateSchema = (message: JSONSchema4 | JSONSchema7) => {
-		const initialSchema = createInitialActMessage(message) || '{}';
-		setCode(initialSchema);
-	};
-
 	const onValidate: OnValidate = React.useCallback(
 		markers => {
-			setIsValid(markers.filter(marker => marker.severity === MarkerSeverity.Error).length === 0);
+			setIsCodeValid(markers.filter(marker => marker.severity === MarkerSeverity.Error).length === 0);
 		},
-		[setIsValid],
-	);
-
-	React.useImperativeHandle(
-		ref,
-		() => ({
-			getFilledMessage: () => {
-				let filledMessage: object | null;
-				try {
-					filledMessage = JSON.parse(currentValue);
-				} catch {
-					filledMessage = null;
-				}
-				return filledMessage;
-			},
-		}),
-		[currentValue],
+		[setIsCodeValid],
 	);
 
 	return (
 		<Editor
 			language='json'
-			value={currentValue}
-			onChange={onValueChange}
+			value={code}
+			onChange={value => setCode(value ?? '{}')}
 			onValidate={onValidate}
 			onMount={onMount}
 			options={{
@@ -184,4 +150,4 @@ const MessageEditor = (
 	);
 };
 
-export default observer(MessageEditor, { forwardRef: true });
+export default observer(MessageEditor);

@@ -53,10 +53,9 @@ const Value = ({ value }: Props) => {
 				anchorEl={anchorRef.current}
 				anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
 				open={showEditor}
-				onClose={() => toggleShowEditor(false)}>
+				onClose={() => toggleShowEditor(false)}
+				PaperProps={{ sx: { width: 500, height: 250, overflow: 'hidden' } }}>
 				<Editor
-					width={500}
-					height={250}
 					value={JSON.stringify(value, null, '    ')}
 					language='json'
 					options={{
@@ -64,6 +63,7 @@ const Value = ({ value }: Props) => {
 						readOnly: true,
 						lineNumbers: 'off',
 						wordWrap: 'on',
+						automaticLayout: true,
 					}}
 					path='/value'
 				/>

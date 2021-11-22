@@ -27,6 +27,8 @@ type Options = {
 class EditorStore {
 	code = '{}';
 
+	isCodeValid = true;
+
 	options: Options = {
 		parsedMessage: new ParsedMessageOptionsStore(),
 		act: new ActOptionsStore(),
@@ -35,8 +37,11 @@ class EditorStore {
 	constructor(private readonly rootStore: RootStore) {
 		makeObservable(this, {
 			code: observable,
+			isCodeValid: observable,
 			currentOptionsStore: computed,
+			filledMessage: computed,
 			setCode: action,
+			setIsCodeValid: action,
 		});
 	}
 
@@ -44,8 +49,22 @@ class EditorStore {
 		return this.options[this.rootStore.schemaType];
 	}
 
+	get filledMessage() {
+		let filledMessage: object | null;
+		try {
+			filledMessage = JSON.parse(this.code);
+		} catch {
+			filledMessage = null;
+		}
+		return filledMessage;
+	}
+
 	setCode = (newCode: string) => {
 		this.code = newCode;
+	};
+
+	setIsCodeValid = (isCodeValid: boolean) => {
+		this.isCodeValid = isCodeValid;
 	};
 }
 

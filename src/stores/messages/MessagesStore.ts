@@ -27,15 +27,23 @@ export default abstract class MessagesStore<T> {
 
 	appliedReplacements: AppliedReplacement[] = [];
 
+	messageCode = '{}';
+
 	protected constructor(protected readonly rootStore: RootStore) {
 		makeObservable(this, {
 			isSending: observable,
 			messageSendingResponse: observable,
 			replacements: observable,
 			appliedReplacements: observable,
+			messageCode: observable,
+			setMessageCode: action,
 			setReplacements: action,
 		});
 	}
+
+	setMessageCode = (messageCode: string) => {
+		this.messageCode = messageCode;
+	};
 
 	abstract sendMessage: (message: object) => void;
 

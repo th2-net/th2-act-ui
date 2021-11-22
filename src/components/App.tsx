@@ -14,16 +14,14 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import React from 'react';
 import { hot } from 'react-hot-loader/root';
-import * as React from 'react';
 import { observer } from 'mobx-react-lite';
-import loader from '@monaco-editor/loader';
 import { Tab, Tabs, Button, CircularProgress, Box } from '@mui/material';
 import { Send, Check, Replay } from '@mui/icons-material';
-import { useEffect } from 'react';
 import Result from './result/Result';
 import '../styles/root.scss';
-import MessageEditor, { MessageEditorMethods } from './message-editor/MessageEditor';
+import MessageEditor from './message-editor/MessageEditor';
 import { useRootStore } from '../hooks/useRootStore';
 import Control from './message-editor/Control';
 import { EmbeddedEditor } from './dictionary-view/EmbeddedEditor';
@@ -37,8 +35,7 @@ import ReplayView from './replay/ReplayView';
 import MessageWorker from '../stores/MessageWorker';
 import MessageWorkerProvider from '../contexts/messageWorkerContext';
 import HistoryView from './history/HistoryView';
-
-loader.config({ paths: { vs: 'resources/vs' } });
+import useSchema from '../hooks/useSchema';
 
 const App = () => {
 	const store = useRootStore();
@@ -46,57 +43,22 @@ const App = () => {
 	const messagesStore = useMessagesStore();
 	const editorStore = useEditorStore();
 	const replayStore = useReplayStore();
-	const { replayList, resetResults } = replayStore;
+	const schema = useSchema();
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
-	const [schema, setSchema] = React.useState<string | null>(null);
-	const [isCodeValid, setIsCodeValid] = React.useState(true);
-	const [isReplaying, setIsReplaying] = React.useState(false);
 	const [showReplacementsConfig, toggleReplacementsConfig] = React.useState(false);
-
-	const startReplay = () => {
-		if (replayList[0]) {
-			resetResults();
-			setIsReplaying(true);
-			replayMessageRecursive(0);
-		}
-	};
-
-	const replayMessageRecursive = (index: number) => {
-		setTimeout(() => {
-			replayStore.replay(replayList[index].id).then(() => {
-				if (index < replayList.length - 1) {
-					replayMessageRecursive(index + 1);
-				} else {
-					setIsReplaying(false);
-				}
-			});
-		}, replayList[index].delay);
-	};
-
-	React.useEffect(() => {
-		// TODO: improve detecting schema
-
-		const urlSchema = window.location.pathname.split('/')[1];
-		if (urlSchema) {
-			setSchema(urlSchema.replace(/^th2-/, ''));
-		}
-	}, [setSchema]);
-
-	const messageEditorRef = React.useRef<MessageEditorMethods>(null);
 
 	React.useEffect(() => messageWorker.dispose, []);
 
 	const sendMessage = () => {
-		if (messageEditorRef.current) {
-			const filledMessage = messageEditorRef.current.getFilledMessage();
-			if (filledMessage) {
-				messagesStore.sendMessage(filledMessage);
-			}
+		const { filledMessage } = editorStore;
+
+		if (filledMessage) {
+			messagesStore.sendMessage(filledMessage);
 		}
 	};
 
-	useEffect(() => {
+	React.useEffect(() => {
 		store.init();
 	}, [store]);
 
@@ -114,10 +76,8 @@ const App = () => {
 					<SplitView panelArea={panelArea} onPanelAreaChange={setPanelArea}>
 						<SplitViewPane>
 							<MessageEditor
-								setIsValid={setIsCodeValid}
 								messageSchema={editorStore.currentOptionsStore.schema}
 								openReplacementsConfig={() => toggleReplacementsConfig(true)}
-								ref={messageEditorRef}
 							/>
 						</SplitViewPane>
 
@@ -169,14 +129,14 @@ const App = () => {
 					<div className='app__buttons'>
 						{currentTab === 2 ? (
 							<>
-								{isReplaying ? (
+								{replayStore.isReplaying ? (
 									<Button
 										variant='contained'
 										endIcon={<CircularProgress color='inherit' size={14} />}>
 										Replaying
 									</Button>
 								) : (
-									<Button variant='contained' endIcon={<Replay />} onClick={() => startReplay()}>
+									<Button variant='contained' endIcon={<Replay />} onClick={replayStore.startReplay}>
 										Start replay
 									</Button>
 								)}
@@ -194,7 +154,9 @@ const App = () => {
 									)
 								}
 								onClick={sendMessage}
-								disabled={!editorStore.currentOptionsStore.allOptionsSelected || !isCodeValid}>
+								disabled={
+									!editorStore.currentOptionsStore.allOptionsSelected || !editorStore.isCodeValid
+								}>
 								Send Message
 							</Button>
 						)}
