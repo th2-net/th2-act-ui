@@ -17,6 +17,7 @@
 import { hot } from 'react-hot-loader/root';
 import * as React from 'react';
 import { observer } from 'mobx-react-lite';
+import loader from '@monaco-editor/loader';
 import { Tab, Tabs, Button, CircularProgress, Box } from '@mui/material';
 import { Send, Check, Replay } from '@mui/icons-material';
 import { useEffect } from 'react';
@@ -36,6 +37,8 @@ import ReplayView from './replay/ReplayView';
 import MessageWorker from '../stores/MessageWorker';
 import MessageWorkerProvider from '../contexts/messageWorkerContext';
 import HistoryView from './history/HistoryView';
+
+loader.config({ paths: { vs: 'resources/vs' } });
 
 const App = () => {
 	const store = useRootStore();
