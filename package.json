@@ -32,6 +32,8 @@
 		"core-js": "^3.6.5",
 		"cross-env": "^6.0.3",
 		"json-schema": "^0.3.0",
+		"json-source-map": "^0.6.1",
+		"jsonpath": "^1.1.1",
 		"lodash.throttle": "^4.1.1",
 		"mobx": "^6.3.5",
 		"mobx-react-lite": "^1.5.2",
