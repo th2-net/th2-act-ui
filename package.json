@@ -1,6 +1,6 @@
 {
 	"name": "act-ui",
-	"version": "1.0.25",
+	"version": "1.1.25",
 	"description": "",
 	"main": "index.tsx",
 	"private": true,
@@ -14,10 +14,11 @@
 		"lint:fix": "eslint --fix './src/**/*.{ts,tsx}'"
 	},
 	"dependencies": {
-		"@emotion/react": "^11.5.0",
-		"@emotion/styled": "^11.3.0",
+		"@material-ui/core": "^4.12.3",
 		"@monaco-editor/loader": "^1.2.0",
 		"@monaco-editor/react": "^4.3.1",
+		"@emotion/react": "^11.5.0",
+		"@emotion/styled": "^11.3.0",
 		"@mui/icons-material": "^5.0.4",
 		"@mui/material": "^5.0.4",
 		"@types/ace": "0.0.44",
@@ -25,7 +26,6 @@
 		"@types/enzyme-adapter-react-16": "^1.0.5",
 		"@types/jest": "^24.0.23",
 		"@types/json-schema": "^7.0.6",
-		"@types/jsonpath": "^0.2.0",
 		"@types/lodash.throttle": "^4.1.6",
 		"@types/react": "^17.0.32",
 		"@types/react-beautiful-dnd": "^13.1.1",
@@ -33,8 +33,6 @@
 		"core-js": "^3.6.5",
 		"cross-env": "^6.0.3",
 		"json-schema": "^0.3.0",
-		"json-source-map": "^0.6.1",
-		"jsonpath": "^1.1.1",
 		"lodash.throttle": "^4.1.1",
 		"mobx": "^6.3.5",
 		"mobx-react-lite": "^1.5.2",
