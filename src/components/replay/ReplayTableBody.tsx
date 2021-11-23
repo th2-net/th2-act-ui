@@ -16,11 +16,12 @@
 
 import React from 'react';
 import { Draggable, DraggableProvided, DraggableStateSnapshot, DroppableProvided } from 'react-beautiful-dnd';
-import { IconButton, TableBody, TableCell, TableRow } from '@mui/material';
+import { IconButton, TableBody, TableCell, TableRow, Tooltip } from '@mui/material';
 import { DriveFileMove, Edit } from '@mui/icons-material';
 import { blue } from '@mui/material/colors';
 import { observer } from 'mobx-react-lite';
 import { nanoid } from 'nanoid';
+import { toJS } from 'mobx';
 import {
 	ActReplayItem,
 	isActReplayItem,
@@ -32,6 +33,7 @@ import { useRootStore } from '../../hooks/useRootStore';
 import useEditorStore from '../../hooks/useEditorStore';
 import ReplayTableRow from './ReplayTableRow';
 import SimpleKeyValueCell from './SimpleKeyValueCell';
+import useMessagesStore from '../../hooks/useMessagesStore';
 
 type Props = {
 	droppableProvided: DroppableProvided;
@@ -45,7 +47,6 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 		removeReplayItem,
 		setEditedReplayItemId,
 		setEditReplayItemMode,
-		setEditedReplayItemCode,
 		editedReplayItemId,
 		saveEditedReplayItem,
 		editReplayItemMode,
@@ -53,7 +54,8 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 	} = useReplayStore();
 	const { editorStore, schemaType, setSchemaType } = useRootStore();
 	const { options } = editorStore;
-	const { code } = useEditorStore();
+	const { code, setCode } = useEditorStore();
+	const { messageCode, setMessageCode, replacements } = useMessagesStore();
 
 	const handleEditCodeClicked = (replayItemIndex: number) => {
 		const replayItem = replayList[replayItemIndex];
@@ -70,9 +72,18 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 			options.parsedMessage.selectMessageType(replayItem.messageType);
 		}
 
+		if (!editReplayItemMode) {
+			setMessageCode(code);
+		}
+
 		setEditedReplayItemId(replayItem.id);
-		setEditedReplayItemCode(replayItem.message);
+		setCode(replayItem.message);
 		setEditReplayItemMode(true);
+	};
+
+	const handleSaveReplayItemClicked = () => {
+		saveEditedReplayItem();
+		setCode(messageCode);
 	};
 
 	const saveToReplay = React.useCallback(() => {
@@ -86,10 +97,11 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 					delay: 0,
 					createdAt: +new Date(),
 					message: code,
-					status: {
-						type: 'ready',
+					result: {
+						status: 'ready',
 					},
 					...selectedOptions,
+					replacements: toJS(replacements),
 				};
 
 				addToReplayList(replayItem);
@@ -104,16 +116,17 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 					delay: 0,
 					createdAt: +new Date(),
 					message: code,
-					status: {
-						type: 'ready',
+					result: {
+						status: 'ready',
 					},
 					...selectedOptions,
+					replacements: toJS(replacements),
 				};
 
 				addToReplayList(replayItem);
 			}
 		}
-	}, [code, options, schemaType]);
+	}, [code, options, schemaType, replacements]);
 
 	return (
 		<TableBody ref={droppableProvided.innerRef} {...droppableProvided.droppableProps}>
@@ -143,16 +156,17 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 				)}
 				<TableCell>
 					{editReplayItemMode && (
-						<IconButton title='Edit item' onClick={() => setEditReplayItemMode(false)}>
-							<Edit />
-						</IconButton>
+						<Tooltip title='Edit item'>
+							<IconButton onClick={() => setEditReplayItemMode(false)}>
+								<Edit />
+							</IconButton>
+						</Tooltip>
 					)}
-					<IconButton
-						title='Save to replay'
-						disabled={!editorStore.currentOptionsStore.selectedOptions}
-						onClick={saveToReplay}>
-						<DriveFileMove />
-					</IconButton>
+					<Tooltip title='Save to replay'>
+						<IconButton disabled={!editorStore.currentOptionsStore.selectedOptions} onClick={saveToReplay}>
+							<DriveFileMove />
+						</IconButton>
+					</Tooltip>
 				</TableCell>
 			</TableRow>
 			{replayList.map((replayItem, index: number) => (
@@ -164,7 +178,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 							isEditing={editedReplayItemId === replayItem.id}
 							replayItem={replayItem}
 							changeDelay={delay => changeDelay(replayItem.id, delay)}
-							save={saveEditedReplayItem}
+							save={handleSaveReplayItemClicked}
 							edit={() => handleEditCodeClicked(index)}
 							remove={() => removeReplayItem(replayItem.id)}
 							rename={newName => renameReplayItem(replayItem.id, newName)}

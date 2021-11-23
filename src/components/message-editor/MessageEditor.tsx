@@ -17,31 +17,37 @@
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import Editor, { OnChange, OnValidate, useMonaco } from '@monaco-editor/react';
+import Editor, { OnMount, OnValidate, useMonaco } from '@monaco-editor/react';
 // eslint-disable-next-line import/no-unresolved
-import { MarkerSeverity } from 'monaco-editor';
+import { languages, MarkerSeverity } from 'monaco-editor';
+import jsm from 'json-source-map';
 import { createInitialActMessage } from '../../helpers/schema';
 import useReplayStore from '../../hooks/useReplayStore';
 import useEditorStore from '../../hooks/useEditorStore';
+import useMessagesStore from '../../hooks/useMessagesStore';
+
+enum Commands {
+	OPEN_REPLACEMENTS_CONFIG = 'openReplacementsConfig',
+}
 
 interface Props {
 	messageSchema: JSONSchema4 | JSONSchema7 | null;
-	setIsValid: (isValid: boolean) => void;
+	openReplacementsConfig: () => void;
 }
 
-export interface MessageEditorMethods {
-	getFilledMessage: () => object | null;
-}
-
-const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<MessageEditorMethods>) => {
+const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 	const replayStore = useReplayStore();
-	const { code, setCode } = useEditorStore();
+	const { code, setCode, setIsCodeValid } = useEditorStore();
+	const messagesStore = useMessagesStore();
 	const monaco = useMonaco();
 
 	React.useEffect(() => {
 		if (monaco) {
 			if (messageSchema) {
-				initiateSchema(messageSchema);
+				if (!replayStore.editReplayItemMode) {
+					const initialMessage = createInitialActMessage(messageSchema) || '{}';
+					setCode(initialMessage);
+				}
 
 				const json = JSON.stringify(messageSchema);
 				const blob = new Blob([json], { type: 'application/json' });
@@ -72,54 +78,76 @@ const MessageEditor = ({ messageSchema, setIsValid }: Props, ref: React.Ref<Mess
 		}
 	}, [monaco, messageSchema]);
 
-	const onValueChange: OnChange = value => {
-		if (replayStore.editReplayItemMode) {
-			replayStore.setEditedReplayItemCode(value || '{}');
-		} else {
-			setCode(value || '{}');
+	const currentReplacements = replayStore.replayItemToEdit
+		? replayStore.replayItemToEdit.replacements
+		: messagesStore.replacements;
+
+	const lenses: languages.CodeLens[] = React.useMemo(() => {
+		if (!currentReplacements) return [];
+		try {
+			const { pointers } = jsm.parse(code);
+
+			const paths = currentReplacements
+				.map(({ destinationPath }) => (destinationPath === '/' ? '' : destinationPath))
+				.filter(path => path in pointers);
+
+			return paths.map<languages.CodeLens>(path => ({
+				range: {
+					startLineNumber: (pointers[path].key?.line ?? pointers[path].value.line) + 1,
+					startColumn: (pointers[path].key?.column ?? pointers[path].value.column) + 1,
+					endLineNumber: (pointers[path].keyEnd?.line ?? pointers[path].valueEnd.line) + 1,
+					endColumn: (pointers[path].keyEnd?.column ?? pointers[path].valueEnd.column) + 1,
+				},
+				command: {
+					id: Commands.OPEN_REPLACEMENTS_CONFIG,
+					title: `A value of ${path || '/'} will be replaced`,
+				},
+			}));
+		} catch {
+			return [];
 		}
+	}, [currentReplacements]);
+
+	const onMount: OnMount = (_, _monaco) => {
+		_monaco.editor.registerCommand(Commands.OPEN_REPLACEMENTS_CONFIG, () => openReplacementsConfig());
 	};
 
-	const initiateSchema = (message: JSONSchema4 | JSONSchema7) => {
-		const initialSchema = createInitialActMessage(message) || '{}';
-		setCode(initialSchema);
-		// setIsSchemaApplied(true);
-	};
+	React.useEffect(() => {
+		if (monaco) {
+			const provider = monaco.languages.registerCodeLensProvider('json', {
+				provideCodeLenses: model => ({
+					lenses: model.uri.path === '/editor' ? lenses : [],
+					dispose: () => undefined,
+				}),
+				resolveCodeLens: (_, codeLens) => codeLens,
+			});
+
+			return () => provider.dispose();
+		}
+
+		return () => undefined;
+	}, [monaco, lenses]);
 
 	const onValidate: OnValidate = React.useCallback(
 		markers => {
-			setIsValid(markers.filter(marker => marker.severity === MarkerSeverity.Error).length === 0);
+			setIsCodeValid(markers.filter(marker => marker.severity === MarkerSeverity.Error).length === 0);
 		},
-		[setIsValid],
-	);
-
-	React.useImperativeHandle(
-		ref,
-		() => ({
-			getFilledMessage: () => {
-				let filledMessage: object | null;
-				try {
-					filledMessage = JSON.parse(code);
-				} catch {
-					filledMessage = null;
-				}
-				return filledMessage;
-			},
-		}),
-		[code],
+		[setIsCodeValid],
 	);
 
 	return (
 		<Editor
 			language='json'
-			value={replayStore.editReplayItemMode ? replayStore.editedReplayItemCode : code}
-			onChange={onValueChange}
+			value={code}
+			onChange={value => setCode(value ?? '{}')}
 			onValidate={onValidate}
+			onMount={onMount}
 			options={{
 				automaticLayout: true,
 			}}
+			path='/editor'
 		/>
 	);
 };
 
-export default observer(MessageEditor, { forwardRef: true });
+export default observer(MessageEditor);

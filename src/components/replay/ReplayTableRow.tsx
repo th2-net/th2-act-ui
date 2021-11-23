@@ -16,8 +16,8 @@
 
 import React from 'react';
 import { blue, red } from '@mui/material/colors';
-import { IconButton, InputAdornment, TableCell, TableRow, TextField } from '@mui/material';
-import { DeleteOutline, Edit, ReorderRounded, Save } from '@mui/icons-material';
+import { Badge, IconButton, InputAdornment, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material';
+import { Code, DeleteOutline, Edit, ReorderRounded, Save } from '@mui/icons-material';
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import {
 	ActReplayItem,
@@ -64,15 +64,24 @@ const ReplayTableRow = ({
 			</div>
 		</TableCell>
 		<TableCell>
-			<TextField
-				placeholder='Untitled'
-				value={replayItem.name ?? ''}
-				onChange={e => rename(e.target.value)}
-				onFocus={e => e.target.select()}
-				size='small'
-				variant='standard'
-				sx={{ minWidth: 60 }}
-			/>
+			<Stack direction='row' spacing={1} alignItems='center'>
+				<TextField
+					placeholder='Untitled'
+					value={replayItem.name ?? ''}
+					onChange={e => rename(e.target.value)}
+					onFocus={e => e.target.select()}
+					size='small'
+					variant='standard'
+					sx={{ minWidth: 90 }}
+				/>
+				{replayItem.replacements.length > 0 && (
+					<Tooltip title='Some fields will be modified by expressions'>
+						<Badge variant='dot' color='info'>
+							<Code color='primary' fontSize='small' />
+						</Badge>
+					</Tooltip>
+				)}
+			</Stack>
 		</TableCell>
 		{isActReplayItem(replayItem) && (
 			<>
@@ -104,20 +113,26 @@ const ReplayTableRow = ({
 				}}
 			/>
 		</TableCell>
-		<ReplayStatusCell status={replayItem.status} />
+		<ReplayStatusCell result={replayItem.result} />
 		<TableCell sx={{ whiteSpace: 'nowrap' }}>
 			{isEditing ? (
-				<IconButton title='Save' onClick={save}>
-					<Save />
-				</IconButton>
+				<Tooltip title='Save'>
+					<IconButton onClick={save}>
+						<Save />
+					</IconButton>
+				</Tooltip>
 			) : (
-				<IconButton title='Edit message' onClick={edit}>
-					<Edit />
-				</IconButton>
+				<Tooltip title='Edit message'>
+					<IconButton onClick={edit}>
+						<Edit />
+					</IconButton>
+				</Tooltip>
 			)}
-			<IconButton title='Remove' onClick={remove}>
-				<DeleteOutline sx={{ color: red[500] }} />
-			</IconButton>
+			<Tooltip title='Remove'>
+				<IconButton onClick={remove}>
+					<DeleteOutline sx={{ color: red[500] }} />
+				</IconButton>
+			</Tooltip>
 		</TableCell>
 	</TableRow>
 );

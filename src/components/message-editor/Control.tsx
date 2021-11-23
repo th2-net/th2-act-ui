@@ -17,23 +17,37 @@
 import { observer } from 'mobx-react-lite';
 import React from 'react';
 import {
-	Box,
+	Badge,
 	CircularProgress,
 	FormControlLabel,
+	IconButton,
 	InputLabel,
 	MenuItem,
 	Radio,
 	RadioGroup,
 	Select,
+	Stack,
+	Tooltip,
 } from '@mui/material';
+import { Code } from '@mui/icons-material';
 import { useRootStore } from '../../hooks/useRootStore';
 import useEditorStore from '../../hooks/useEditorStore';
+import ReplacementsConfigModal from '../replacements-config/ReplacementsConfigModal';
+import useMessagesStore from '../../hooks/useMessagesStore';
+import useReplayStore from '../../hooks/useReplayStore';
 
 export type SchemaType = 'parsedMessage' | 'act';
 
-const Control = () => {
+type Props = {
+	showConfig: boolean;
+	toggleConfig: (show: boolean) => void;
+};
+
+const Control = ({ showConfig, toggleConfig }: Props) => {
 	const store = useRootStore();
 	const { options } = useEditorStore();
+	const { replacements } = useMessagesStore();
+	const { replayItemToEdit } = useReplayStore();
 
 	const controlConfigs = [
 		{
@@ -112,9 +126,14 @@ const Control = () => {
 		},
 	];
 
+	const currentReplacements = React.useMemo(
+		() => replayItemToEdit?.replacements ?? replacements,
+		[replayItemToEdit, replacements],
+	);
+
 	return (
 		<>
-			<Box display='flex' alignItems='center'>
+			<Stack direction='row' alignItems='center'>
 				<RadioGroup
 					row
 					value={store.schemaType}
@@ -128,9 +147,9 @@ const Control = () => {
 						/>
 					))}
 				</RadioGroup>
-			</Box>
+			</Stack>
 			<div key='parameters' className='app__row app__controls'>
-				<Box display='flex' gap={2} alignItems='center'>
+				<Stack direction='row' gap={2} alignItems='center'>
 					{
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 						controlConfigs
@@ -157,7 +176,19 @@ const Control = () => {
 								</React.Fragment>
 							))
 					}
-				</Box>
+					<Tooltip title='Replacements config'>
+						<IconButton onClick={() => toggleConfig(true)}>
+							{currentReplacements.length ? (
+								<Badge color='primary' badgeContent={currentReplacements.length}>
+									<Code />
+								</Badge>
+							) : (
+								<Code />
+							)}
+						</IconButton>
+					</Tooltip>
+					<ReplacementsConfigModal open={showConfig} onClose={() => toggleConfig(false)} />
+				</Stack>
 			</div>
 		</>
 	);

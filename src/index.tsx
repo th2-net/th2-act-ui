@@ -21,10 +21,13 @@ import 'core-js/stable';
 import 'core-js/features/array/flat-map';
 import 'core-js/features/array/flat';
 import { ThemeProvider } from '@mui/material';
+import loader from '@monaco-editor/loader';
 import App from './components/App';
 import ErrorBoundary from './components/util/ErrorBoundary';
 import StoresProvider from './components/StoresProvider';
 import theme from './theme';
+
+loader.config({ paths: { vs: 'resources/vs' } });
 
 ReactDOM.render(
 	<ErrorBoundary>

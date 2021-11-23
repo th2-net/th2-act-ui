@@ -19,6 +19,7 @@ import api from '../../api';
 import MessagesStore from './MessagesStore';
 import { ActMessageOptions } from '../options/ActOptionsStore';
 import RootStore from '../RootStore';
+import applyReplacements from '../../helpers/applyReplacements';
 
 export default class ActMessagesStore extends MessagesStore<ActMessageOptions> {
 	constructor(rootStore: RootStore) {
@@ -32,6 +33,12 @@ export default class ActMessagesStore extends MessagesStore<ActMessageOptions> {
 		this.isSending = true;
 
 		try {
+			this.appliedReplacements = applyReplacements(
+				message,
+				this.replacements,
+				this.rootStore.replayStore.replayList,
+			);
+
 			this.messageSendingResponse = yield api.callMethod({
 				...options,
 				message,
