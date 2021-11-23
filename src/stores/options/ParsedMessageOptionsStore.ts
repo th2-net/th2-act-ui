@@ -71,14 +71,11 @@ export default class ParsedMessageOptionsStore {
 			() => this.selectedSession,
 			session => {
 				if (session) {
-					localStorageWorker.setSelectedSessionId(session);
-
 					this.resetDictionary();
-					this.fetchDictionaries(session).then(() => {
-						if (this.dictionaries.length > 0) {
-							this.selectDictionary(this.dictionaries[0]);
-						}
-					});
+					this.resetMessageTypes();
+					this.resetSchema();
+					this.fetchDictionaries(session);
+					localStorageWorker.setSelectedSessionId(session);
 				}
 			},
 		);
@@ -205,16 +202,15 @@ export default class ParsedMessageOptionsStore {
 
 		if (savedSession) {
 			this.selectSession(savedSession);
-			yield this.fetchDictionaries(savedSession);
-		}
+		} else return;
 
-		if (savedSession && savedDictionaryName) {
+		yield this.fetchDictionaries(savedSession);
+
+		if (savedDictionaryName) {
 			this.selectDictionary(savedDictionaryName);
-		}
+		} else return;
 
-		if (savedSession && savedDictionaryName) {
-			yield this.fetchMessageTypes(savedDictionaryName);
-		}
+		yield this.fetchMessageTypes(savedDictionaryName);
 
 		if (savedMessageType) {
 			this.selectMessageType(savedMessageType);
