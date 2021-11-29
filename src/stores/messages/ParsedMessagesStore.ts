@@ -44,7 +44,7 @@ export default class ParsedMessagesStore extends MessagesStore<ParsedMessageOpti
 				message,
 			});
 		} catch (error) {
-			console.error('Error occurred while calling method');
+			console.error('Error occurred while sending message');
 		} finally {
 			this.isSending = false;
 		}
