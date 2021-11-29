@@ -148,7 +148,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 						<SimpleKeyValueCell
 							label='Method'
 							value={options.act.selectedMethod?.methodName ?? ''}
-							tableCellProps={{ colSpan: 4 }}
+							tableCellProps={{ colSpan: 3 }}
 						/>
 					</>
 				)}
