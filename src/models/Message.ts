@@ -74,7 +74,6 @@ export interface AppliedReplacement extends ReplacementConfig {
 
 export interface ReplayItem {
 	name?: string;
-	createdAt: number;
 	message: string;
 	delay: number;
 	id: string;
