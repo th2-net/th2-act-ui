@@ -18,6 +18,7 @@ import jp from 'jsonpath';
 import { AppliedReplacement, ReplacementConfig, ReplayItem } from '../models/Message';
 import { JSMPathToJsonPath } from './jsonPath';
 import getValueFromReplayListByJSMPath from './getValueFromReplayListByJSMPath';
+import getValueBySimpleExpression from './getValueBySimpleExpression';
 
 const applyReplacements = (
 	message: object,
@@ -28,7 +29,13 @@ const applyReplacements = (
 
 	replacements.forEach(({ destinationPath, sourcePath }) => {
 		jp.apply(message, JSMPathToJsonPath(destinationPath), () => {
-			const sourceValue = getValueFromReplayListByJSMPath(replayList, sourcePath);
+			let sourceValue: string;
+
+			if (sourcePath.startsWith('$')) {
+				sourceValue = getValueBySimpleExpression(sourcePath);
+			} else {
+				sourceValue = getValueFromReplayListByJSMPath(replayList, sourcePath);
+			}
 
 			appliedReplacements.push({
 				destinationPath,
