@@ -14,17 +14,10 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import jp from 'jsonpath';
-import { ReplayItem } from '../models/Message';
-import { JSMPathToJsonPath } from './jsonPath';
-
-const getValueFromReplayListByJSMPath = (replayList: ReplayItem[], path: string): string => {
-	const pathArray = path.split('/').slice(1);
-	const replayItemIndex = parseInt(pathArray[0]);
-	const pathToValue = JSMPathToJsonPath(`/${pathArray.slice(1).join('/')}`);
-	const responseMessage = JSON.parse(replayList[replayItemIndex].result.response?.message || '{}');
-
-	return jp.value(responseMessage, pathToValue);
+const valueGetters: Record<string, () => string> = {
+	$datetime: () => new Date().toISOString(),
 };
 
-export default getValueFromReplayListByJSMPath;
+const getValueBySimpleExpression = (expression: string) => valueGetters[expression]?.();
+
+export default getValueBySimpleExpression;

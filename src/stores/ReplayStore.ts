@@ -31,7 +31,7 @@ import { downloadFile } from '../helpers/downloadFile';
 import localStorageWorker from '../helpers/localStorageWorker';
 import applyReplacements from '../helpers/applyReplacements';
 
-type ReplayExportData<T extends ReplayItem> = Omit<T, 'id' | 'result' | 'createdAt'>;
+type ReplayExportData<T extends ReplayItem> = Omit<T, 'id' | 'result'>;
 
 export default class ReplayStore {
 	isReplaying = false;
@@ -295,7 +295,6 @@ export default class ReplayStore {
 							...replayItem,
 							result: { status: 'ready' },
 							id: nanoid(),
-							createdAt: +new Date(),
 						});
 					});
 			}

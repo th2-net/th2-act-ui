@@ -95,7 +95,6 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 					type: 'act',
 					id: nanoid(),
 					delay: 0,
-					createdAt: +new Date(),
 					message: code,
 					result: {
 						status: 'ready',
@@ -114,7 +113,6 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 					type: 'parsedMessage',
 					id: nanoid(),
 					delay: 0,
-					createdAt: +new Date(),
 					message: code,
 					result: {
 						status: 'ready',
@@ -139,7 +137,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 						<SimpleKeyValueCell
 							label='Message Type'
 							value={options.parsedMessage.selectedMessageType ?? ''}
-							tableCellProps={{ colSpan: 4 }}
+							tableCellProps={{ colSpan: 3 }}
 						/>
 					</>
 				) : (
@@ -150,7 +148,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 						<SimpleKeyValueCell
 							label='Method'
 							value={options.act.selectedMethod?.methodName ?? ''}
-							tableCellProps={{ colSpan: 4 }}
+							tableCellProps={{ colSpan: 3 }}
 						/>
 					</>
 				)}

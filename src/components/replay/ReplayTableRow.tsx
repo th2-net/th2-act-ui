@@ -97,7 +97,6 @@ const ReplayTableRow = ({
 				<SimpleKeyValueCell label='Message Type' value={replayItem.messageType} />
 			</>
 		)}
-		<SimpleKeyValueCell label='Created At' value={new Date(replayItem.createdAt).toLocaleString()} />
 		<TableCell>
 			<TextField
 				label='Delay'

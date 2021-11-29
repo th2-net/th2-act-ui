@@ -1,5 +1,5 @@
 /** ****************************************************************************
- * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
+ * Copyright 2020-2021 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,13 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import jp from 'jsonpath';
-import { ReplayItem } from '../models/Message';
-import { JSMPathToJsonPath } from './jsonPath';
+import { JSONSchema7 } from 'json-schema';
 
-const getValueFromReplayListByJSMPath = (replayList: ReplayItem[], path: string): string => {
-	const pathArray = path.split('/').slice(1);
-	const replayItemIndex = parseInt(pathArray[0]);
-	const pathToValue = JSMPathToJsonPath(`/${pathArray.slice(1).join('/')}`);
-	const responseMessage = JSON.parse(replayList[replayItemIndex].result.response?.message || '{}');
+const makeSchemaFieldsOptional = (schema: JSONSchema7, fields: string[]) => ({
+	...schema,
+	required: schema.required
+		? schema.required.filter(requiredField => !fields.some(field => field === requiredField))
+		: schema.required,
+});
 
-	return jp.value(responseMessage, pathToValue);
-};
-
-export default getValueFromReplayListByJSMPath;
+export default makeSchemaFieldsOptional;

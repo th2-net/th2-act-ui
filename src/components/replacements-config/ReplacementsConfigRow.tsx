@@ -21,6 +21,7 @@ import useReplacementsConfigStore from '../../hooks/useReplacementsConfigStore';
 import Value from '../util/Value';
 import useReplayStore from '../../hooks/useReplayStore';
 import getValueFromReplayListByJSMPath from '../../helpers/getValueFromReplayListByJSMPath';
+import getValueBySimpleExpression from '../../helpers/getValueBySimpleExpression';
 
 type Props = {
 	sourcePath: string;
@@ -41,6 +42,10 @@ const ReplacementsConfigRow = ({
 	const { changeConfig, deleteConfig } = useReplacementsConfigStore();
 
 	const currentValue = React.useMemo(() => {
+		if (sourcePath.startsWith('$')) {
+			return getValueBySimpleExpression(sourcePath);
+		}
+
 		try {
 			return getValueFromReplayListByJSMPath(replayList, sourcePath);
 		} catch {
@@ -55,7 +60,7 @@ const ReplacementsConfigRow = ({
 					autoSelect
 					value={destinationPath}
 					onChange={(_, newValue: string | null) =>
-						changeConfig(configIndex, { destinationPath: newValue || '/' })
+						changeConfig(configIndex, { destinationPath: newValue ?? '' })
 					}
 					renderInput={params => (
 						<TextField {...params} size='small' variant='standard' sx={{ minWidth: 300 }} />

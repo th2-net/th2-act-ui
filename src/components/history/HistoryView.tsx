@@ -44,7 +44,6 @@ const HistoryTab = () => {
 				result: {
 					status: 'ready',
 				},
-				createdAt: +new Date(),
 				message: message.jsonBody ?? '{}',
 				replacements: [],
 			});

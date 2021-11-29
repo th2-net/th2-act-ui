@@ -19,6 +19,7 @@ import { JSONSchema7 } from 'json-schema';
 import { ParsedMessage } from '../../models/Message';
 import api from '../../api';
 import localStorageWorker from '../../helpers/localStorageWorker';
+import makeSchemaFieldsOptional from '../../helpers/makeFieldsOptional';
 
 export type ParsedMessageOptions = {
 	session: string;
@@ -172,7 +173,11 @@ export default class ParsedMessageOptionsStore {
 
 		try {
 			const message: ParsedMessage | null = yield api.getMessage(messageType, dictionaryName);
-			this.schema = message ? (message[Object.keys(message)[0]] as JSONSchema7) : null;
+			const schema = message ? (message[Object.keys(message)[0]] as JSONSchema7) : null;
+
+			if (schema) {
+				this.schema = makeSchemaFieldsOptional(schema, ['header', 'trailer']);
+			}
 		} catch (error) {
 			console.error('Error occurred while fetching message');
 		}
