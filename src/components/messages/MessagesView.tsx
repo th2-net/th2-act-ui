@@ -27,7 +27,7 @@ import { IncomingMessageActions } from '../../stores/MessageWorker';
 
 const rangeInMinutes = 30;
 
-const HistoryTab = () => {
+const MessagesView = () => {
 	const { editorStore, replayStore } = useRootStore();
 	const { selectedSession } = editorStore.options.parsedMessage;
 	const messageWorker = useMessageWorker();
@@ -93,4 +93,4 @@ const HistoryTab = () => {
 	return <iframe className='embedded-editor' src={url} />;
 };
 
-export default observer(HistoryTab);
+export default observer(MessagesView);

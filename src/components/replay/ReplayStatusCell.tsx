@@ -28,7 +28,7 @@ type Props = {
 const colors: Record<ReplayStatus, string> = {
 	ready: blue[500],
 	edited: yellow[500],
-	success: green[500],
+	sent: green[500],
 	fail: red[500],
 };
 

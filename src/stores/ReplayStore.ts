@@ -250,7 +250,7 @@ export default class ReplayStore {
 				}
 
 				if (result) {
-					replayItem.result.status = result.code === 200 ? 'success' : 'fail';
+					replayItem.result.status = result.code === 200 ? 'sent' : 'fail';
 					replayItem.result.response = result;
 					replayItem.result.appliedReplacements = appliedReplacements;
 				}

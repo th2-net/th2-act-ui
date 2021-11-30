@@ -34,7 +34,7 @@ import useReplayStore from '../hooks/useReplayStore';
 import ReplayView from './replay/ReplayView';
 import MessageWorker from '../stores/MessageWorker';
 import MessageWorkerProvider from '../contexts/messageWorkerContext';
-import HistoryView from './history/HistoryView';
+import MessagesView from './messages/MessagesView';
 import useSchema from '../hooks/useSchema';
 
 const App = () => {
@@ -63,7 +63,7 @@ const App = () => {
 	}, [store]);
 
 	React.useEffect(() => {
-		if (store.schemaType === 'act' && (currentTab === 1 || currentTab === 3)) {
+		if (store.schemaType === 'act' && currentTab === 3) {
 			setCurrentTab(0);
 		}
 	}, [store.schemaType, currentTab]);
@@ -93,11 +93,7 @@ const App = () => {
 										borderTopRightRadius: 6,
 									}}>
 									<Tab label='Result' className='app__tab' />
-									<Tab
-										label='History'
-										className='app__tab'
-										disabled={store.schemaType !== 'parsedMessage'}
-									/>
+									<Tab label='Messages' className='app__tab' />
 									<Tab label='Replay' className='app__tab' />
 									<Tab
 										label='Dictionary'
@@ -112,7 +108,7 @@ const App = () => {
 									/>
 								</TabPanel>
 								<TabPanel currentTab={currentTab} tabIndex={1} keepMounted>
-									<HistoryView />
+									<MessagesView />
 								</TabPanel>
 								<TabPanel currentTab={currentTab} tabIndex={2}>
 									<ReplayView />
