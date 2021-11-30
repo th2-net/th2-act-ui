@@ -145,7 +145,7 @@ const Result = ({ response, appliedReplacements }: Props) => {
 
 	return (
 		<Stack overflow='auto' height='100%' className='scrollbar'>
-			{code === 200 ? <Alert severity='success'>SUCCESS</Alert> : <Alert severity='error'>FAIL</Alert>}
+			{code === 200 ? <Alert severity='success'>SENT</Alert> : <Alert severity='error'>FAIL</Alert>}
 			{link && (
 				<Link
 					href={link}

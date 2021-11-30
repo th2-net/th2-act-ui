@@ -17,14 +17,15 @@
 import { JSONSchema4, JSONSchema7 } from 'json-schema';
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import Editor, { OnMount, OnValidate, useMonaco } from '@monaco-editor/react';
+import Editor, { Monaco, OnMount, OnValidate } from '@monaco-editor/react';
 // eslint-disable-next-line import/no-unresolved
-import { languages, MarkerSeverity } from 'monaco-editor';
+import { editor, IRange, languages, MarkerSeverity } from 'monaco-editor';
 import jsm from 'json-source-map';
 import { createInitialActMessage } from '../../helpers/schema';
 import useReplayStore from '../../hooks/useReplayStore';
 import useEditorStore from '../../hooks/useEditorStore';
 import useMessagesStore from '../../hooks/useMessagesStore';
+import '../../styles/monacoDecorations.scss';
 
 enum Commands {
 	OPEN_REPLACEMENTS_CONFIG = 'openReplacementsConfig',
@@ -39,10 +40,29 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 	const replayStore = useReplayStore();
 	const { code, setCode, setIsCodeValid } = useEditorStore();
 	const messagesStore = useMessagesStore();
-	const monaco = useMonaco();
+	const monacoRef = React.useRef<Monaco | null>(null);
+	const editorRef = React.useRef<editor.IStandaloneCodeEditor | null>(null);
+	const oldDecorations = React.useRef<string[]>([]);
+
+	const onMount: OnMount = React.useCallback((editorInstance, monacoInstance) => {
+		editorRef.current = editorInstance;
+		monacoRef.current = monacoInstance;
+
+		monacoInstance.languages.json.jsonDefaults.setDiagnosticsOptions({
+			validate: true,
+			schemas: [
+				{
+					uri: 'do.not.load',
+					schema: {},
+				},
+			],
+		});
+
+		monacoInstance.editor.registerCommand(Commands.OPEN_REPLACEMENTS_CONFIG, () => openReplacementsConfig());
+	}, []);
 
 	React.useEffect(() => {
-		if (monaco) {
+		if (monacoRef.current) {
 			if (messageSchema) {
 				if (!replayStore.editReplayItemMode) {
 					const initialMessage = createInitialActMessage(messageSchema) || '{}';
@@ -53,7 +73,7 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 				const blob = new Blob([json], { type: 'application/json' });
 				const uri = URL.createObjectURL(blob);
 
-				monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+				monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
 					validate: true,
 					schemaValidation: 'error',
 					enableSchemaRequest: true,
@@ -64,57 +84,84 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 						},
 					],
 				});
-			} else {
-				monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-					validate: true,
-					schemas: [
-						{
-							uri: 'do.not.load',
-							schema: {},
-						},
-					],
-				});
 			}
 		}
-	}, [monaco, messageSchema]);
+	}, [messageSchema]);
 
 	const currentReplacements = replayStore.replayItemToEdit
 		? replayStore.replayItemToEdit.replacements
 		: messagesStore.replacements;
 
+	const pointers = React.useMemo(() => {
+		try {
+			return jsm.parse(code).pointers;
+		} catch {
+			return {};
+		}
+	}, [code]);
+
+	const filteredReplacements = React.useMemo(
+		() =>
+			currentReplacements
+				.map(({ destinationPath, sourcePath }) => ({
+					destinationPath: destinationPath === '' ? '/' : destinationPath,
+					sourcePath,
+				}))
+				.filter(({ destinationPath }) => destinationPath in pointers),
+		[currentReplacements, pointers],
+	);
+
+	const decorations = React.useMemo(
+		() =>
+			filteredReplacements.map<editor.IModelDeltaDecoration>(({ destinationPath }) => {
+				const range: IRange = {
+					startLineNumber: pointers[destinationPath].value.line + 1,
+					startColumn: pointers[destinationPath].value.column + 1,
+					endLineNumber: pointers[destinationPath].valueEnd.line + 1,
+					endColumn: pointers[destinationPath].valueEnd.column + 1,
+				};
+
+				return {
+					range,
+					options: {
+						inlineClassName: 'valueToReplace',
+					},
+				};
+			}),
+		[filteredReplacements],
+	);
+
+	React.useEffect(() => {
+		if (editorRef.current) {
+			oldDecorations.current = editorRef.current.deltaDecorations(oldDecorations.current, decorations);
+		}
+	}, [decorations]);
+
 	const lenses: languages.CodeLens[] = React.useMemo(() => {
 		if (!currentReplacements) return [];
 		try {
-			const { pointers } = jsm.parse(code);
-
-			const paths = currentReplacements
-				.map(({ destinationPath }) => (destinationPath === '/' ? '' : destinationPath))
-				.filter(path => path in pointers);
-
-			return paths.map<languages.CodeLens>(path => ({
+			return filteredReplacements.map<languages.CodeLens>(({ destinationPath, sourcePath }) => ({
 				range: {
-					startLineNumber: (pointers[path].key?.line ?? pointers[path].value.line) + 1,
-					startColumn: (pointers[path].key?.column ?? pointers[path].value.column) + 1,
-					endLineNumber: (pointers[path].keyEnd?.line ?? pointers[path].valueEnd.line) + 1,
-					endColumn: (pointers[path].keyEnd?.column ?? pointers[path].valueEnd.column) + 1,
+					startLineNumber: (pointers[destinationPath].key?.line ?? pointers[destinationPath].value.line) + 1,
+					startColumn: (pointers[destinationPath].key?.column ?? pointers[destinationPath].value.column) + 1,
+					endLineNumber:
+						(pointers[destinationPath].keyEnd?.line ?? pointers[destinationPath].valueEnd.line) + 1,
+					endColumn:
+						(pointers[destinationPath].keyEnd?.column ?? pointers[destinationPath].valueEnd.column) + 1,
 				},
 				command: {
 					id: Commands.OPEN_REPLACEMENTS_CONFIG,
-					title: `A value of ${path || '/'} will be replaced`,
+					title: `A value of ${destinationPath || '/'} will be replaced with ${sourcePath}`,
 				},
 			}));
 		} catch {
 			return [];
 		}
-	}, [currentReplacements]);
-
-	const onMount: OnMount = (_, _monaco) => {
-		_monaco.editor.registerCommand(Commands.OPEN_REPLACEMENTS_CONFIG, () => openReplacementsConfig());
-	};
+	}, [currentReplacements, pointers]);
 
 	React.useEffect(() => {
-		if (monaco) {
-			const provider = monaco.languages.registerCodeLensProvider('json', {
+		if (monacoRef.current) {
+			const provider = monacoRef.current.languages.registerCodeLensProvider('json', {
 				provideCodeLenses: model => ({
 					lenses: model.uri.path === '/editor' ? lenses : [],
 					dispose: () => undefined,
@@ -126,7 +173,7 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 		}
 
 		return () => undefined;
-	}, [monaco, lenses]);
+	}, [lenses]);
 
 	const onValidate: OnValidate = React.useCallback(
 		markers => {

@@ -60,7 +60,7 @@ export interface ActSendingResponse {
 	responseMessage: string;
 }
 
-export type ReplayStatus = 'ready' | 'edited' | 'fail' | 'success';
+export type ReplayStatus = 'ready' | 'edited' | 'fail' | 'sent';
 
 export interface ReplacementConfig {
 	destinationPath: string;

@@ -1,0 +1,6 @@
+@import "./common/colors";
+
+.valueToReplace {
+  color: $secondaryTextColor !important;
+  text-decoration-line: line-through;
+}
