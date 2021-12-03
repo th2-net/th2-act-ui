@@ -31,6 +31,7 @@ import { Add } from '@mui/icons-material';
 import { observer } from 'mobx-react-lite';
 import jsm from 'json-source-map';
 import { toJS } from 'mobx';
+import { nanoid } from 'nanoid';
 import useReplayStore from '../../hooks/useReplayStore';
 import useReplacementsConfigStore from '../../hooks/useReplacementsConfigStore';
 import useMessagesStore from '../../hooks/useMessagesStore';
@@ -100,7 +101,7 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 	}, [changeReplacements, onClose, replacementsConfig]);
 
 	return (
-		<Dialog open={open} onClose={onClose} maxWidth='lg'>
+		<Dialog open={open} onClose={onClose} maxWidth='lg' fullWidth>
 			<DialogTitle>Replacements Config</DialogTitle>
 			<DialogContent>
 				<Table size='small'>
@@ -113,9 +114,9 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 						</TableRow>
 					</TableHead>
 					<TableBody>
-						{replacementsConfig.map(({ sourcePath, destinationPath }, configIndex) => (
+						{replacementsConfig.map(({ id, sourcePath, destinationPath }, configIndex) => (
 							<ReplacementsConfigRow
-								key={`${sourcePath}-${destinationPath}-${configIndex}`}
+								key={id}
 								sourcePath={sourcePath}
 								destinationPath={destinationPath}
 								configIndex={configIndex}
@@ -125,7 +126,9 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 						))}
 					</TableBody>
 				</Table>
-				<Button startIcon={<Add />} onClick={() => addConfig({ destinationPath: '/', sourcePath: '/' })}>
+				<Button
+					startIcon={<Add />}
+					onClick={() => addConfig({ id: nanoid(), destinationPath: '/', sourcePath: '/' })}>
 					Add
 				</Button>
 			</DialogContent>

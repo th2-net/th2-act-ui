@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { Dictionary } from '../models/Dictionary';
+import { Dictionary, DictionaryRequestPayload } from '../models/Dictionary';
 import {
 	JSONSchemaResponse,
 	MessageRequestModel,
@@ -23,6 +23,7 @@ import {
 	ParsedMessage,
 } from '../models/Message';
 import Service from '../models/Service';
+import { Schema } from '../models/Schema';
 
 const api = {
 	async getDictionaryList(sessionName: string): Promise<string[]> {
@@ -165,6 +166,32 @@ const api = {
 			code: res.status,
 			message,
 		};
+	},
+	async fetchSchema(schemaName: string): Promise<Schema | null> {
+		const res = await fetch(`/editor/backend/schema/${schemaName}`, { cache: 'no-cache' });
+
+		if (res.ok) {
+			return res.json();
+		}
+
+		console.error(res.statusText);
+
+		return null;
+	},
+	async updateDictionary(schemaName: string, payload: DictionaryRequestPayload): Promise<boolean> {
+		const res = await fetch(`/editor/backend/schema/${schemaName}`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify([payload]),
+		});
+
+		if (!res.ok) {
+			console.error(res.statusText);
+		}
+
+		return res.ok;
 	},
 };
 

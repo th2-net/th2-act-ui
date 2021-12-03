@@ -63,11 +63,12 @@ export interface ActSendingResponse {
 export type ReplayStatus = 'ready' | 'edited' | 'fail' | 'sent';
 
 export interface ReplacementConfig {
+	id: string;
 	destinationPath: string;
 	sourcePath: string;
 }
 
-export interface AppliedReplacement extends ReplacementConfig {
+export interface AppliedReplacement extends Omit<ReplacementConfig, 'id'> {
 	originalValue: unknown;
 	newValue: unknown;
 }

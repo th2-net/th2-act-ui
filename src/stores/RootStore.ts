@@ -22,6 +22,7 @@ import { SchemaType } from '../components/message-editor/Control';
 import localStorageWorker from '../helpers/localStorageWorker';
 import ReplayStore from './ReplayStore';
 import ReplacementsConfigStore from './ReplacementsConfigStore';
+import DictionaryStore from './DictionaryStore';
 
 type MessagesStores = {
 	act: ActMessagesStore;
@@ -34,6 +35,8 @@ export default class RootStore {
 	replayStore = new ReplayStore(this);
 
 	editorStore = new EditorStore(this);
+
+	dictionaryStore = new DictionaryStore();
 
 	messagesStores: MessagesStores = {
 		act: new ActMessagesStore(this),

@@ -48,17 +48,10 @@ const ReplayView = () => {
 				<Button variant='outlined' size='small' startIcon={<Upload />} onClick={exportReplayList}>
 					Export
 				</Button>
-				<label htmlFor='contained-button-file'>
-					<Button variant='outlined' component='label' size='small' startIcon={<Download />}>
-						Import
-						<input
-							type='file'
-							accept='application/json'
-							hidden
-							onChange={e => loadFromFile(e.target.files)}
-						/>
-					</Button>
-				</label>
+				<Button variant='outlined' component='label' size='small' startIcon={<Download />}>
+					Import
+					<input type='file' accept='application/json' hidden onChange={e => loadFromFile(e.target.files)} />
+				</Button>
 			</Stack>
 		</Box>
 	);
