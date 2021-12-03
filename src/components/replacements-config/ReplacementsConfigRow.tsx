@@ -54,31 +54,26 @@ const ReplacementsConfigRow = ({
 	}, [replayList, sourcePath]);
 
 	return (
-		<TableRow key={`${sourcePath}-${destinationPath}-${configIndex}`}>
+		<TableRow>
 			<TableCell>
 				<Autocomplete
-					autoSelect
+					autoHighlight
+					freeSolo
 					value={destinationPath}
-					onChange={(_, newValue: string | null) =>
-						changeConfig(configIndex, { destinationPath: newValue ?? '' })
-					}
-					renderInput={params => (
-						<TextField {...params} size='small' variant='standard' sx={{ minWidth: 300 }} />
-					)}
+					inputValue={destinationPath}
+					onInputChange={(_, newValue) => changeConfig(configIndex, { destinationPath: newValue })}
+					renderInput={params => <TextField {...params} size='small' variant='standard' />}
 					options={destinationPaths}
 				/>
 			</TableCell>
 			<TableCell>
 				<Autocomplete
+					autoHighlight
 					freeSolo
-					autoSelect
 					value={sourcePath}
-					onChange={(_, newValue: string | null) =>
-						changeConfig(configIndex, { sourcePath: newValue || '/' })
-					}
-					renderInput={params => (
-						<TextField {...params} size='small' variant='standard' sx={{ minWidth: 300 }} />
-					)}
+					inputValue={sourcePath}
+					onInputChange={(_, newValue) => changeConfig(configIndex, { sourcePath: newValue })}
+					renderInput={params => <TextField {...params} size='small' variant='standard' />}
 					options={replayResultsPaths}
 				/>
 			</TableCell>

@@ -1,4 +1,4 @@
-/** *****************************************************************************
+/** ****************************************************************************
  * Copyright 2020-2020 Exactpro (Exactpro Systems Limited)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,20 +14,8 @@
  * limitations under the License.
  ***************************************************************************** */
 
-export type Dictionary = Array<string>;
+import { useRootStore } from './useRootStore';
 
-export type DictionaryEntity = {
-	kind: 'Th2Dictionary';
-	name: string;
-	spec: {
-		data: string;
-	};
-};
+const useDictionaryStore = () => useRootStore().dictionaryStore;
 
-export type DictionaryRequestPayload = {
-	operation: 'add' | 'update' | 'remove';
-	payload: DictionaryEntity;
-};
-
-export const isDictionaryEntity = (object: unknown): object is DictionaryEntity =>
-	typeof object === 'object' && object !== null && (object as DictionaryEntity).kind === 'Th2Dictionary';
+export default useDictionaryStore;

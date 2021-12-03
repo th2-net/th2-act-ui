@@ -24,7 +24,6 @@ import '../styles/root.scss';
 import MessageEditor from './message-editor/MessageEditor';
 import { useRootStore } from '../hooks/useRootStore';
 import Control from './message-editor/Control';
-import { EmbeddedEditor } from './dictionary-view/EmbeddedEditor';
 import SplitView from './split-view/SplitView';
 import SplitViewPane from './split-view/SplitViewPane';
 import TabPanel from './util/TabPanel';
@@ -35,7 +34,7 @@ import ReplayView from './replay/ReplayView';
 import MessageWorker from '../stores/MessageWorker';
 import MessageWorkerProvider from '../contexts/messageWorkerContext';
 import MessagesView from './messages/MessagesView';
-import useSchema from '../hooks/useSchema';
+import DictionaryView from './dictionary/DictionaryView';
 
 const App = () => {
 	const store = useRootStore();
@@ -43,7 +42,6 @@ const App = () => {
 	const messagesStore = useMessagesStore();
 	const editorStore = useEditorStore();
 	const replayStore = useReplayStore();
-	const schema = useSchema();
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [panelArea, setPanelArea] = React.useState(50);
 	const [showReplacementsConfig, toggleReplacementsConfig] = React.useState(false);
@@ -114,10 +112,7 @@ const App = () => {
 									<ReplayView />
 								</TabPanel>
 								<TabPanel currentTab={currentTab} tabIndex={3} keepMounted>
-									<EmbeddedEditor
-										schema={schema}
-										object={store.editorStore.options.parsedMessage.selectedDictionary}
-									/>
+									<DictionaryView />
 								</TabPanel>
 							</Box>
 						</SplitViewPane>

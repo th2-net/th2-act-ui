@@ -47,10 +47,10 @@ module.exports = webpackMerge(commonConfig, {
 				changeOrigin: true,
 				secure: false,
 			},
-			'/editor2': {
+			'/editor': {
 				target: 'http://th2-qa:30000',
-				secure: false,
 				changeOrigin: true,
+				secure: false,
 			},
 		},
 	},
