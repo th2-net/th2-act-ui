@@ -20,6 +20,7 @@ import React from 'react';
 import { observer } from 'mobx-react-lite';
 import '../../styles/splitter.scss';
 import { nanoid } from 'nanoid';
+import { Box } from '@mui/material';
 import { EventMessage } from '../../models/Message';
 import { useRootStore } from '../../hooks/useRootStore';
 import useMessageWorker from '../../hooks/useMessageWorker';
@@ -90,7 +91,7 @@ const MessagesView = () => {
 
 	if (!selectedSession) return null;
 
-	return <iframe className='embedded-editor' src={url} />;
+	return <Box width='100%' height='100%' component='iframe' src={url} border='none' />;
 };
 
 export default observer(MessagesView);
