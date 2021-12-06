@@ -127,7 +127,11 @@ const App = () => {
 										Replaying
 									</Button>
 								) : (
-									<Button variant='contained' endIcon={<Replay />} onClick={replayStore.startReplay}>
+									<Button
+										variant='contained'
+										endIcon={<Replay />}
+										onClick={replayStore.startReplay}
+										disabled={replayStore.replayList.length === 0}>
 										Start replay
 									</Button>
 								)}
