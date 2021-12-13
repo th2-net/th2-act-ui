@@ -131,7 +131,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 			<TableRow sx={{ bgcolor: editReplayItemMode ? 'white' : blue[50] }}>
 				{schemaType === 'parsedMessage' ? (
 					<>
-						<TableCell colSpan={2}>New Message</TableCell>
+						<TableCell colSpan={3}>New Message</TableCell>
 						<SimpleKeyValueCell label='Session' value={options.parsedMessage.selectedSession ?? ''} />
 						<SimpleKeyValueCell label='Dictionary' value={options.parsedMessage.selectedDictionary ?? ''} />
 						<SimpleKeyValueCell
@@ -142,7 +142,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 					</>
 				) : (
 					<>
-						<TableCell colSpan={2}>New gRPC Call</TableCell>
+						<TableCell colSpan={3}>New gRPC Call</TableCell>
 						<SimpleKeyValueCell label='Box' value={options.act.selectedAct ?? ''} />
 						<SimpleKeyValueCell label='Service' value={options.act.selectedService ?? ''} />
 						<SimpleKeyValueCell

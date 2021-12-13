@@ -17,6 +17,7 @@
 import { ActReplayItem, isActReplayItem, isParsedMessageReplayItem, ParsedMessageReplayItem } from '../models/Message';
 import { SchemaType } from '../components/message-editor/Control';
 import { Method } from '../models/Service';
+import { isPreviewTagsConfig, PreviewTagsConfig } from '../stores/PreviewTagsStore';
 
 enum localStorageKeys {
 	SELECTED_SCHEMA_TYPE = 'selectedSchemaType',
@@ -27,6 +28,7 @@ enum localStorageKeys {
 	SELECTED_ACT_BOX = 'selectedActBox',
 	SELECTED_SERVICE = 'selectedService',
 	SELECTED_METHOD_NAME = 'selectedMethodName',
+	PREVIEW_TAGS_CONFIG = 'previewTagsConfig',
 }
 
 class LocalStorageWorker {
@@ -68,36 +70,46 @@ class LocalStorageWorker {
 		return schemaType === 'parsedMessage' || schemaType === 'act' ? schemaType : 'parsedMessage';
 	}
 
+	getPreviewTagsConfig(): PreviewTagsConfig[] {
+		const tagsConfig = JSON.parse(localStorage.getItem(localStorageKeys.PREVIEW_TAGS_CONFIG) ?? '[]');
+
+		return Array.isArray(tagsConfig) && tagsConfig.every(isPreviewTagsConfig) ? tagsConfig : [];
+	}
+
 	setReplayList(replayList: Array<ParsedMessageReplayItem | ActReplayItem>) {
 		localStorage.setItem(localStorageKeys.REPLAY_LIST, JSON.stringify(replayList));
 	}
 
 	setSelectedSessionId(id: string) {
-		return localStorage.setItem(localStorageKeys.SELECTED_SESSION_ID, id);
+		localStorage.setItem(localStorageKeys.SELECTED_SESSION_ID, id);
 	}
 
 	setSelectedDictionaryName(dictionaryName: string) {
-		return localStorage.setItem(localStorageKeys.SELECTED_DICTIONARY_NAME, dictionaryName);
+		localStorage.setItem(localStorageKeys.SELECTED_DICTIONARY_NAME, dictionaryName);
 	}
 
 	setSelectedActBox(actBox: string) {
-		return localStorage.setItem(localStorageKeys.SELECTED_ACT_BOX, actBox);
+		localStorage.setItem(localStorageKeys.SELECTED_ACT_BOX, actBox);
 	}
 
 	setSelectedService(service: string) {
-		return localStorage.setItem(localStorageKeys.SELECTED_SERVICE, service);
+		localStorage.setItem(localStorageKeys.SELECTED_SERVICE, service);
 	}
 
 	setSelectedMessageType(type: string) {
-		return localStorage.setItem(localStorageKeys.SELECTED_MESSAGE_TYPE, type);
+		localStorage.setItem(localStorageKeys.SELECTED_MESSAGE_TYPE, type);
 	}
 
 	setSelectedMethod(method: Method) {
-		return localStorage.setItem(localStorageKeys.SELECTED_METHOD_NAME, JSON.stringify(method));
+		localStorage.setItem(localStorageKeys.SELECTED_METHOD_NAME, JSON.stringify(method));
 	}
 
 	setSelectedSchemaType(type: string) {
-		return localStorage.setItem(localStorageKeys.SELECTED_SCHEMA_TYPE, type);
+		localStorage.setItem(localStorageKeys.SELECTED_SCHEMA_TYPE, type);
+	}
+
+	setPreviewTagsConfig(previewTagsConfig: PreviewTagsConfig[]) {
+		localStorage.setItem(localStorageKeys.PREVIEW_TAGS_CONFIG, JSON.stringify(previewTagsConfig));
 	}
 }
 

@@ -27,6 +27,7 @@ import {
 } from '../../models/Message';
 import ReplayStatusCell from './ReplayStatusCell';
 import SimpleKeyValueCell from './SimpleKeyValueCell';
+import ReplayPreviewCell from './ReplayPreviewCell';
 
 type Props = {
 	draggableProvided: DraggableProvided;
@@ -83,6 +84,7 @@ const ReplayTableRow = ({
 				)}
 			</Stack>
 		</TableCell>
+		<ReplayPreviewCell replayItem={replayItem} />
 		{isActReplayItem(replayItem) && (
 			<>
 				<SimpleKeyValueCell label='Box' value={replayItem.actBox} />
