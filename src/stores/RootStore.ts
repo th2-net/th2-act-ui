@@ -23,6 +23,7 @@ import localStorageWorker from '../helpers/localStorageWorker';
 import ReplayStore from './ReplayStore';
 import ReplacementsConfigStore from './ReplacementsConfigStore';
 import DictionaryStore from './DictionaryStore';
+import PreviewTagsStore from './PreviewTagsStore';
 
 type MessagesStores = {
 	act: ActMessagesStore;
@@ -42,6 +43,8 @@ export default class RootStore {
 		act: new ActMessagesStore(this),
 		parsedMessage: new ParsedMessagesStore(this),
 	};
+
+	previewTagsStore = new PreviewTagsStore();
 
 	schemaType: SchemaType = localStorageWorker.getSelectedSchemaType();
 

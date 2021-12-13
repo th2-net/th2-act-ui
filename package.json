@@ -1,6 +1,6 @@
 {
 	"name": "act-ui",
-	"version": "1.1.30",
+	"version": "1.1.31",
 	"description": "",
 	"main": "index.tsx",
 	"private": true,
@@ -26,6 +26,7 @@
 		"@types/jest": "^24.0.23",
 		"@types/json-schema": "^7.0.6",
 		"@types/jsonpath": "^0.2.0",
+		"@types/lodash.clonedeep": "^4.5.6",
 		"@types/lodash.throttle": "^4.1.6",
 		"@types/react": "^17.0.32",
 		"@types/react-beautiful-dnd": "^13.1.1",
@@ -35,6 +36,7 @@
 		"json-schema": "^0.3.0",
 		"json-source-map": "^0.6.1",
 		"jsonpath": "^1.1.1",
+		"lodash.clonedeep": "^4.5.0",
 		"lodash.throttle": "^4.1.1",
 		"mobx": "^6.3.5",
 		"mobx-react-lite": "^1.5.2",
