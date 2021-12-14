@@ -16,17 +16,18 @@
 
 import React from 'react';
 import { Box, Button, Stack } from '@mui/material';
-import { ClearAll, Download, Settings, Upload } from '@mui/icons-material';
+import { CheckBox, CheckBoxOutlineBlank, ClearAll, Download, Settings, Upload } from '@mui/icons-material';
 import ReplayTable from './ReplayTable';
 import useReplayStore from '../../hooks/useReplayStore';
 import PreviewConfigModal from './preview-config/PreviewConfigModal';
 
 const ReplayView = () => {
-	const { exportReplayList, clearReplayList, clearUntitled, importFromJSON } = useReplayStore();
+	const { exportReplayList, clearSelected, importFromJSON, selectedItems, allItemsSelected, toggleAll, replayList } =
+		useReplayStore();
 	const [showPreviewConfigModal, togglePreviewConfigModal] = React.useState(false);
 
 	const loadFromFile = (file: FileList | null) => {
-		if (file != null) {
+		if (file) {
 			const reader = new FileReader();
 			reader.readAsText(file.item(0) as Blob);
 			reader.onload = () => {
@@ -41,11 +42,32 @@ const ReplayView = () => {
 		<Box display='grid' gridTemplateRows='1fr auto' height='100%'>
 			<ReplayTable />
 			<Stack direction='row' spacing={1} p={1}>
-				<Button variant='outlined' size='small' startIcon={<ClearAll />} onClick={clearReplayList}>
-					Clear
-				</Button>
-				<Button variant='outlined' size='small' startIcon={<ClearAll />} onClick={clearUntitled}>
-					Clear untitled
+				{allItemsSelected ? (
+					<Button
+						variant='outlined'
+						size='small'
+						startIcon={<CheckBox />}
+						onClick={() => toggleAll(false)}
+						disabled={replayList.length === 0}>
+						Unselect all
+					</Button>
+				) : (
+					<Button
+						variant='outlined'
+						size='small'
+						startIcon={<CheckBoxOutlineBlank />}
+						onClick={() => toggleAll(true)}
+						disabled={replayList.length === 0}>
+						Select all
+					</Button>
+				)}
+				<Button
+					variant='outlined'
+					size='small'
+					startIcon={<ClearAll />}
+					onClick={clearSelected}
+					disabled={selectedItems.length === 0}>
+					Clear ({selectedItems.length})
 				</Button>
 				<Button variant='outlined' size='small' startIcon={<Upload />} onClick={exportReplayList}>
 					Export

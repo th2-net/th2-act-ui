@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, flow, makeObservable, observable, reaction, runInAction } from 'mobx';
+import { action, computed, flow, makeObservable, observable, reaction, runInAction } from 'mobx';
 import { nanoid } from 'nanoid';
 import {
 	ActReplayItem,
@@ -31,7 +31,7 @@ import { downloadFile } from '../helpers/downloadFile';
 import localStorageWorker from '../helpers/localStorageWorker';
 import applyReplacements from '../helpers/applyReplacements';
 
-type ReplayExportData<T extends ReplayItem> = Omit<T, 'id' | 'result'>;
+type ReplayExportData<T extends ReplayItem> = Omit<T, 'id' | 'result' | 'selected'>;
 
 export default class ReplayStore {
 	isReplaying = false;
@@ -50,16 +50,20 @@ export default class ReplayStore {
 			replayList: observable,
 			editReplayItemMode: observable,
 			editedReplayItemId: observable,
+			replayItemToEdit: computed,
+			selectedItems: computed,
+			allItemsSelected: computed,
 			saveEditedReplayItem: action,
 			addToReplayList: action,
-			clearReplayList: action,
-			clearUntitled: action,
-			resetResults: action,
+			clearSelected: action,
+			resetSelectedResults: action,
 			changeResult: action,
 			changeDelay: action,
 			setEditedReplayItemId: action,
 			setEditReplayItemMode: action,
 			removeReplayItem: action,
+			toggleItem: action,
+			toggleAll: action,
 			reorder: action,
 			renameReplayItem: action,
 			importFromJSON: action,
@@ -76,6 +80,14 @@ export default class ReplayStore {
 		return this.editReplayItemMode && this.editedReplayItemId
 			? this.replayList.find(({ id }) => id === this.editedReplayItemId)
 			: null;
+	}
+
+	get selectedItems() {
+		return this.replayList.filter(({ selected }) => selected);
+	}
+
+	get allItemsSelected() {
+		return this.replayList.every(({ selected }) => selected);
 	}
 
 	buildEditedReplayItem = (id: string): ParsedMessageReplayItem | ActReplayItem | null => {
@@ -128,23 +140,26 @@ export default class ReplayStore {
 		this.replayList = [...this.replayList, replayItem];
 	};
 
-	clearReplayList = () => {
-		this.replayList = [];
-
-		if (this.editReplayItemMode) {
+	clearSelected = () => {
+		if (
+			this.editReplayItemMode &&
+			this.replayList.find(replayItem => replayItem.id === this.editedReplayItemId)?.selected
+		) {
 			this.setEditReplayItemMode(false);
 		}
+
+		this.replayList = this.replayList.filter(({ selected }) => !selected);
 	};
 
-	clearUntitled = () => {
-		this.replayList = this.replayList.filter(replayItem => !!replayItem.name);
-	};
-
-	resetResults = () => {
-		this.replayList = this.replayList.map(replayItem => ({
-			...replayItem,
-			result: { status: 'ready' },
-		}));
+	resetSelectedResults = () => {
+		this.replayList = this.replayList.map(replayItem =>
+			replayItem.selected
+				? {
+						...replayItem,
+						result: { status: 'ready' },
+				  }
+				: replayItem,
+		);
 	};
 
 	renameReplayItem = (id: string, name: string) => {
@@ -200,24 +215,35 @@ export default class ReplayStore {
 		this.replayList = temp;
 	};
 
+	toggleItem = (id: string, selected: boolean) => {
+		this.replayList = this.replayList.map(replayItem =>
+			replayItem.id === id ? { ...replayItem, selected } : replayItem,
+		);
+	};
+
+	toggleAll = (selected: boolean) => {
+		this.replayList = this.replayList.map(replayItem =>
+			replayItem.selected === selected ? replayItem : { ...replayItem, selected },
+		);
+	};
+
 	startReplay = () => {
-		if (this.replayList[0]) {
-			this.resetResults();
-			this.isReplaying = true;
-			this.replayMessageRecursive(0);
-		}
+		this.resetSelectedResults();
+		this.isReplaying = true;
+		this.replayMessageRecursive(0);
 	};
 
 	replayMessageRecursive = (index: number) => {
+		const { selectedItems } = this;
 		setTimeout(() => {
-			this.replay(this.replayList[index].id).then(() => {
-				if (index < this.replayList.length - 1) {
+			this.replay(selectedItems[index].id).then(() => {
+				if (index < selectedItems.length - 1) {
 					this.replayMessageRecursive(index + 1);
 				} else {
 					runInAction(() => (this.isReplaying = false));
 				}
 			});
-		}, this.replayList[index].delay);
+		}, selectedItems[index].delay);
 	};
 
 	replay = flow(function* (this: ReplayStore, id: string) {
@@ -295,6 +321,7 @@ export default class ReplayStore {
 							...replayItem,
 							result: { status: 'ready' },
 							id: nanoid(),
+							selected: false,
 						});
 					});
 			}

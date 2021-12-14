@@ -50,6 +50,10 @@ const PreviewConfigRow = ({ configIndex, autocomplete }: Props) => {
 		[autocomplete, config.type, config.subType],
 	);
 
+	const isValid =
+		modifiedConfig.findIndex(({ type, subType }) => type === config.type && subType === config.subType) ===
+		configIndex;
+
 	return (
 		<TableRow>
 			<TableCell>
@@ -61,7 +65,14 @@ const PreviewConfigRow = ({ configIndex, autocomplete }: Props) => {
 					inputValue={config.type}
 					onInputChange={(_, newValue) => changeConfig(configIndex, { type: newValue })}
 					renderInput={params => (
-						<TextField {...params} size='small' variant='standard' label='Dictionary or Service' />
+						<TextField
+							{...params}
+							size='small'
+							variant='standard'
+							label='Dictionary or Service'
+							error={!isValid}
+							helperText={!isValid && 'A config with these type and sub-type already exists'}
+						/>
 					)}
 					options={typeAutoComplete}
 					sx={{ minWidth: 200 }}
@@ -76,7 +87,13 @@ const PreviewConfigRow = ({ configIndex, autocomplete }: Props) => {
 					inputValue={config.subType}
 					onInputChange={(_, newValue) => changeConfig(configIndex, { subType: newValue })}
 					renderInput={params => (
-						<TextField {...params} size='small' variant='standard' label='Msg Type or Method' />
+						<TextField
+							{...params}
+							size='small'
+							variant='standard'
+							label='Msg Type or Method'
+							error={!isValid}
+						/>
 					)}
 					options={subTypeAutoComplete}
 					sx={{ minWidth: 200 }}

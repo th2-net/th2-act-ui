@@ -16,7 +16,9 @@
 
 import { action, makeObservable, observable, reaction, toJS } from 'mobx';
 import cloneDeep from 'lodash.clonedeep';
+import { nanoid } from 'nanoid';
 import localStorageWorker from '../helpers/localStorageWorker';
+import { downloadFile } from '../helpers/downloadFile';
 
 export interface PreviewTagsConfig {
 	id: string;
@@ -50,6 +52,7 @@ export default class PreviewTagsStore {
 			removeConfig: action,
 			saveChanges: action,
 			cancelChanges: action,
+			importFromJSON: action,
 		});
 
 		reaction(
@@ -78,5 +81,21 @@ export default class PreviewTagsStore {
 
 	cancelChanges = () => {
 		this.modifiedConfig = cloneDeep(toJS(this.originalConfig));
+	};
+
+	importFromJSON = (jsonString: string) => {
+		try {
+			const data = JSON.parse(jsonString);
+
+			if (Array.isArray(data) && data.every(isPreviewTagsConfig)) {
+				this.modifiedConfig = [...this.modifiedConfig, ...data.map(config => ({ ...config, id: nanoid() }))];
+			}
+		} catch (error) {
+			console.error('Error occurred while importing config', error);
+		}
+	};
+
+	exportConfig = () => {
+		downloadFile(JSON.stringify(this.modifiedConfig, null, '    '), 'previewConfig', 'application/json');
 	};
 }

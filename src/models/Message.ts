@@ -74,6 +74,7 @@ export interface AppliedReplacement extends Omit<ReplacementConfig, 'id'> {
 }
 
 export interface ReplayItem {
+	selected: boolean;
 	name?: string;
 	message: string;
 	delay: number;

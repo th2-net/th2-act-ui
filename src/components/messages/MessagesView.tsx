@@ -36,6 +36,7 @@ const MessagesView = () => {
 	React.useEffect(() => {
 		const addToReplay = (message: EventMessage) =>
 			replayStore.addToReplayList({
+				selected: false,
 				type: 'parsedMessage',
 				id: nanoid(),
 				session: message.sessionId,

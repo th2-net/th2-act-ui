@@ -131,8 +131,8 @@ const App = () => {
 										variant='contained'
 										endIcon={<Replay />}
 										onClick={replayStore.startReplay}
-										disabled={replayStore.replayList.length === 0}>
-										Start replay
+										disabled={replayStore.selectedItems.length === 0}>
+										Start replay ({replayStore.selectedItems.length})
 									</Button>
 								)}
 							</>
