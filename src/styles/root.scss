@@ -58,31 +58,6 @@ ul {
 }
 
 .app {
-	display: block;
-	width: 100%;
-	height: 100%;
-	overflow: hidden;
-	row-gap: 10px;
-	padding: 10px;
-
-	&__body {
-		padding: 15px 20px;
-		background-color: $appBackgroundColor;
-		border-radius: 8px;
-		display: grid;
-		grid-template-rows: auto auto 1fr auto;
-		height: 100%;
-	}
-
-	&__title {
-		font-size: 16px;
-		font-weight: bold;
-		text-transform: uppercase;
-		display: inline;
-		margin-right: 20px;
-		margin-bottom: 5px;
-	}
-
 	&__row {
 		padding: 10px 0;
 	}
@@ -92,61 +67,11 @@ ul {
 		align-items: center;
 	}
 
-	&__editor {
-		margin: 10px 0;
-	}
-
-	  &__buttons {
-		padding: 10px 0;
-		display: flex;
-		justify-content: flex-end;
-	}
-
-	&__result {
-		display: grid;
-		grid-template-rows: auto 1fr;
-	}
-
-	&__tabs-container {
-		height: 100%;
-		width: 100%;
-		display: grid;
-		grid-template-rows: 50px auto;
-		grid-row-gap: 10px;
-	}
-
     &__tab:hover{
         background-color: #cccccc;
     }
 }
 
-.splash-screen {
-	width: auto;
-	display: inline-block;
-	place-items: center;
-	margin: 0 5px;
-
-	&__spinner {
-		@include spinner(3px, 14px, 2s);
-	}
-}
-
-.app__editor {
-	position: relative;
-	overflow: hidden;
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	grid-column-gap: 20px;
-
-	.overlay {
-		position: absolute;
-
-		height: 100%;
-		top: 0;
-		left: 0;
-		background: rgba(#000, 0.2);
-	}
-}
 
 .scrollbar {
   @include scrollbar();

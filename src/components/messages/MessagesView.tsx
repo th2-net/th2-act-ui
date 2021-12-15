@@ -18,7 +18,6 @@
 
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import '../../styles/splitter.scss';
 import { nanoid } from 'nanoid';
 import { Box } from '@mui/material';
 import { EventMessage } from '../../models/Message';
