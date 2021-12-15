@@ -15,10 +15,11 @@
  ***************************************************************************** */
 
 import React, { useEffect } from 'react';
-import { Box, Button, CircularProgress, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import Editor from '@monaco-editor/react';
 import { observer } from 'mobx-react-lite';
 import { grey, red } from '@mui/material/colors';
+import { Done } from '@mui/icons-material';
 import useDictionaryStore from '../../hooks/useDictionaryStore';
 import useSchema from '../../hooks/useSchema';
 import useEditorStore from '../../hooks/useEditorStore';
@@ -26,7 +27,7 @@ import useEditorStore from '../../hooks/useEditorStore';
 const DictionaryView = () => {
 	const { options } = useEditorStore();
 	const dictionaryStore = useDictionaryStore();
-	const schema = useSchema() || 'hand';
+	const schema = useSchema();
 	const { dictionary, isLoadingDictionary, isSavingDictionary, setDictionaryCode, isDictionaryCodeValid } =
 		dictionaryStore;
 	const { selectedDictionary } = options.parsedMessage;
@@ -60,7 +61,7 @@ const DictionaryView = () => {
 
 	return (
 		<Box display='grid' gridTemplateRows='1fr auto' height='100%'>
-			<Box sx={{ border: `1px solid ${isDictionaryCodeValid ? 'transparent' : red[500]}` }}>
+			<Box sx={{ border: `1px solid ${isDictionaryCodeValid ? 'transparent' : red[500]}` }} overflow='hidden'>
 				{dictionary && (
 					<Editor
 						language='xml'
@@ -70,16 +71,16 @@ const DictionaryView = () => {
 					/>
 				)}
 			</Box>
-			<Box p={1}>
+			<Stack p={1} direction='row' justifyContent='flex-end'>
 				<Button
 					size='small'
-					variant='outlined'
+					variant='contained'
 					onClick={() => dictionaryStore.saveDictionary(schema)}
-					endIcon={isSavingDictionary && <CircularProgress size={14} />}
+					endIcon={isSavingDictionary ? <CircularProgress size={13} /> : <Done />}
 					disabled={isSavingDictionary || !isDictionaryCodeValid}>
 					Apply changes
 				</Button>
-			</Box>
+			</Stack>
 		</Box>
 	);
 };

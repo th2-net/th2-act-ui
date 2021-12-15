@@ -15,15 +15,25 @@
  ***************************************************************************** */
 
 import React from 'react';
-import { Box, Button, Stack } from '@mui/material';
-import { CheckBox, CheckBoxOutlineBlank, ClearAll, Download, Settings, Upload } from '@mui/icons-material';
+import { Box, Button, CircularProgress, Stack } from '@mui/material';
+import { CheckBox, CheckBoxOutlineBlank, ClearAll, Download, Replay, Settings, Upload } from '@mui/icons-material';
+import { observer } from 'mobx-react-lite';
 import ReplayTable from './ReplayTable';
 import useReplayStore from '../../hooks/useReplayStore';
 import PreviewConfigModal from './preview-config/PreviewConfigModal';
 
 const ReplayView = () => {
-	const { exportReplayList, clearSelected, importFromJSON, selectedItems, allItemsSelected, toggleAll, replayList } =
-		useReplayStore();
+	const {
+		exportReplayList,
+		clearSelected,
+		importFromJSON,
+		selectedItems,
+		allItemsSelected,
+		toggleAll,
+		replayList,
+		isReplaying,
+		startReplay,
+	} = useReplayStore();
 	const [showPreviewConfigModal, togglePreviewConfigModal] = React.useState(false);
 
 	const loadFromFile = (file: FileList | null) => {
@@ -83,10 +93,19 @@ const ReplayView = () => {
 					onClick={() => togglePreviewConfigModal(true)}>
 					Preview Config
 				</Button>
+				<Box flexGrow={1} />
+				<Button
+					size='small'
+					variant='contained'
+					endIcon={isReplaying ? <CircularProgress color='inherit' size={14} /> : <Replay />}
+					disabled={selectedItems.length === 0}
+					onClick={() => !isReplaying && startReplay()}>
+					{isReplaying ? 'Replaying' : 'Start Replay'}
+				</Button>
 			</Stack>
 			<PreviewConfigModal open={showPreviewConfigModal} onClose={() => togglePreviewConfigModal(false)} />
 		</Box>
 	);
 };
 
-export default ReplayView;
+export default observer(ReplayView);

@@ -92,7 +92,7 @@ const MessagesView = () => {
 
 	if (!selectedSession) return null;
 
-	return <Box width='100%' height='100%' component='iframe' src={url} border='none' />;
+	return <Box width='100%' height='100%' component='iframe' src={url} border='none' bgcolor='white' />;
 };
 
 export default observer(MessagesView);
