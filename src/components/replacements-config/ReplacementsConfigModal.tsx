@@ -78,11 +78,14 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 
 		replayList.forEach((replayItem, index) => {
 			paths.push(`/${index}`);
-
+			const objectPaths = Object.keys(jsm.parse(replayItem.message).pointers)
+				.filter(x => x)
+				.map(x => `/${index}/body${x}`);
+			paths = [...paths, ...objectPaths];
 			if (replayItem.result.response?.code === 200) {
 				const resultPaths = Object.keys(jsm.parse(replayItem.result.response.message).pointers)
 					.filter(x => x)
-					.map(x => `/${index}${x}`);
+					.map(x => `/${index}/response${x}`);
 
 				paths = [...paths, ...resultPaths];
 			}
