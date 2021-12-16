@@ -146,7 +146,7 @@ const Result = ({ response, appliedReplacements, isSending }: Props) => {
 	const { link, content } = parseContent();
 
 	return isSending ? (
-		<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+		<div className='result__loading'>
 			<CircularProgress />
 		</div>
 	) : (
