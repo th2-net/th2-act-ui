@@ -28,16 +28,10 @@ type Props = {
 	destinationPath: string;
 	configIndex: number;
 	destinationPaths: string[];
-	replayResultsPaths: string[];
+	replayPaths: string[];
 };
 
-const ReplacementsConfigRow = ({
-	sourcePath,
-	destinationPath,
-	configIndex,
-	destinationPaths,
-	replayResultsPaths,
-}: Props) => {
+const ReplacementsConfigRow = ({ sourcePath, destinationPath, configIndex, destinationPaths, replayPaths }: Props) => {
 	const { replayList } = useReplayStore();
 	const { changeConfig, deleteConfig } = useReplacementsConfigStore();
 
@@ -74,7 +68,7 @@ const ReplacementsConfigRow = ({
 					inputValue={sourcePath}
 					onInputChange={(_, newValue) => changeConfig(configIndex, { sourcePath: newValue })}
 					renderInput={params => <TextField {...params} size='small' variant='standard' />}
-					options={replayResultsPaths}
+					options={replayPaths}
 				/>
 			</TableCell>
 			<TableCell>
