@@ -73,15 +73,24 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 		}
 	}, [currentMessage]);
 
-	const replayResultsPaths = React.useMemo(() => {
+	const replayPaths = React.useMemo(() => {
 		let paths: string[] = ['$datetime'];
 
 		replayList.forEach((replayItem, index) => {
 			paths.push(`/${index}`);
-			const objectPaths = Object.keys(jsm.parse(replayItem.message).pointers)
-				.filter(x => x)
-				.map(x => `/${index}/body${x}`);
-			paths = [...paths, ...objectPaths];
+
+			let bodyPaths: string[];
+
+			try {
+				bodyPaths = Object.keys(jsm.parse(replayItem.message).pointers)
+					.filter(x => x)
+					.map(x => `/${index}/body${x}`);
+			} catch {
+				bodyPaths = [];
+			}
+
+			paths = [...paths, ...bodyPaths];
+
 			if (replayItem.result.response?.code === 200) {
 				const resultPaths = Object.keys(jsm.parse(replayItem.result.response.message).pointers)
 					.filter(x => x)
@@ -91,7 +100,7 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 			}
 		});
 
-		return paths;
+		return paths.sort((a, b) => (a.startsWith('$') ? -1 : +a.split('/')[1] - +b.split('/')[1]));
 	}, [replayList]);
 
 	const handleSave = React.useCallback(() => {
@@ -124,7 +133,7 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 								destinationPath={destinationPath}
 								configIndex={configIndex}
 								destinationPaths={destinationPaths}
-								replayResultsPaths={replayResultsPaths}
+								replayPaths={replayPaths}
 							/>
 						))}
 					</TableBody>

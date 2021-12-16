@@ -25,9 +25,12 @@ const getValueFromReplayListByJSMPath = (replayList: ReplayItem[], path: string)
 	const objectToParse =
 		pathArray[1] === 'body'
 			? replayList[replayItemIndex].message
-			: replayList[replayItemIndex].result.response?.message;
-	const responseMessage = JSON.parse(objectToParse || '{}');
-	return jp.value(responseMessage, pathToValue);
+			: pathArray[1] === 'response'
+			? replayList[replayItemIndex].result.response?.message
+			: null;
+
+	const parsedObject = JSON.parse(objectToParse || '{}');
+	return jp.value(parsedObject, pathToValue);
 };
 
 export default getValueFromReplayListByJSMPath;
