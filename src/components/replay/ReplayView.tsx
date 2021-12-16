@@ -16,12 +16,14 @@
 
 import React from 'react';
 import { Box, Button, Stack } from '@mui/material';
-import { ClearAll, Download, Upload } from '@mui/icons-material';
+import { ClearAll, Download, Settings, Upload } from '@mui/icons-material';
 import ReplayTable from './ReplayTable';
 import useReplayStore from '../../hooks/useReplayStore';
+import PreviewConfigModal from './preview-config/PreviewConfigModal';
 
 const ReplayView = () => {
 	const { exportReplayList, clearReplayList, clearUntitled, importFromJSON } = useReplayStore();
+	const [showPreviewConfigModal, togglePreviewConfigModal] = React.useState(false);
 
 	const loadFromFile = (file: FileList | null) => {
 		if (file != null) {
@@ -52,7 +54,15 @@ const ReplayView = () => {
 					Import
 					<input type='file' accept='application/json' hidden onChange={e => loadFromFile(e.target.files)} />
 				</Button>
+				<Button
+					variant='outlined'
+					size='small'
+					startIcon={<Settings />}
+					onClick={() => togglePreviewConfigModal(true)}>
+					Preview Config
+				</Button>
 			</Stack>
+			<PreviewConfigModal open={showPreviewConfigModal} onClose={() => togglePreviewConfigModal(false)} />
 		</Box>
 	);
 };
