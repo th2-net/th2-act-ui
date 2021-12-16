@@ -21,10 +21,16 @@ import { JSMPathToJsonPath } from './jsonPath';
 const getValueFromReplayListByJSMPath = (replayList: ReplayItem[], path: string): string => {
 	const pathArray = path.split('/').slice(1);
 	const replayItemIndex = parseInt(pathArray[0]);
-	const pathToValue = JSMPathToJsonPath(`/${pathArray.slice(1).join('/')}`);
-	const responseMessage = JSON.parse(replayList[replayItemIndex].result.response?.message || '{}');
+	const pathToValue = JSMPathToJsonPath(`/${pathArray.slice(2).join('/')}`);
+	const objectToParse =
+		pathArray[1] === 'body'
+			? replayList[replayItemIndex].message
+			: pathArray[1] === 'response'
+			? replayList[replayItemIndex].result.response?.message
+			: null;
 
-	return jp.value(responseMessage, pathToValue);
+	const parsedObject = JSON.parse(objectToParse || '{}');
+	return jp.value(parsedObject, pathToValue);
 };
 
 export default getValueFromReplayListByJSMPath;
