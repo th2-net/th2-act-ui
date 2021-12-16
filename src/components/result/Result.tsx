@@ -21,6 +21,7 @@ import {
 	AccordionSummary,
 	Alert,
 	Box,
+	CircularProgress,
 	Link,
 	Stack,
 	Table,
@@ -48,9 +49,10 @@ const isDev = process.env.NODE_ENV === 'development';
 type Props = {
 	response?: MessageSendingResponse;
 	appliedReplacements?: AppliedReplacement[];
+	isSending?: boolean;
 };
 
-const Result = ({ response, appliedReplacements }: Props) => {
+const Result = ({ response, appliedReplacements, isSending }: Props) => {
 	if (!response) {
 		return (
 			<Box pt={1} pl={2}>
@@ -143,7 +145,11 @@ const Result = ({ response, appliedReplacements }: Props) => {
 
 	const { link, content } = parseContent();
 
-	return (
+	return isSending ? (
+		<div style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+			<CircularProgress />
+		</div>
+	) : (
 		<Stack overflow='auto' height='100%' className='scrollbar'>
 			{code === 200 ? <Alert severity='success'>SENT</Alert> : <Alert severity='error'>FAIL</Alert>}
 			{link && (
