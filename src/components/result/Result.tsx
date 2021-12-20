@@ -61,6 +61,14 @@ const Result = ({ response, appliedReplacements, isSending }: Props) => {
 		);
 	}
 
+	if (isSending) {
+		return (
+			<Stack justifyContent='center' alignItems='center'>
+				<CircularProgress />
+			</Stack>
+		);
+	}
+
 	const { code, message } = response;
 
 	const parseContent = (): { link: string | null; content: string } => {
@@ -145,11 +153,7 @@ const Result = ({ response, appliedReplacements, isSending }: Props) => {
 
 	const { link, content } = parseContent();
 
-	return isSending ? (
-		<div className='result__loading'>
-			<CircularProgress />
-		</div>
-	) : (
+	return (
 		<Stack overflow='auto' height='100%' className='scrollbar'>
 			{code === 200 ? <Alert severity='success'>SENT</Alert> : <Alert severity='error'>FAIL</Alert>}
 			{link && (
