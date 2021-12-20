@@ -51,7 +51,7 @@ const MessageEditorView = ({ toggleReplacementsConfig }: Props) => {
 					endIcon={messagesStore.isSending ? <CircularProgress size={14} color='inherit' /> : <Send />}
 					onClick={handleSend}
 					disabled={!isCodeValid}>
-					{messagesStore.isSending ? 'Sending' : 'Send Message'}
+					{messagesStore.isSending ? 'Sending' : 'Send'}
 				</Button>
 			</Stack>
 		</Box>
