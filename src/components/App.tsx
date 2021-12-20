@@ -89,6 +89,7 @@ const App = () => {
 									<Result
 										response={messagesStore.messageSendingResponse ?? undefined}
 										appliedReplacements={messagesStore.appliedReplacements}
+										isSending={messagesStore.isSending}
 									/>
 								</TabPanel>
 								<TabPanel currentTab={currentTab} tabIndex={1}>

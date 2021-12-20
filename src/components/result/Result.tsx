@@ -21,6 +21,7 @@ import {
 	AccordionSummary,
 	Alert,
 	Box,
+	CircularProgress,
 	Link,
 	Stack,
 	Table,
@@ -48,14 +49,23 @@ const isDev = process.env.NODE_ENV === 'development';
 type Props = {
 	response?: MessageSendingResponse;
 	appliedReplacements?: AppliedReplacement[];
+	isSending?: boolean;
 };
 
-const Result = ({ response, appliedReplacements }: Props) => {
+const Result = ({ response, appliedReplacements, isSending }: Props) => {
 	if (!response) {
 		return (
 			<Box pt={1} pl={2}>
 				<Typography sx={{ color: grey[700] }}>No data to display</Typography>
 			</Box>
+		);
+	}
+
+	if (isSending) {
+		return (
+			<Stack justifyContent='center' alignItems='center' height='100%'>
+				<CircularProgress />
+			</Stack>
 		);
 	}
 
