@@ -62,7 +62,7 @@ const MessagesView = () => {
 		const messageStoreState = {
 			timestampFrom: +timestampFrom,
 			timestampTo: Date.now(),
-			streams: [selectedSession],
+			streams: selectedSession ? [selectedSession] : [],
 			sse: {
 				type: {
 					type: 'string[]',
@@ -88,8 +88,6 @@ const MessagesView = () => {
 			`/?viewMode=embeddedMessages&${messageStoreStateString}`
 		);
 	}, [selectedSession]);
-
-	if (!selectedSession) return null;
 
 	return <Box width='100%' height='100%' component='iframe' src={url} border='none' bgcolor='white' />;
 };
