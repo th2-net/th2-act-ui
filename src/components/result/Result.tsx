@@ -63,7 +63,7 @@ const Result = ({ response, appliedReplacements, isSending }: Props) => {
 
 	if (isSending) {
 		return (
-			<Stack justifyContent='center' alignItems='center'>
+			<Stack justifyContent='center' alignItems='center' height='100%'>
 				<CircularProgress />
 			</Stack>
 		);
