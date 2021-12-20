@@ -27,7 +27,7 @@ import {
 	TableHead,
 	TableRow,
 } from '@mui/material';
-import { Add } from '@mui/icons-material';
+import { Add, Download, Upload } from '@mui/icons-material';
 import { observer } from 'mobx-react-lite';
 import { nanoid } from 'nanoid';
 import usePreviewTagsStore from '../../../hooks/usePreviewTagsStore';
@@ -50,9 +50,22 @@ type Props = {
 };
 
 const PreviewConfigModal = ({ open, onClose }: Props) => {
-	const { modifiedConfig, saveChanges, cancelChanges, addConfig } = usePreviewTagsStore();
+	const { modifiedConfig, saveChanges, cancelChanges, addConfig, importFromJSON, exportConfig } =
+		usePreviewTagsStore();
 	const { options } = useEditorStore();
 	const { replayList } = useReplayStore();
+
+	const loadFromFile = (file: FileList | null) => {
+		if (file) {
+			const reader = new FileReader();
+			reader.readAsText(file.item(0) as Blob);
+			reader.onload = () => {
+				if (typeof reader.result === 'string') {
+					importFromJSON(reader.result);
+				}
+			};
+		}
+	};
 
 	const previewAutoComplete = React.useMemo(() => {
 		const result: PreviewAutoComplete = {};
@@ -145,6 +158,13 @@ const PreviewConfigModal = ({ open, onClose }: Props) => {
 				</Button>
 			</DialogContent>
 			<DialogActions>
+				<Button size='small' startIcon={<Upload />} onClick={exportConfig}>
+					Export
+				</Button>
+				<Button component='label' size='small' startIcon={<Download />} sx={{ mr: 'auto' }}>
+					Import
+					<input type='file' accept='application/json' hidden onChange={e => loadFromFile(e.target.files)} />
+				</Button>
 				<Button onClick={handleCancel} color='secondary'>
 					Cancel
 				</Button>

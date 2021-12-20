@@ -18,7 +18,6 @@
 
 import React from 'react';
 import { observer } from 'mobx-react-lite';
-import '../../styles/splitter.scss';
 import { nanoid } from 'nanoid';
 import { Box } from '@mui/material';
 import { EventMessage } from '../../models/Message';
@@ -36,6 +35,7 @@ const MessagesView = () => {
 	React.useEffect(() => {
 		const addToReplay = (message: EventMessage) =>
 			replayStore.addToReplayList({
+				selected: false,
 				type: 'parsedMessage',
 				id: nanoid(),
 				session: message.sessionId,
@@ -62,7 +62,7 @@ const MessagesView = () => {
 		const messageStoreState = {
 			timestampFrom: +timestampFrom,
 			timestampTo: Date.now(),
-			streams: [selectedSession],
+			streams: selectedSession ? [selectedSession] : [],
 			sse: {
 				type: {
 					type: 'string[]',
@@ -89,9 +89,7 @@ const MessagesView = () => {
 		);
 	}, [selectedSession]);
 
-	if (!selectedSession) return null;
-
-	return <Box width='100%' height='100%' component='iframe' src={url} border='none' />;
+	return <Box width='100%' height='100%' component='iframe' src={url} border='none' bgcolor='white' />;
 };
 
 export default observer(MessagesView);

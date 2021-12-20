@@ -32,9 +32,7 @@ const TabPanel = ({ currentTab, tabIndex, keepMounted = false, children }: Props
 	}
 
 	return (
-		<Box
-			sx={{ height: '100%', bgcolor: 'white', borderRadius: 1, borderTopLeftRadius: 0, overflow: 'hidden' }}
-			hidden={!show}>
+		<Box sx={{ height: '100%', bgcolor: 'white', borderTopRightRadius: 6, overflow: 'hidden' }} hidden={!show}>
 			{children}
 		</Box>
 	);

@@ -16,7 +16,17 @@
 
 import React from 'react';
 import { blue, red } from '@mui/material/colors';
-import { Badge, IconButton, InputAdornment, Stack, TableCell, TableRow, TextField, Tooltip } from '@mui/material';
+import {
+	Badge,
+	Checkbox,
+	IconButton,
+	InputAdornment,
+	Stack,
+	TableCell,
+	TableRow,
+	TextField,
+	Tooltip,
+} from '@mui/material';
 import { Code, DeleteOutline, Edit, ReorderRounded, Save } from '@mui/icons-material';
 import { DraggableProvided, DraggableStateSnapshot } from 'react-beautiful-dnd';
 import {
@@ -34,6 +44,7 @@ type Props = {
 	snapshot: DraggableStateSnapshot;
 	isEditing: boolean;
 	replayItem: ParsedMessageReplayItem | ActReplayItem;
+	toggle: (selected: boolean) => void;
 	changeDelay: (delay: number) => void;
 	save: () => void;
 	edit: () => void;
@@ -46,6 +57,7 @@ const ReplayTableRow = ({
 	snapshot,
 	isEditing,
 	replayItem,
+	toggle,
 	changeDelay,
 	save,
 	edit,
@@ -59,6 +71,9 @@ const ReplayTableRow = ({
 			opacity: snapshot.isDragging ? '0.80' : '1',
 			bgcolor: isEditing ? blue[50] : 'white',
 		}}>
+		<TableCell sx={{ pr: 0 }}>
+			<Checkbox size='small' checked={replayItem.selected} onClick={() => toggle(!replayItem.selected)} />
+		</TableCell>
 		<TableCell>
 			<div {...draggableProvided.dragHandleProps}>
 				<ReorderRounded />

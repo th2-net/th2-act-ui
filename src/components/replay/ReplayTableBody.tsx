@@ -51,6 +51,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 		saveEditedReplayItem,
 		editReplayItemMode,
 		addToReplayList,
+		toggleItem,
 	} = useReplayStore();
 	const { editorStore, schemaType, setSchemaType } = useRootStore();
 	const { options } = editorStore;
@@ -92,6 +93,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 
 			if (selectedOptions) {
 				const replayItem: ActReplayItem = {
+					selected: false,
 					type: 'act',
 					id: nanoid(),
 					delay: 0,
@@ -110,6 +112,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 
 			if (selectedOptions) {
 				const replayItem: ParsedMessageReplayItem = {
+					selected: false,
 					type: 'parsedMessage',
 					id: nanoid(),
 					delay: 0,
@@ -131,7 +134,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 			<TableRow sx={{ bgcolor: editReplayItemMode ? 'white' : blue[50] }}>
 				{schemaType === 'parsedMessage' ? (
 					<>
-						<TableCell colSpan={3}>New Message</TableCell>
+						<TableCell colSpan={4}>New Message</TableCell>
 						<SimpleKeyValueCell label='Session' value={options.parsedMessage.selectedSession ?? ''} />
 						<SimpleKeyValueCell label='Dictionary' value={options.parsedMessage.selectedDictionary ?? ''} />
 						<SimpleKeyValueCell
@@ -142,7 +145,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 					</>
 				) : (
 					<>
-						<TableCell colSpan={3}>New gRPC Call</TableCell>
+						<TableCell colSpan={4}>New gRPC Call</TableCell>
 						<SimpleKeyValueCell label='Box' value={options.act.selectedAct ?? ''} />
 						<SimpleKeyValueCell label='Service' value={options.act.selectedService ?? ''} />
 						<SimpleKeyValueCell
@@ -175,6 +178,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 							snapshot={snapshot}
 							isEditing={editedReplayItemId === replayItem.id}
 							replayItem={replayItem}
+							toggle={selected => toggleItem(replayItem.id, selected)}
 							changeDelay={delay => changeDelay(replayItem.id, delay)}
 							save={handleSaveReplayItemClicked}
 							edit={() => handleEditCodeClicked(index)}

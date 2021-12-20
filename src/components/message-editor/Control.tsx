@@ -18,6 +18,7 @@ import { observer } from 'mobx-react-lite';
 import React from 'react';
 import {
 	Badge,
+	Box,
 	CircularProgress,
 	FormControlLabel,
 	IconButton,
@@ -132,7 +133,7 @@ const Control = ({ showConfig, toggleConfig }: Props) => {
 	);
 
 	return (
-		<>
+		<Box>
 			<Stack direction='row' alignItems='center'>
 				<RadioGroup
 					row
@@ -162,7 +163,6 @@ const Control = ({ showConfig, toggleConfig }: Props) => {
 										sx={{ minWidth: 100, height: 30 }}
 										autoComplete='true'
 										onChange={event => props.onChange(event.target.value)}
-										// error={!props.valid}
 										disabled={props.disabled}
 										value={props.selected}
 										defaultValue={props.selected}>
@@ -179,7 +179,7 @@ const Control = ({ showConfig, toggleConfig }: Props) => {
 					<Tooltip title='Replacements config'>
 						<IconButton onClick={() => toggleConfig(true)}>
 							{currentReplacements.length ? (
-								<Badge color='primary' badgeContent={currentReplacements.length}>
+								<Badge color='primary' badgeContent={currentReplacements.length} component='span'>
 									<Code />
 								</Badge>
 							) : (
@@ -190,7 +190,7 @@ const Control = ({ showConfig, toggleConfig }: Props) => {
 					<ReplacementsConfigModal open={showConfig} onClose={() => toggleConfig(false)} />
 				</Stack>
 			</div>
-		</>
+		</Box>
 	);
 };
 
