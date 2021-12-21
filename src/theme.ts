@@ -22,6 +22,15 @@ const theme = createTheme({
 		primary: blue,
 		secondary: red,
 	},
+	components: {
+		MuiTab: {
+			styleOverrides: {
+				root: {
+					minHeight: 48,
+				},
+			},
+		},
+	},
 });
 
 export default theme;

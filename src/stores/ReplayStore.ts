@@ -14,7 +14,7 @@
  * limitations under the License.
  ***************************************************************************** */
 
-import { action, computed, flow, makeObservable, observable, reaction, runInAction } from 'mobx';
+import { action, computed, flow, makeObservable, observable, reaction } from 'mobx';
 import { nanoid } from 'nanoid';
 import {
 	ActReplayItem,
@@ -36,6 +36,8 @@ type ReplayExportData<T extends ReplayItem> = Omit<T, 'id' | 'result' | 'selecte
 export default class ReplayStore {
 	isReplaying = false;
 
+	isSuccessful: boolean | null = null;
+
 	replayList: Array<ParsedMessageReplayItem | ActReplayItem> = [];
 
 	editReplayItemMode = false;
@@ -47,6 +49,7 @@ export default class ReplayStore {
 
 		makeObservable(this, {
 			isReplaying: observable,
+			isSuccessful: observable,
 			replayList: observable,
 			editReplayItemMode: observable,
 			editedReplayItemId: observable,
@@ -68,6 +71,7 @@ export default class ReplayStore {
 			renameReplayItem: action,
 			importFromJSON: action,
 			startReplay: action,
+			onReplayEnd: action,
 		});
 
 		reaction(
@@ -240,7 +244,7 @@ export default class ReplayStore {
 				if (index < selectedItems.length - 1) {
 					this.replayMessageRecursive(index + 1);
 				} else {
-					runInAction(() => (this.isReplaying = false));
+					this.onReplayEnd();
 				}
 			});
 		}, selectedItems[index].delay);
@@ -291,6 +295,11 @@ export default class ReplayStore {
 			}
 		}
 	});
+
+	onReplayEnd = () => {
+		this.isReplaying = false;
+		this.isSuccessful = this.replayList.every(replayItem => replayItem.result.status === 'sent');
+	};
 
 	exportReplayList = () => {
 		const exportData: Array<ReplayExportData<ParsedMessageReplayItem> | ReplayExportData<ActReplayItem>> =

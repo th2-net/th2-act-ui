@@ -17,8 +17,9 @@
 import React from 'react';
 import { hot } from 'react-hot-loader/root';
 import { observer } from 'mobx-react-lite';
-import { Tab, Tabs, Box } from '@mui/material';
+import { Tab, Tabs, Box, CircularProgress } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import { DoneAll, ErrorOutline } from '@mui/icons-material';
 import Result from './result/Result';
 import '../styles/root.scss';
 import { useRootStore } from '../hooks/useRootStore';
@@ -32,11 +33,13 @@ import MessageWorkerProvider from '../contexts/messageWorkerContext';
 import DictionaryView from './dictionary/DictionaryView';
 import MessageEditorView from './message-editor/MessageEditorView';
 import MessagesView from './messages/MessagesView';
+import useReplayStore from '../hooks/useReplayStore';
 
 const App = () => {
 	const store = useRootStore();
 	const [messageWorker] = React.useState(() => new MessageWorker());
 	const messagesStore = useMessagesStore();
+	const replayStore = useReplayStore();
 	const [currentTab, setCurrentTab] = React.useState(0);
 	const [showReplacementsConfig, toggleReplacementsConfig] = React.useState(false);
 
@@ -77,8 +80,22 @@ const App = () => {
 										borderTopLeftRadius: 6,
 										borderTopRightRadius: 6,
 									}}>
-									<Tab label='Result' className='app__tab' />
-									<Tab label='Replay' className='app__tab' />
+									<Tab label='Result' className='app__tab' sx={{ height: 48 }} />
+									<Tab
+										label='Replay'
+										icon={
+											replayStore.isReplaying ? (
+												<CircularProgress size={14} />
+											) : replayStore.isSuccessful ===
+											  null ? undefined : replayStore.isSuccessful ? (
+												<DoneAll fontSize='small' />
+											) : (
+												<ErrorOutline fontSize='small' color='error' />
+											)
+										}
+										iconPosition='end'
+										className='app__tab'
+									/>
 									<Tab
 										label='Dictionary'
 										className='app__tab'
