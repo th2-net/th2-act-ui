@@ -298,7 +298,7 @@ export default class ReplayStore {
 
 	onReplayEnd = () => {
 		this.isReplaying = false;
-		this.isSuccessful = this.replayList.every(replayItem => replayItem.result.status === 'sent');
+		this.isSuccessful = this.selectedItems.every(replayItem => replayItem.result.status === 'sent');
 	};
 
 	exportReplayList = () => {
