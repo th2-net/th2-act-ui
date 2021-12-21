@@ -80,7 +80,7 @@ const App = () => {
 										borderTopLeftRadius: 6,
 										borderTopRightRadius: 6,
 									}}>
-									<Tab label='Result' className='app__tab' sx={{ height: 48 }} />
+									<Tab label='Result' className='app__tab' />
 									<Tab
 										label='Replay'
 										icon={
