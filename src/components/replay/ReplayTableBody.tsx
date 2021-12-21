@@ -41,6 +41,7 @@ type Props = {
 
 const ReplayTableBody = ({ droppableProvided }: Props) => {
 	const {
+		isReplaying,
 		replayList,
 		renameReplayItem,
 		changeDelay,
@@ -184,6 +185,7 @@ const ReplayTableBody = ({ droppableProvided }: Props) => {
 							edit={() => handleEditCodeClicked(index)}
 							remove={() => removeReplayItem(replayItem.id)}
 							rename={newName => renameReplayItem(replayItem.id, newName)}
+							isReplaying={isReplaying}
 						/>
 					)}
 				</Draggable>

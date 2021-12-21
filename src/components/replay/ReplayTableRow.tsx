@@ -50,6 +50,7 @@ type Props = {
 	edit: () => void;
 	remove: () => void;
 	rename: (newName: string) => void;
+	isReplaying: boolean;
 };
 
 const ReplayTableRow = ({
@@ -63,6 +64,7 @@ const ReplayTableRow = ({
 	edit,
 	remove,
 	rename,
+	isReplaying,
 }: Props) => (
 	<TableRow
 		ref={draggableProvided.innerRef}
@@ -72,7 +74,12 @@ const ReplayTableRow = ({
 			bgcolor: isEditing ? blue[50] : 'white',
 		}}>
 		<TableCell sx={{ pr: 0 }}>
-			<Checkbox size='small' checked={replayItem.selected} onClick={() => toggle(!replayItem.selected)} />
+			<Checkbox
+				size='small'
+				checked={replayItem.selected}
+				onClick={() => toggle(!replayItem.selected)}
+				disabled={isReplaying}
+			/>
 		</TableCell>
 		<TableCell>
 			<div {...draggableProvided.dragHandleProps}>
@@ -92,7 +99,7 @@ const ReplayTableRow = ({
 				/>
 				{replayItem.replacements.length > 0 && (
 					<Tooltip title='Some fields will be modified by expressions'>
-						<Badge variant='dot' color='info'>
+						<Badge variant='dot' color='info' component='span'>
 							<Code color='primary' fontSize='small' />
 						</Badge>
 					</Tooltip>
