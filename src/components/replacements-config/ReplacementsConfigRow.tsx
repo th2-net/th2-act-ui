@@ -22,6 +22,7 @@ import Value from '../util/Value';
 import useReplayStore from '../../hooks/useReplayStore';
 import getValueFromReplayListByJSMPath from '../../helpers/getValueFromReplayListByJSMPath';
 import getValueBySimpleExpression from '../../helpers/getValueBySimpleExpression';
+import FullContentPopper from '../util/FullContentPopper';
 
 type Props = {
 	sourcePath: string;
@@ -58,6 +59,7 @@ const ReplacementsConfigRow = ({ sourcePath, destinationPath, configIndex, desti
 					onInputChange={(_, newValue) => changeConfig(configIndex, { destinationPath: newValue })}
 					renderInput={params => <TextField {...params} size='small' variant='standard' />}
 					options={destinationPaths}
+					PopperComponent={FullContentPopper}
 				/>
 			</TableCell>
 			<TableCell>
@@ -69,6 +71,7 @@ const ReplacementsConfigRow = ({ sourcePath, destinationPath, configIndex, desti
 					onInputChange={(_, newValue) => changeConfig(configIndex, { sourcePath: newValue })}
 					renderInput={params => <TextField {...params} size='small' variant='standard' />}
 					options={replayPaths}
+					PopperComponent={FullContentPopper}
 				/>
 			</TableCell>
 			<TableCell>

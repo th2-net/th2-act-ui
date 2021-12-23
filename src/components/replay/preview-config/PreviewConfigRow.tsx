@@ -20,6 +20,7 @@ import { Add, Remove } from '@mui/icons-material';
 import { observer } from 'mobx-react-lite';
 import usePreviewTagsStore from '../../../hooks/usePreviewTagsStore';
 import { PreviewAutoComplete } from './PreviewConfigModal';
+import FullContentPopper from '../../util/FullContentPopper';
 
 type Props = {
 	configIndex: number;
@@ -76,6 +77,7 @@ const PreviewConfigRow = ({ configIndex, autocomplete }: Props) => {
 					)}
 					options={typeAutoComplete}
 					sx={{ minWidth: 200 }}
+					PopperComponent={FullContentPopper}
 				/>
 			</TableCell>
 			<TableCell>
@@ -97,6 +99,7 @@ const PreviewConfigRow = ({ configIndex, autocomplete }: Props) => {
 					)}
 					options={subTypeAutoComplete}
 					sx={{ minWidth: 200 }}
+					PopperComponent={FullContentPopper}
 				/>
 			</TableCell>
 			<TableCell>
@@ -139,6 +142,7 @@ const PreviewConfigRow = ({ configIndex, autocomplete }: Props) => {
 							)}
 							options={pathAutoComplete}
 							sx={{ minWidth: 400 }}
+							PopperComponent={FullContentPopper}
 						/>
 					)}
 				</Stack>
