@@ -27,7 +27,7 @@ import useEditorStore from '../../hooks/useEditorStore';
 const DictionaryView = () => {
 	const { options } = useEditorStore();
 	const dictionaryStore = useDictionaryStore();
-	const schema = useSchema();
+	const schema = useSchema() || 'hand';
 	const { dictionary, isLoadingDictionary, isSavingDictionary, setDictionaryCode, isDictionaryCodeValid } =
 		dictionaryStore;
 	const { selectedDictionary } = options.parsedMessage;
