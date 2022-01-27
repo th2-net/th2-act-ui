@@ -75,8 +75,7 @@ const Control = ({ showConfig, toggleConfig }: Props) => {
 					disabled: options.parsedMessage.isSessionsLoading || options.parsedMessage.isDictionariesLoading,
 					onChange: options.parsedMessage.selectDictionary,
 					isLoading: options.parsedMessage.isDictionariesLoading,
-					onOpen: (e: React.SyntheticEvent) => {
-						console.log(e);
+					onOpen: () => {
 						options.parsedMessage.fetchDictionaries(options.parsedMessage.selectedSession || '');
 					},
 				},
@@ -173,7 +172,7 @@ const Control = ({ showConfig, toggleConfig }: Props) => {
 										disabled={props.disabled}
 										value={props.selected}
 										defaultValue={props.selected}
-										onOpen={e => props.onOpen && props.onOpen(e)}>
+										onOpen={() => props.onOpen && props.onOpen()}>
 										{props.isLoading && (
 											<Stack direction='row' justifyContent='center' alignItems='center'>
 												<CircularProgress size={14} />
