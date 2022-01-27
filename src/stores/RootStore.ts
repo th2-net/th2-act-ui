@@ -37,7 +37,7 @@ export default class RootStore {
 
 	editorStore = new EditorStore(this);
 
-	dictionaryStore = new DictionaryStore();
+	dictionaryStore = new DictionaryStore(this);
 
 	messagesStores: MessagesStores = {
 		act: new ActMessagesStore(this),
