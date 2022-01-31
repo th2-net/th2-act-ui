@@ -25,7 +25,7 @@ import { useRootStore } from '../../hooks/useRootStore';
 import useMessageWorker from '../../hooks/useMessageWorker';
 import { IncomingMessageActions } from '../../stores/MessageWorker';
 
-const rangeInMinutes = 30;
+const rangeInMinutes = 60;
 
 const MessagesView = () => {
 	const { editorStore, replayStore } = useRootStore();
