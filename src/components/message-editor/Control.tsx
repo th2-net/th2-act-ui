@@ -67,11 +67,17 @@ const Control = ({ showConfig, toggleConfig }: Props) => {
 				{
 					label: 'Dictionary',
 					id: 'dictionary',
-					options: options.parsedMessage.dictionaries,
+					options:
+						options.parsedMessage.isSessionsLoading || options.parsedMessage.isDictionariesLoading
+							? []
+							: options.parsedMessage.dictionaries,
 					selected: options.parsedMessage.selectedDictionary || '',
 					disabled: options.parsedMessage.isSessionsLoading || options.parsedMessage.isDictionariesLoading,
 					onChange: options.parsedMessage.selectDictionary,
 					isLoading: options.parsedMessage.isDictionariesLoading,
+					onOpen: () => {
+						options.parsedMessage.fetchDictionaries(options.parsedMessage.selectedSession || '');
+					},
 				},
 				{
 					label: 'Msg Type',
@@ -165,7 +171,13 @@ const Control = ({ showConfig, toggleConfig }: Props) => {
 										onChange={event => props.onChange(event.target.value)}
 										disabled={props.disabled}
 										value={props.selected}
-										defaultValue={props.selected}>
+										defaultValue={props.selected}
+										onOpen={() => props.onOpen && props.onOpen()}>
+										{props.isLoading && (
+											<Stack direction='row' justifyContent='center' alignItems='center'>
+												<CircularProgress size={14} />
+											</Stack>
+										)}
 										{props.options.map((opt, index) => (
 											<MenuItem key={index} value={opt}>
 												{opt}
