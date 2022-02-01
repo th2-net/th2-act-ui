@@ -43,6 +43,7 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 	const monacoRef = React.useRef<Monaco | null>(null);
 	const editorRef = React.useRef<editor.IStandaloneCodeEditor | null>(null);
 	const oldDecorations = React.useRef<string[]>([]);
+	const [pointers, setPointers] = React.useState<Record<string, jsm.Pointer>>({});
 
 	const onMount: OnMount = React.useCallback((editorInstance, monacoInstance) => {
 		editorRef.current = editorInstance;
@@ -88,32 +89,38 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 		}
 	}, [messageSchema]);
 
-	const currentReplacements = replayStore.replayItemToEdit
+	const replacementsConfig = replayStore.replayItemToEdit
 		? replayStore.replayItemToEdit.replacements
 		: messagesStore.replacements;
 
-	const pointers = React.useMemo(() => {
+	React.useEffect(() => {
+		let actualPointers;
+
 		try {
-			return jsm.parse(code).pointers;
+			actualPointers = jsm.parse(code).pointers;
 		} catch {
-			return {};
+			return;
+		}
+
+		if (actualPointers) {
+			setPointers(actualPointers);
 		}
 	}, [code]);
 
-	const filteredReplacements = React.useMemo(
+	const replacementsExistingInCode = React.useMemo(
 		() =>
-			currentReplacements
+			replacementsConfig
 				.map(({ destinationPath, sourcePath }) => ({
 					destinationPath: destinationPath === '' ? '/' : destinationPath,
 					sourcePath,
 				}))
 				.filter(({ destinationPath }) => destinationPath in pointers),
-		[currentReplacements, pointers],
+		[replacementsConfig, pointers],
 	);
 
 	const decorations = React.useMemo(
 		() =>
-			filteredReplacements.map<editor.IModelDeltaDecoration>(({ destinationPath }) => {
+			replacementsExistingInCode.map<editor.IModelDeltaDecoration>(({ destinationPath }) => {
 				const range: IRange = {
 					startLineNumber: pointers[destinationPath].value.line + 1,
 					startColumn: pointers[destinationPath].value.column + 1,
@@ -128,19 +135,23 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 					},
 				};
 			}),
-		[filteredReplacements],
+		[replacementsExistingInCode, pointers],
 	);
 
-	React.useEffect(() => {
+	const updateDecorations = React.useCallback(() => {
 		if (editorRef.current) {
 			oldDecorations.current = editorRef.current.deltaDecorations(oldDecorations.current, decorations);
 		}
 	}, [decorations]);
 
+	React.useEffect(() => {
+		updateDecorations();
+	}, [updateDecorations]);
+
 	const lenses: languages.CodeLens[] = React.useMemo(() => {
-		if (!currentReplacements) return [];
+		if (!replacementsConfig) return [];
 		try {
-			return filteredReplacements.map<languages.CodeLens>(({ destinationPath, sourcePath }) => ({
+			return replacementsExistingInCode.map<languages.CodeLens>(({ destinationPath, sourcePath }) => ({
 				range: {
 					startLineNumber: (pointers[destinationPath].key?.line ?? pointers[destinationPath].value.line) + 1,
 					startColumn: (pointers[destinationPath].key?.column ?? pointers[destinationPath].value.column) + 1,
@@ -157,7 +168,7 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 		} catch {
 			return [];
 		}
-	}, [currentReplacements, pointers]);
+	}, [replacementsConfig, pointers]);
 
 	React.useEffect(() => {
 		if (monacoRef.current) {
@@ -175,19 +186,56 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 		return () => undefined;
 	}, [lenses]);
 
-	const onValidate: OnValidate = React.useCallback(
+	const filterExistingInReplacementsConfigMarkers: OnValidate = React.useCallback(
 		markers => {
-			setIsCodeValid(markers.filter(marker => marker.severity === MarkerSeverity.Error).length === 0);
+			const nonExistingInReplacementsConfigMarkers = markers.filter(
+				({ severity, startLineNumber, startColumn, endLineNumber, endColumn }) =>
+					severity === MarkerSeverity.Error &&
+					!replacementsExistingInCode.some(({ destinationPath }) => {
+						const { value, valueEnd } = pointers[destinationPath];
+						return (
+							value.line + 1 === startLineNumber &&
+							value.column + 1 === startColumn &&
+							valueEnd.line + 1 === endLineNumber &&
+							valueEnd.column + 1 === endColumn
+						);
+					}),
+			);
+
+			if (monacoRef.current && editorRef.current) {
+				const model = editorRef.current.getModel();
+				if (model && markers.length !== nonExistingInReplacementsConfigMarkers.length) {
+					monacoRef.current.editor.setModelMarkers(model, 'json', nonExistingInReplacementsConfigMarkers);
+				}
+			}
+
+			const errorMarkers = nonExistingInReplacementsConfigMarkers.filter(
+				({ severity }) => severity === MarkerSeverity.Error,
+			);
+
+			setIsCodeValid(errorMarkers.length === 0);
 		},
-		[setIsCodeValid],
+		[setIsCodeValid, pointers, replacementsExistingInCode],
 	);
+
+	React.useEffect(() => {
+		if (!monacoRef.current || !editorRef.current) return;
+		const model = editorRef.current.getModel();
+
+		/* We need to trigger the code validation again, because we need to ignore typing errors
+			 of the fields defined in replacements config when the last one was modified.
+			 So, setting the same value is probably only way to do it */
+
+		model?.setValue(model.getValue());
+		updateDecorations();
+	}, [replacementsConfig]);
 
 	return (
 		<Editor
 			language='json'
 			value={code}
 			onChange={value => setCode(value ?? '{}')}
-			onValidate={onValidate}
+			onValidate={filterExistingInReplacementsConfigMarkers}
 			onMount={onMount}
 			options={{
 				automaticLayout: true,
