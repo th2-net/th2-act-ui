@@ -186,7 +186,7 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 		return () => undefined;
 	}, [lenses]);
 
-	const filterExistingInReplacementsConfigMarkers: OnValidate = React.useCallback(
+	const onValidate: OnValidate = React.useCallback(
 		markers => {
 			const nonExistingInReplacementsConfigMarkers = markers.filter(
 				({ severity, startLineNumber, startColumn, endLineNumber, endColumn }) =>
@@ -235,7 +235,7 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 			language='json'
 			value={code}
 			onChange={value => setCode(value ?? '{}')}
-			onValidate={filterExistingInReplacementsConfigMarkers}
+			onValidate={onValidate}
 			onMount={onMount}
 			options={{
 				automaticLayout: true,
