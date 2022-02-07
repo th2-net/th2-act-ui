@@ -189,8 +189,7 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 	const onValidate: OnValidate = React.useCallback(
 		markers => {
 			const nonExistingInReplacementsConfigMarkers = markers.filter(
-				({ severity, startLineNumber, startColumn, endLineNumber, endColumn }) =>
-					severity === MarkerSeverity.Error &&
+				({ startLineNumber, startColumn, endLineNumber, endColumn }) =>
 					!replacementsExistingInCode.some(({ destinationPath }) => {
 						const { value, valueEnd } = pointers[destinationPath];
 						return (
