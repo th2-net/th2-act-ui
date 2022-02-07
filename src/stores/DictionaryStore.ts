@@ -18,6 +18,7 @@ import { action, computed, flow, makeObservable, observable } from 'mobx';
 import { DictionaryEntity, isDictionaryEntity } from '../models/Dictionary';
 import api from '../api';
 import { Schema } from '../models/Schema';
+import RootStore from './RootStore';
 
 export default class DictionaryStore {
 	isLoadingDictionary = false;
@@ -26,7 +27,7 @@ export default class DictionaryStore {
 
 	dictionary: DictionaryEntity | null = null;
 
-	constructor() {
+	constructor(private readonly rootStore: RootStore) {
 		makeObservable(this, {
 			isLoadingDictionary: observable,
 			isSavingDictionary: observable,
@@ -68,6 +69,7 @@ export default class DictionaryStore {
 		this.isSavingDictionary = true;
 		try {
 			yield api.updateDictionary(schemaName, { operation: 'update', payload: this.dictionary });
+			yield this.rootStore.editorStore.options.parsedMessage.init();
 		} catch (error) {
 			console.error('Error occurred while saving dictionary');
 		} finally {
