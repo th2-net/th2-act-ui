@@ -64,28 +64,30 @@ const MessageEditor = ({ messageSchema, openReplacementsConfig }: Props) => {
 
 	React.useEffect(() => {
 		if (monacoRef.current) {
-			if (messageSchema) {
-				if (!replayStore.editReplayItemMode) {
+			if (!replayStore.editReplayItemMode) {
+				if (messageSchema) {
 					const initialMessage = createInitialActMessage(messageSchema) || '{}';
 					setCode(initialMessage);
+				} else {
+					setCode('{}');
 				}
-
-				const json = JSON.stringify(messageSchema);
-				const blob = new Blob([json], { type: 'application/json' });
-				const uri = URL.createObjectURL(blob);
-
-				monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
-					validate: true,
-					schemaValidation: 'error',
-					enableSchemaRequest: true,
-					schemas: [
-						{
-							uri,
-							fileMatch: ['*'],
-						},
-					],
-				});
 			}
+
+			const json = JSON.stringify(messageSchema || '{}');
+			const blob = new Blob([json], { type: 'application/json' });
+			const uri = URL.createObjectURL(blob);
+
+			monacoRef.current.languages.json.jsonDefaults.setDiagnosticsOptions({
+				validate: true,
+				schemaValidation: 'error',
+				enableSchemaRequest: true,
+				schemas: [
+					{
+						uri,
+						fileMatch: ['*'],
+					},
+				],
+			});
 		}
 	}, [messageSchema]);
 
