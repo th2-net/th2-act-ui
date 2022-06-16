@@ -77,12 +77,7 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 		let paths: string[] = ['$datetime'];
 
 		replayList.forEach((replayItem, index) => {
-			let name = '';
-			if (replayItem.name) {
-				name = replayItem.name;
-			} else {
-				name = `untitled${index}`;
-			}
+			const name = replayItem.name || `untitled${index}`;
 			paths.push(`/${name}`);
 
 			let bodyPaths: string[];
