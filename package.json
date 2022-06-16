@@ -1,6 +1,6 @@
 {
 	"name": "act-ui",
-	"version": "1.1.40",
+	"version": "1.1.41",
 	"description": "",
 	"main": "index.tsx",
 	"private": true,
@@ -33,7 +33,7 @@
 		"@types/react-dom": "^17.0.10",
 		"core-js": "^3.6.5",
 		"cross-env": "^6.0.3",
-		"json-schema": "^0.3.0",
+		"json-schema": "^0.4.0",
 		"json-source-map": "^0.6.1",
 		"jsonpath": "^1.1.1",
 		"lodash.clonedeep": "^4.5.0",
@@ -41,7 +41,7 @@
 		"mobx": "^6.3.5",
 		"mobx-react-lite": "^1.5.2",
 		"monaco-editor": "^0.29.1",
-		"nanoid": "^3.1.9",
+		"nanoid": "^3.3.4",
 		"react": "^17.0.2",
 		"react-beautiful-dnd": "^13.0.0",
 		"react-dom": "^17.0.2",
@@ -52,7 +52,7 @@
 		"use-resize-observer": "^6.1.0"
 	},
 	"devDependencies": {
-		"@babel/cli": "^7.8.4",
+		"@babel/cli": "^7.17.10",
 		"@babel/core": "^7.9.6",
 		"@babel/plugin-proposal-class-properties": "^7.8.3",
 		"@babel/plugin-proposal-decorators": "^7.8.3",
@@ -103,7 +103,7 @@
 		"wait-for-expect": "^3.0.2",
 		"webpack": "^4.41.2",
 		"webpack-cli": "^4.9.1",
-		"webpack-dev-server": "^4.3.1",
+		"webpack-dev-server": "^4.9.2",
 		"webpack-merge": "^4.2.2"
 	}
 }

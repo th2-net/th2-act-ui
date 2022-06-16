@@ -77,14 +77,14 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 		let paths: string[] = ['$datetime'];
 
 		replayList.forEach((replayItem, index) => {
-			paths.push(`/${index}`);
+			const name = replayItem.name || `untitled${index}`;
+			paths.push(`/${name}`);
 
 			let bodyPaths: string[];
-
 			try {
 				bodyPaths = Object.keys(jsm.parse(replayItem.message).pointers)
 					.filter(x => x)
-					.map(x => `/${index}/body${x}`);
+					.map(x => `/${name}/body${x}`);
 			} catch {
 				bodyPaths = [];
 			}
@@ -94,7 +94,7 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 			if (replayItem.result.response?.code === 200) {
 				const resultPaths = Object.keys(jsm.parse(replayItem.result.response.message).pointers)
 					.filter(x => x)
-					.map(x => `/${index}/response${x}`);
+					.map(x => `/${name}/response${x}`);
 
 				paths = [...paths, ...resultPaths];
 			}
