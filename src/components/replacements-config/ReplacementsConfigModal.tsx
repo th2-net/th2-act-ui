@@ -74,7 +74,7 @@ const ReplacementsConfigModal = ({ open, onClose }: Props) => {
 	}, [currentMessage]);
 
 	const replayPaths = React.useMemo(() => {
-		let paths: string[] = ['$datetime'];
+		let paths: string[] = ['$datetime', '$idAlphabetic', '$idNumeric'];
 
 		replayList.forEach((replayItem, index) => {
 			const name = replayItem.name || `untitled${index}`;

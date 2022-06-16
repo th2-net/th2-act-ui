@@ -16,6 +16,8 @@
 
 const valueGetters: Record<string, () => string> = {
 	$datetime: () => new Date().toISOString(),
+	$idNumeric: () => Math.random().toString(10).slice(-7),
+	$idAlphabetic: () => Math.random().toString(36).slice(-7),
 };
 
 const getValueBySimpleExpression = (expression: string) => valueGetters[expression]?.();
