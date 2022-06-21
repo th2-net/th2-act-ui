@@ -14,8 +14,12 @@
  * limitations under the License.
  ***************************************************************************** */
 
+import { nanoid, customAlphabet } from 'nanoid';
+
 const valueGetters: Record<string, () => string> = {
 	$datetime: () => new Date().toISOString(),
+	$idNumeric: customAlphabet('0123456789', 7),
+	$idAlphabetic: () => nanoid(7),
 };
 
 const getValueBySimpleExpression = (expression: string) => valueGetters[expression]?.();
